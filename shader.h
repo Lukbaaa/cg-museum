@@ -9,7 +9,7 @@ typedef struct Object Object;
 
 typedef struct Shader {
     GLuint program;
-    void (*setUniforms)(GLuint, Object*);
+    void (*setUniforms)(Object*);
 } Shader;
 
 void checkCompileErrors(unsigned int shader, const char* type) {
@@ -90,6 +90,7 @@ Shader* createShader(const char* vertexPath, const char* fragmentPath) {
     // Create shader
     Shader* shader = malloc(sizeof(Shader));
     shader->program = programID;
+    shader->setUniforms = NULL;
 
     return shader;
 }

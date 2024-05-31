@@ -52,8 +52,17 @@ void init(void) {
   glViewport(0, 0, 800, 800);
 }
 
-void createObjects(void) {
+void crateUniforms(Object* obj) {
+  glUniformMatrix4fv(glGetUniformLocation(obj->shader->program, "model"), 1, GL_FALSE, model);
+  glUniformMatrix4fv(glGetUniformLocation(obj->shader->program, "view"), 1, GL_FALSE, view);
+  glUniformMatrix4fv(glGetUniformLocation(obj->shader->program, "projection"), 1, GL_TRUE, projection);
+}
 
+void createObjects(void) {
+  Object* crate = createObject("objects/cube.obj");
+  crate->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  crate->shader->setUniforms = &crateUniforms;
+  loadTexture(crate, "textures/crate.png", 0);
 }
 
 void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {

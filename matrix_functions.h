@@ -1,8 +1,9 @@
 #ifndef TRANSFORMATIONS_H
 #define TRANSFORMATIONS_H
 
-#include <GL/glew.h>
 #include <math.h>
+#include <stdio.h>
+#include <GL/glew.h>
 
 #define M_PI 3.14159265358979323846
 

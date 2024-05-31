@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "transformations.h"
+#include "matrix_functions.h"
 
 int firstMouse = 0;
 float yaw   = -90.0f;	
