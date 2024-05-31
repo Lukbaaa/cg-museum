@@ -21,6 +21,9 @@ typedef struct Object {
     int textureCount;
     Shader* shader;
     int shouldRender;
+    Object* parent;
+    Object** children;
+    int childrenCount;
 } Object;
 
 void setPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
@@ -51,5 +54,8 @@ void initObject(Object* obj) {
     obj->textureCount = 0;
     obj->shader = NULL;
     obj->shouldRender = 1;
+    obj->parent = NULL;
+    obj->children = NULL;
+    obj->childrenCount = 0;
 }
 #endif

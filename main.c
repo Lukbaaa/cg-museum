@@ -1,6 +1,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
+#include "scene_graph.h"
 #include "objectLoader.h"
 #include "matrix_functions.h"
   
