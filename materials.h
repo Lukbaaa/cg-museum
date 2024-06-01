@@ -1,7 +1,6 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-
 typedef struct MaterialParams {
     float emissive[4];
     float ambient[4];

@@ -1,3 +1,4 @@
+#include "light.h"
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
@@ -11,12 +12,7 @@
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-typedef struct LightParams {
-    GLfloat position[4];
-    GLfloat ambient[4];
-    GLfloat diffuse[4];
-    GLfloat specular[4];
-} LightSource;
+
 
 LightSource light = 
   {

@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 
 #include "shader.h"
+#include "light.h"
 #include "materials.h"
 
 typedef struct Transform {
@@ -24,6 +25,7 @@ typedef struct Object {
     Object* parent;
     Object** children;
     int childrenCount;
+    LightSource* light;
 } Object;
 
 void setPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
@@ -57,5 +59,6 @@ void initObject(Object* obj) {
     obj->parent = NULL;
     obj->children = NULL;
     obj->childrenCount = 0;
+    obj->light = NULL;
 }
 #endif
