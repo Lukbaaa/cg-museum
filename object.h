@@ -1,6 +1,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include <assert.h>
 #include <GL/glew.h>
 
 #include "shader.h"
@@ -29,24 +30,28 @@ typedef struct Object {
 } Object;
 
 void setPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
+    assert(obj != NULL);
     obj->transform.position[0] = x;
     obj->transform.position[1] = y;
     obj->transform.position[2] = z;
 }
 
 void setScale(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
+    assert(obj != NULL);
     obj->transform.scale[0] = x;
     obj->transform.scale[1] = y;
     obj->transform.scale[2] = y;
 }
 
 void setRotation(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
+    assert(obj != NULL);
     obj->transform.rotation[0] = x;
     obj->transform.rotation[1] = y;
     obj->transform.rotation[2] = z;
 }
 
 void initObject(Object* obj) {
+    assert(obj != NULL);
     obj->vao = 0;
     obj->vertCount = 0;
     setPosition(obj, 0,0,0);

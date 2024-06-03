@@ -3,22 +3,26 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
 #include <GL/glew.h>
 
 #define M_PI 3.14159265358979323846
 
 void copyMat(GLfloat* mat1, GLfloat* mat2) {
+  assert(mat1 != NULL);
+  assert(mat2 != NULL);
   for (int i = 0; i < 16; i++) { mat1[i] = mat2[i]; }
 }
 
-void printMat4(GLfloat* mat, int transpose) {
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        if (transpose) {
-          printf("%f ",mat[j*4+i]);
-        } else {
-          printf("%f ",mat[i*4+j]);
-        }
+void printMat4(GLfloat* mat, int transpose) { 
+  assert(mat != NULL);
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (transpose) {
+        printf("%f ",mat[j*4+i]);
+      } else {
+        printf("%f ",mat[i*4+j]);
+      }
     }
     printf("\n");
   }
@@ -26,6 +30,7 @@ void printMat4(GLfloat* mat, int transpose) {
 }
 
 void printVec3(GLfloat* vec) {
+  assert(vec != NULL);
   for (int i = 0; i < 3; i++) {
     printf("%f ", vec[i]);
   }
@@ -33,6 +38,7 @@ void printVec3(GLfloat* vec) {
 }
 
 void identity(GLfloat* out) {
+  assert(out != NULL);
   for (int i = 0; i < 16; i++) {
     if (i % 5 == 0) {
       out[i] = 1;
@@ -43,6 +49,10 @@ void identity(GLfloat* out) {
 }
 
 void mat4Multiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
+  assert(out != NULL);
+  assert(in != NULL);
+  assert(v != NULL);
+
   GLfloat temp[16];
 
   for (int i = 0; i < 4; i++) {
@@ -57,16 +67,25 @@ void mat4Multiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
 }
 
 GLfloat dotProduct(GLfloat* vec1, GLfloat* vec2) {
+  assert(vec1 != NULL);
+  assert(vec2 != NULL);
+
   return vec1[0]*vec2[0]+vec1[1]*vec2[1]+vec1[2]*vec2[2];
 }
 
 void crossProduct(GLfloat* out, GLfloat* in, GLfloat* v) {
+  assert(out != NULL);
+  assert(in != NULL);
+  assert(v != NULL);
+
   out[0] = in[1]*v[2] - in[2]*v[1];
   out[1] = in[2]*v[0] - in[0]*v[2];
   out[2] = in[0]*v[1] - in[1]*v[0];
 }
 
 void normalize(GLfloat* vec) {
+  assert(vec != NULL);
+
   GLfloat length = sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
   GLfloat invLen = 1/length;
 
@@ -76,10 +95,17 @@ void normalize(GLfloat* vec) {
 }
 
 void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
+  assert(out != NULL);
+  assert(in != NULL);
+  assert(v != NULL);
+
   mat4Multiplication(out, in, v);
 }
 
 void createTransMatFP(GLfloat* out, GLfloat vec[3]) {
+  assert(out != NULL);
+  assert(vec != NULL);
+
   GLfloat temp[16];
   identity(temp);
   temp[12]  = vec[0];
@@ -89,6 +115,8 @@ void createTransMatFP(GLfloat* out, GLfloat vec[3]) {
 }
 
 void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
+  assert(out != NULL);
+
   GLfloat temp[16];
   identity(temp);
   temp[12] = x;
@@ -98,10 +126,17 @@ void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
 }
 
 void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
+  assert(out != NULL);
+  assert(in != NULL);
+  assert(v != NULL);
+
   mat4Multiplication(out, in, v);
 }
 
 void createScaleMatFP(GLfloat* out, GLfloat vec[3]) {
+  assert(out != NULL);
+  assert(vec != NULL);
+
   GLfloat temp[16];
   identity(temp);
   temp[0]  = vec[0];
@@ -111,6 +146,8 @@ void createScaleMatFP(GLfloat* out, GLfloat vec[3]) {
 }
 
 void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
+  assert(out != NULL);
+
   GLfloat temp[16];
   identity(temp);
   temp[0]  = x;
@@ -120,6 +157,9 @@ void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
 }
 
 void rotatex(GLfloat* out, GLfloat* in, double a) {
+  assert(out != NULL);
+  assert(in != NULL);
+
   a = a * M_PI/180;
   GLfloat rotMat[16] = {
     1,        0,       0, 0,
@@ -131,6 +171,9 @@ void rotatex(GLfloat* out, GLfloat* in, double a) {
 }
 
 void rotatey(GLfloat* out, GLfloat* in, double a) {
+  assert(out != NULL);
+  assert(in != NULL);
+
   a = a * M_PI/180;
   GLfloat rotMat[16] = {
     cosf(a), 0, -sinf(a), 0,
@@ -142,6 +185,9 @@ void rotatey(GLfloat* out, GLfloat* in, double a) {
 }
 
 void rotatez(GLfloat* out, GLfloat* in, double a) {
+  assert(out != NULL);
+  assert(in != NULL);
+
   a = a * M_PI/180;
   GLfloat rotMat[16] = {
      cosf(a), sinf(a), 0, 0,
@@ -153,6 +199,9 @@ void rotatez(GLfloat* out, GLfloat* in, double a) {
 }
 
 void transpose4(GLfloat in[16], GLfloat out[16]) {
+  assert(out != NULL);
+  assert(in != NULL);
+
   GLfloat temp[16];
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
@@ -162,134 +211,135 @@ void transpose4(GLfloat in[16], GLfloat out[16]) {
   copyMat(out, temp);
 }
 
-int inverse4(GLfloat m[16], GLfloat out[16])
-{
-    double inv[16], det;
-    int i;
+int inverse4(GLfloat m[16], GLfloat out[16]) {
+  assert(m != NULL);
+  assert(out != NULL);
+  double inv[16], det;
+  int i;
 
-    inv[0] = m[5]  * m[10] * m[15] - 
-             m[5]  * m[11] * m[14] - 
-             m[9]  * m[6]  * m[15] + 
-             m[9]  * m[7]  * m[14] +
-             m[13] * m[6]  * m[11] - 
-             m[13] * m[7]  * m[10];
+  inv[0] = m[5]  * m[10] * m[15] - 
+            m[5]  * m[11] * m[14] - 
+            m[9]  * m[6]  * m[15] + 
+            m[9]  * m[7]  * m[14] +
+            m[13] * m[6]  * m[11] - 
+            m[13] * m[7]  * m[10];
 
-    inv[4] = -m[4]  * m[10] * m[15] + 
-              m[4]  * m[11] * m[14] + 
-              m[8]  * m[6]  * m[15] - 
-              m[8]  * m[7]  * m[14] - 
-              m[12] * m[6]  * m[11] + 
-              m[12] * m[7]  * m[10];
+  inv[4] = -m[4]  * m[10] * m[15] + 
+            m[4]  * m[11] * m[14] + 
+            m[8]  * m[6]  * m[15] - 
+            m[8]  * m[7]  * m[14] - 
+            m[12] * m[6]  * m[11] + 
+            m[12] * m[7]  * m[10];
 
-    inv[8] = m[4]  * m[9] * m[15] - 
-             m[4]  * m[11] * m[13] - 
-             m[8]  * m[5] * m[15] + 
-             m[8]  * m[7] * m[13] + 
-             m[12] * m[5] * m[11] - 
-             m[12] * m[7] * m[9];
+  inv[8] = m[4]  * m[9] * m[15] - 
+            m[4]  * m[11] * m[13] - 
+            m[8]  * m[5] * m[15] + 
+            m[8]  * m[7] * m[13] + 
+            m[12] * m[5] * m[11] - 
+            m[12] * m[7] * m[9];
 
-    inv[12] = -m[4]  * m[9] * m[14] + 
-               m[4]  * m[10] * m[13] +
-               m[8]  * m[5] * m[14] - 
-               m[8]  * m[6] * m[13] - 
-               m[12] * m[5] * m[10] + 
-               m[12] * m[6] * m[9];
+  inv[12] = -m[4]  * m[9] * m[14] + 
+              m[4]  * m[10] * m[13] +
+              m[8]  * m[5] * m[14] - 
+              m[8]  * m[6] * m[13] - 
+              m[12] * m[5] * m[10] + 
+              m[12] * m[6] * m[9];
 
-    inv[1] = -m[1]  * m[10] * m[15] + 
-              m[1]  * m[11] * m[14] + 
-              m[9]  * m[2] * m[15] - 
-              m[9]  * m[3] * m[14] - 
-              m[13] * m[2] * m[11] + 
-              m[13] * m[3] * m[10];
+  inv[1] = -m[1]  * m[10] * m[15] + 
+            m[1]  * m[11] * m[14] + 
+            m[9]  * m[2] * m[15] - 
+            m[9]  * m[3] * m[14] - 
+            m[13] * m[2] * m[11] + 
+            m[13] * m[3] * m[10];
 
-    inv[5] = m[0]  * m[10] * m[15] - 
-             m[0]  * m[11] * m[14] - 
-             m[8]  * m[2] * m[15] + 
-             m[8]  * m[3] * m[14] + 
-             m[12] * m[2] * m[11] - 
-             m[12] * m[3] * m[10];
+  inv[5] = m[0]  * m[10] * m[15] - 
+            m[0]  * m[11] * m[14] - 
+            m[8]  * m[2] * m[15] + 
+            m[8]  * m[3] * m[14] + 
+            m[12] * m[2] * m[11] - 
+            m[12] * m[3] * m[10];
 
-    inv[9] = -m[0]  * m[9] * m[15] + 
-              m[0]  * m[11] * m[13] + 
-              m[8]  * m[1] * m[15] - 
-              m[8]  * m[3] * m[13] - 
-              m[12] * m[1] * m[11] + 
-              m[12] * m[3] * m[9];
+  inv[9] = -m[0]  * m[9] * m[15] + 
+            m[0]  * m[11] * m[13] + 
+            m[8]  * m[1] * m[15] - 
+            m[8]  * m[3] * m[13] - 
+            m[12] * m[1] * m[11] + 
+            m[12] * m[3] * m[9];
 
-    inv[13] = m[0]  * m[9] * m[14] - 
-              m[0]  * m[10] * m[13] - 
-              m[8]  * m[1] * m[14] + 
-              m[8]  * m[2] * m[13] + 
-              m[12] * m[1] * m[10] - 
-              m[12] * m[2] * m[9];
+  inv[13] = m[0]  * m[9] * m[14] - 
+            m[0]  * m[10] * m[13] - 
+            m[8]  * m[1] * m[14] + 
+            m[8]  * m[2] * m[13] + 
+            m[12] * m[1] * m[10] - 
+            m[12] * m[2] * m[9];
 
-    inv[2] = m[1]  * m[6] * m[15] - 
-             m[1]  * m[7] * m[14] - 
-             m[5]  * m[2] * m[15] + 
-             m[5]  * m[3] * m[14] + 
-             m[13] * m[2] * m[7] - 
-             m[13] * m[3] * m[6];
+  inv[2] = m[1]  * m[6] * m[15] - 
+            m[1]  * m[7] * m[14] - 
+            m[5]  * m[2] * m[15] + 
+            m[5]  * m[3] * m[14] + 
+            m[13] * m[2] * m[7] - 
+            m[13] * m[3] * m[6];
 
-    inv[6] = -m[0]  * m[6] * m[15] + 
-              m[0]  * m[7] * m[14] + 
-              m[4]  * m[2] * m[15] - 
-              m[4]  * m[3] * m[14] - 
-              m[12] * m[2] * m[7] + 
-              m[12] * m[3] * m[6];
+  inv[6] = -m[0]  * m[6] * m[15] + 
+            m[0]  * m[7] * m[14] + 
+            m[4]  * m[2] * m[15] - 
+            m[4]  * m[3] * m[14] - 
+            m[12] * m[2] * m[7] + 
+            m[12] * m[3] * m[6];
 
-    inv[10] = m[0]  * m[5] * m[15] - 
-              m[0]  * m[7] * m[13] - 
-              m[4]  * m[1] * m[15] + 
-              m[4]  * m[3] * m[13] + 
-              m[12] * m[1] * m[7] - 
-              m[12] * m[3] * m[5];
+  inv[10] = m[0]  * m[5] * m[15] - 
+            m[0]  * m[7] * m[13] - 
+            m[4]  * m[1] * m[15] + 
+            m[4]  * m[3] * m[13] + 
+            m[12] * m[1] * m[7] - 
+            m[12] * m[3] * m[5];
 
-    inv[14] = -m[0]  * m[5] * m[14] + 
-               m[0]  * m[6] * m[13] + 
-               m[4]  * m[1] * m[14] - 
-               m[4]  * m[2] * m[13] - 
-               m[12] * m[1] * m[6] + 
-               m[12] * m[2] * m[5];
+  inv[14] = -m[0]  * m[5] * m[14] + 
+              m[0]  * m[6] * m[13] + 
+              m[4]  * m[1] * m[14] - 
+              m[4]  * m[2] * m[13] - 
+              m[12] * m[1] * m[6] + 
+              m[12] * m[2] * m[5];
 
-    inv[3] = -m[1] * m[6] * m[11] + 
-              m[1] * m[7] * m[10] + 
-              m[5] * m[2] * m[11] - 
-              m[5] * m[3] * m[10] - 
-              m[9] * m[2] * m[7] + 
-              m[9] * m[3] * m[6];
+  inv[3] = -m[1] * m[6] * m[11] + 
+            m[1] * m[7] * m[10] + 
+            m[5] * m[2] * m[11] - 
+            m[5] * m[3] * m[10] - 
+            m[9] * m[2] * m[7] + 
+            m[9] * m[3] * m[6];
 
-    inv[7] = m[0] * m[6] * m[11] - 
-             m[0] * m[7] * m[10] - 
-             m[4] * m[2] * m[11] + 
-             m[4] * m[3] * m[10] + 
-             m[8] * m[2] * m[7] - 
-             m[8] * m[3] * m[6];
+  inv[7] = m[0] * m[6] * m[11] - 
+            m[0] * m[7] * m[10] - 
+            m[4] * m[2] * m[11] + 
+            m[4] * m[3] * m[10] + 
+            m[8] * m[2] * m[7] - 
+            m[8] * m[3] * m[6];
 
-    inv[11] = -m[0] * m[5] * m[11] + 
-               m[0] * m[7] * m[9] + 
-               m[4] * m[1] * m[11] - 
-               m[4] * m[3] * m[9] - 
-               m[8] * m[1] * m[7] + 
-               m[8] * m[3] * m[5];
+  inv[11] = -m[0] * m[5] * m[11] + 
+              m[0] * m[7] * m[9] + 
+              m[4] * m[1] * m[11] - 
+              m[4] * m[3] * m[9] - 
+              m[8] * m[1] * m[7] + 
+              m[8] * m[3] * m[5];
 
-    inv[15] = m[0] * m[5] * m[10] - 
-              m[0] * m[6] * m[9] - 
-              m[4] * m[1] * m[10] + 
-              m[4] * m[2] * m[9] + 
-              m[8] * m[1] * m[6] - 
-              m[8] * m[2] * m[5];
+  inv[15] = m[0] * m[5] * m[10] - 
+            m[0] * m[6] * m[9] - 
+            m[4] * m[1] * m[10] + 
+            m[4] * m[2] * m[9] + 
+            m[8] * m[1] * m[6] - 
+            m[8] * m[2] * m[5];
 
-    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+  det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
 
-    if (det == 0)
-        return 0;
+  if (det == 0)
+      return 0;
 
-    det = 1.0 / det;
+  det = 1.0 / det;
 
-    for (i = 0; i < 16; i++)
-        out[i] = inv[i] * det;
+  for (i = 0; i < 16; i++)
+      out[i] = inv[i] * det;
 
-    return 1;
+  return 1;
 }
 
 #endif

@@ -1,8 +1,9 @@
 #ifndef OBJECTLOADER_H
 #define OBJECTLOADER_H
 
-#include <stdio.h>
 #include <time.h>
+#include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -11,6 +12,9 @@
 #include "object.h"
 
 void writeArrayToFile(float* array, int size, const char* filename) {
+    assert(array != NULL);
+    assert(filename != NULL);
+
     FILE* file = fopen( filename, "w");
     if (file == NULL) {
         printf("Fehler beim Öffnen der Datei %s\n", filename);

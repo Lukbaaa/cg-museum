@@ -1,6 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <assert.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -23,51 +24,56 @@ GLfloat center[3];
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    float xpos = xposIn;
-    float ypos = yposIn;
+  assert(window != NULL);
 
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = 0;
-    }
+  float xpos = xposIn;
+  float ypos = yposIn;
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; 
-    lastX = xpos;
-    lastY = ypos;
+  if (firstMouse)
+  {
+      lastX = xpos;
+      lastY = ypos;
+      firstMouse = 0;
+  }
 
-    float sensitivity = 0.5f; 
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
+  float xoffset = xpos - lastX;
+  float yoffset = lastY - ypos; 
+  lastX = xpos;
+  lastY = ypos;
 
-    yaw += xoffset;
-    pitch += yoffset;
+  float sensitivity = 0.5f; 
+  xoffset *= sensitivity;
+  yoffset *= sensitivity;
 
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
+  yaw += xoffset;
+  pitch += yoffset;
 
-    camFront[0] = cos(yaw*M_PI/180) * cos(pitch*M_PI/180);
-    camFront[1] = sin(pitch*M_PI/180);
-    camFront[2] = sin(yaw*M_PI/180) * cos(pitch*M_PI/180);
-    normalize(camFront);
+  if (pitch > 89.0f)
+      pitch = 89.0f;
+  if (pitch < -89.0f)
+      pitch = -89.0f;
+
+  camFront[0] = cos(yaw*M_PI/180) * cos(pitch*M_PI/180);
+  camFront[1] = sin(pitch*M_PI/180);
+  camFront[2] = sin(yaw*M_PI/180) * cos(pitch*M_PI/180);
+  normalize(camFront);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    fov -= (float)yoffset;
-    if (fov < 1.0f)
-        fov = 1.0f;
-    if (fov > 45.0f)
-        fov = 45.0f;
+  assert(window != NULL);
+
+  fov -= (float)yoffset;
+  if (fov < 1.0f)
+      fov = 1.0f;
+  if (fov > 45.0f)
+      fov = 45.0f;
 }
 
 void processInput(GLFWwindow *window)
 {
-
+  assert(window != NULL);
+  
   float currentFrame = glfwGetTime();
   deltaTime = currentFrame - lastFrame;
   lastFrame = currentFrame;

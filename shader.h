@@ -1,9 +1,10 @@
 #ifndef SHADER_H
 #define SHADER_H
-#include <GL/glew.h>
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <GL/glew.h>
 
 typedef struct Object Object;
 
@@ -13,6 +14,9 @@ typedef struct Shader {
 } Shader;
 
 void checkCompileErrors(unsigned int shader, const char* type) {
+    assert(shader > 0);
+    assert(type != NULL);
+    
     int success;
     char infoLog[1024];
     if (strcmp(type, "PROGRAM") != 0)
@@ -36,6 +40,9 @@ void checkCompileErrors(unsigned int shader, const char* type) {
 }
 
 Shader* createShader(const char* vertexPath, const char* fragmentPath) {
+    assert(vertexPath != NULL);
+    assert(fragmentPath != NULL);
+
     // Read the Vertex Shader code from the file
     FILE* vertexShaderFile = fopen(vertexPath, "r");
     if (vertexShaderFile == NULL) {
