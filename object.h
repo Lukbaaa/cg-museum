@@ -23,7 +23,8 @@ typedef struct Object {
     int textureCount;
     Shader* shader;
     int shouldRender;
-    Object* parent;
+    Object** parents;
+    int parentCount;
     Object** children;
     int childrenCount;
     LightSource* light;
@@ -61,8 +62,9 @@ void initObject(Object* obj) {
     obj->textureCount = 0;
     obj->shader = NULL;
     obj->shouldRender = 1;
-    obj->parent = NULL;
+    obj->parents = NULL;
     obj->children = NULL;
+    obj->parentCount = 0;
     obj->childrenCount = 0;
     obj->light = NULL;
 }

@@ -12,8 +12,6 @@
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-
-
 LightSource light = 
   {
     {-12.0f, 2.0f, 2.0f, 1.0f},
@@ -49,8 +47,26 @@ void init(void) {
   glViewport(0, 0, 800, 800);
 }
 
-void createObjects(void) {
-
+void createScene(void) {
+  Object* root = createObject("objects/cube.obj");
+  Object* cube1 = createObject("objects/cube.obj");
+  Object* cube2 = createObject("objects/cube.obj");
+  Object* cube3 = createObject("objects/cube.obj");
+  Object* cube4 = createObject("objects/cube.obj");
+  Object* cube5 = createObject("objects/cube.obj");
+  Object* cube6 = createObject("objects/cube.obj");
+  Object* cube7 = createObject("objects/cube.obj");
+  Object* cube8 = createObject("objects/cube.obj");
+  scAddChild(root, cube1);
+  scAddChild(root, cube2);
+  scAddChild(root, cube3);
+  scAddChild(cube1, cube4);
+  scAddChild(cube2, cube5);
+  scAddChild(cube2, cube6);
+  scAddChild(cube6, cube7);
+  scAddChild(cube6, cube8);
+  traverse(root);
+  printf("finished traversing!\n");
 }
 
 void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
@@ -186,7 +202,7 @@ int main(void) {
   glfwMakeContextCurrent(window);
   glewInit();
   init();
-  createObjects();
+  createScene();
 
   identity(model);
   center[0] = camPos[0] + camFront[0];
@@ -198,7 +214,7 @@ int main(void) {
   while (!glfwWindowShouldClose(window)) {
 
     processInput(window);
-    draw();
+    //draw();
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

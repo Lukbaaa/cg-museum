@@ -58,7 +58,7 @@ void crateUniforms(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(obj->shader->program, "projection"), 1, GL_TRUE, projection);
 }
 
-void createObjects(void) {
+void createScene(void) {
   Object* crate = createObject("objects/cube.obj");
   crate->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
   crate->shader->setUniforms = &crateUniforms;
@@ -198,7 +198,7 @@ int main(void) {
   glfwMakeContextCurrent(window);
   glewInit();
   init();
-  createObjects();
+  createScene();
 
   identity(model);
   center[0] = camPos[0] + camFront[0];
