@@ -28,11 +28,13 @@ typedef struct Object {
     Object** children;
     int childrenCount;
     LightSource* light;
+    void (*draw)(Object*);
     void (*animate)(Object*);
 } Object;
 
 void setPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     assert(obj != NULL);
+
     obj->transform.position[0] = x;
     obj->transform.position[1] = y;
     obj->transform.position[2] = z;

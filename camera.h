@@ -17,10 +17,64 @@ float fov   =  45.0f;
 float deltaTime = 0.0f;	
 float lastFrame = 0.0f;
 
-GLfloat camPos[3] = {0, 0, 5};
+GLfloat view[16];
+GLfloat projection[16];
+
+GLfloat camPos[3] = {0, 0, 10};
 GLfloat camFront[3] = {0.0f, 0.0f, -1.0f};
 GLfloat camUp[3] = {0, 1, 0};
 GLfloat center[3];
+
+void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
+  GLfloat n[3] = {camPos[0]-center[0],camPos[1]-center[1],camPos[2]-center[2]};
+  GLfloat u[3];
+  GLfloat v[3];
+  crossProduct(u, up, n);
+  crossProduct(v, n, u);
+  
+  normalize(n);
+  normalize(u);
+  normalize(v);
+
+  GLfloat tx = -dotProduct(u, camPos);
+  GLfloat ty = -dotProduct(v, camPos);
+  GLfloat tz = -dotProduct(n, camPos);
+
+  GLfloat view[16] = 
+    {
+      u[0],v[0],n[0],0,
+      u[1],v[1],n[1],0,
+      u[2],v[2],n[2],0,
+        tx,  ty,  tz,1
+    };
+  copyMat(out, view);
+}
+
+void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLfloat far) {
+
+  fovy = fovy * M_PI/180;
+
+  GLfloat t = near * tanf(fovy/2);
+  GLfloat b = -t;
+  GLfloat l = b * aspect;
+  GLfloat r = t * aspect;
+
+  GLfloat temp[16] = 
+    {
+      2/(r-l),       0,            (1/near)*((r+l)/(r-l)),                   0,
+            0, 2/(t-b),            (1/near)*((t+b)/(t-b)),                   0,
+            0,       0, (-1/near)*((far+near)/(far-near)), -(2*far)/(far-near),
+            0,       0,                           -1/near,                   0
+    };
+  copyMat(out, temp);
+}
+
+void changeView() {
+  center[0] = camPos[0] + camFront[0];
+  center[1] = camPos[1] + camFront[1];
+  center[2] = camPos[2] + camFront[2];
+  lookAt(view, camPos, center, camUp);
+}
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {

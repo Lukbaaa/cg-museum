@@ -12,6 +12,8 @@
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+Object* scene;
+
 LightSource light = 
   {
     {-12.0f, 2.0f, 2.0f, 1.0f},
@@ -21,8 +23,7 @@ LightSource light =
   };
 
 GLfloat model[16];
-GLfloat view[16];
-GLfloat projection[16];
+
 GLfloat normalMatrix[16];
 
 Object** objects;
@@ -43,8 +44,59 @@ void init(void) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  identity(model);
+
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
+}
+
+void drawTextures(Object* obj) {
+  for (int j = 0; j < obj->textureCount; j++) {
+    char uniformName[15]; 
+    sprintf(uniformName, "tex%d", j);
+    glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), j);
+    glActiveTexture(GL_TEXTURE0+j);
+    glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
+  } 
+}
+
+void drawScene(Object* obj) {
+  if (!obj->shouldRender) {
+      return;
+    }
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   
+  changeView();
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawCube(Object* obj) {
+  if (!obj->shouldRender) {
+    return;
+  }
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   
+  changeView();
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, projection);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+  printMat4(view, 0);
 }
 
 void createScene(void) {
@@ -65,119 +117,42 @@ void createScene(void) {
   scAddChild(cube2, cube6);
   scAddChild(cube6, cube7);
   scAddChild(cube6, cube8);
-  traverse(root);
-  printf("finished traversing!\n");
-}
 
-void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
-  GLfloat n[3] = {camPos[0]-center[0],camPos[1]-center[1],camPos[2]-center[2]};
-  GLfloat u[3];
-  GLfloat v[3];
-  crossProduct(u, up, n);
-  crossProduct(v, n, u);
-  
-  normalize(n);
-  normalize(u);
-  normalize(v);
+  root->shouldRender = 0;
 
-  GLfloat tx = -dotProduct(u, camPos);
-  GLfloat ty = -dotProduct(v, camPos);
-  GLfloat tz = -dotProduct(n, camPos);
+  cube1->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube2->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube3->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube4->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube5->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube6->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube7->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  cube8->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
 
-  GLfloat view[16] = 
-    {
-      u[0],v[0],n[0],0,
-      u[1],v[1],n[1],0,
-      u[2],v[2],n[2],0,
-        tx,  ty,  tz,1
-    };
-  copyMat(out, view);
-}
+  loadTexture(cube1, "textures/crate.png", 0);
+  loadTexture(cube2, "textures/crate.png", 0);
+  loadTexture(cube3, "textures/crate.png", 0);
+  loadTexture(cube4, "textures/crate.png", 0);
+  loadTexture(cube5, "textures/crate.png", 0);
+  loadTexture(cube6, "textures/crate.png", 0);
+  loadTexture(cube7, "textures/crate.png", 0);
+  loadTexture(cube8, "textures/crate.png", 0);
 
-void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLfloat far) {
+  cube1->draw = &drawCube;
+  cube2->draw = &drawCube;
+  cube3->draw = &drawCube;
+  cube4->draw = &drawCube;
+  cube5->draw = &drawCube;
+  cube6->draw = &drawCube;
+  cube7->draw = &drawCube;
+  cube8->draw = &drawCube;
 
-  fovy = fovy * M_PI/180;
-
-  GLfloat t = near * tanf(fovy/2);
-  GLfloat b = -t;
-  GLfloat l = b * aspect;
-  GLfloat r = t * aspect;
-
-  GLfloat temp[16] = 
-    {
-      2/(r-l),       0,            (1/near)*((r+l)/(r-l)),                   0,
-            0, 2/(t-b),            (1/near)*((t+b)/(t-b)),                   0,
-            0,       0, (-1/near)*((far+near)/(far-near)), -(2*far)/(far-near),
-            0,       0,                           -1/near,                   0
-    };
-  copyMat(out, temp);
-}
-
-void changeView() {
-  center[0] = camPos[0] + camFront[0];
-  center[1] = camPos[1] + camFront[1];
-  center[2] = camPos[2] + camFront[2];
-  lookAt(view, camPos, center, camUp);
+  scene = root;
 } 
- 
-// noch überlegen wie unterschiedliche objekte unterschiedlich bewegt werden sollen
-// maybe auch function pointer
-void changeTransform(Object* obj) {
-  identity(model);
-
-  GLfloat t[16];
-  GLfloat s[16];
-
-  setRotation(obj, 0, glfwGetTime()*10, 0);
-
-  createTransMat3f(t, obj->transform.position[0], obj->transform.position[1], obj->transform.position[2]);
-  createScaleMat3f(s, obj->transform.scale[0], obj->transform.scale[1], obj->transform.scale[2]);
-  translate(model, model, t);
-  rotatex(model, model, obj->transform.rotation[0]);
-  rotatey(model, model, obj->transform.rotation[1]);
-  rotatez(model, model, obj->transform.rotation[2]);
-  scale(model, model, s);
-
-}
-
-void draw(void) {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   
-  changeView();
-  
-  for (int i = 0; i < objCount; i++) {
-    if (!objects[i]->shouldRender) {
-      continue;
-    }
-    int program = objects[i]->shader->program;
-    glUseProgram(program);
-
-    inverse4(model, normalMatrix);
-    transpose4(normalMatrix, normalMatrix);
-    changeTransform(objects[i]);
-
-    if (objects[i]->shader->setUniforms != NULL) {
-      objects[i]->shader->setUniforms(objects[i]);
-    }
-
-    for (int j = 0; j < objects[i]->textureCount; j++) {
-      char uniformName[15]; 
-      sprintf(uniformName, "tex%d", j);
-      glUniform1i(glGetUniformLocation(program, uniformName), j);
-      glActiveTexture(GL_TEXTURE0+j);
-      glBindTexture(GL_TEXTURE_2D, objects[i]->textures[j]);
-    } 
-
-    glBindVertexArray(objects[i]->vao);
-    glDrawArrays(GL_TRIANGLES, 0, objects[i]->vertCount);
-  }
-}
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
-
-
 
 int main(void) {
   glfwInit();
@@ -214,7 +189,8 @@ int main(void) {
   while (!glfwWindowShouldClose(window)) {
 
     processInput(window);
-    //draw();
+    changeView();
+    traverseDraw(scene);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

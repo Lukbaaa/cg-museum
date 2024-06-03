@@ -31,5 +31,21 @@ void traverse(Object* root) {
     }
 }
 
+void traverseDraw(Object* root) {
+    assert(root != NULL);
+
+    if(root->children == NULL) {
+        if (root->shouldRender) {
+            root->draw(root);
+        }
+        return;
+    }
+    for(int i = 0; i < root->childrenCount; i++) {
+        traverseDraw(root->children[i]);
+    }
+    if (root->shouldRender) {
+        root->draw(root);
+    }
+}
 
 #endif
