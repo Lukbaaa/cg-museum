@@ -17,8 +17,8 @@ typedef struct Transform {
 typedef struct Object {
     GLuint vao;
     int vertCount;
-    Material material;
     Transform transform;
+    Material material;
     GLuint* textures;
     int textureCount;
     Shader* shader;
@@ -28,6 +28,7 @@ typedef struct Object {
     Object** children;
     int childrenCount;
     LightSource* light;
+    void (*animate)(Object*);
 } Object;
 
 void setPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
@@ -67,5 +68,6 @@ void initObject(Object* obj) {
     obj->parentCount = 0;
     obj->childrenCount = 0;
     obj->light = NULL;
+    obj->animate = NULL;
 }
 #endif
