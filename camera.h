@@ -7,23 +7,36 @@
 
 #include "matrix_functions.h"
 
-int firstMouse = 0;
-float yaw   = -90.0f;	
-float pitch =  0.0f;
-float lastX =  800.0f / 2.0;
-float lastY =  600.0 / 2.0;
-float fov   =  45.0f;
+typedef struct Camera {
+  GLfloat view[16];
+  GLfloat projection[16];
+  GLfloat camPos[3];
+  GLfloat camFront[3];
+  GLfloat camUp[3];
+  GLfloat center[3];
+  GLfloat yaw;	
+  GLfloat pitch;
+  GLfloat lastX;
+  GLfloat lastY;
+  GLfloat fov;
+} Camera;
 
-float deltaTime = 0.0f;	
-float lastFrame = 0.0f;
+void initCamera(Camera* cam) {
+  setVec33f(cam->camPos, 0, 0, 20);
+  setVec33f(cam->camFront, 0.0f, 0.0f, -1.0f);
+  setVec33f(cam->camUp, 0, 1, 0);
+  cam->yaw   = -90.0f;	
+  cam->pitch =  0.0f;
+  cam->lastX =  800.0f / 2.0;
+  cam->lastY =  600.0 / 2.0;
+  cam->fov   =  45.0f;
+}
 
-GLfloat view[16];
-GLfloat projection[16];
-
-GLfloat camPos[3] = {0, 0, 20};
-GLfloat camFront[3] = {0.0f, 0.0f, -1.0f};
-GLfloat camUp[3] = {0, 1, 0};
-GLfloat center[3];
+Camera* createCamera() {
+  Camera* cam = (Camera*)malloc(sizeof(Camera));
+  initCamera(cam);
+  return cam;
+}
 
 void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
   GLfloat n[3] = {camPos[0]-center[0],camPos[1]-center[1],camPos[2]-center[2]};
@@ -47,7 +60,7 @@ void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
       u[2],v[2],n[2],0,
         tx,  ty,  tz,1
     };
-  copyMat(out, view);
+  copyMat(out, view, 16);
 }
 
 void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLfloat far) {
@@ -66,17 +79,22 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
             0,       0, (-1/near)*((far+near)/(far-near)), -(2*far)/(far-near),
             0,       0,                           -1/near,                   0
     };
-  copyMat(out, temp);
+  copyMat(out, temp, 16);
 }
 
-void changeView() {
-  center[0] = camPos[0] + camFront[0];
-  center[1] = camPos[1] + camFront[1];
-  center[2] = camPos[2] + camFront[2];
-  lookAt(view, camPos, center, camUp);
+void changeView(Camera* cam) {
+  cam->center[0] = cam->camPos[0] + cam->camFront[0];
+  cam->center[1] = cam->camPos[1] + cam->camFront[1];
+  cam->center[2] = cam->camPos[2] + cam->camFront[2];
+  lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
 }
 
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+int firstMouse = 0;
+
+float deltaTime = 0.0f;	
+float lastFrame = 0.0f;
+
+void mouse_callback(GLFWwindow* window, Camera* cam, double xposIn, double yposIn)
 {
   assert(window != NULL);
 
@@ -85,46 +103,46 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
   if (firstMouse)
   {
-      lastX = xpos;
-      lastY = ypos;
+      cam->lastX = xpos;
+      cam->lastY = ypos;
       firstMouse = 0;
   }
 
-  float xoffset = xpos - lastX;
-  float yoffset = lastY - ypos; 
-  lastX = xpos;
-  lastY = ypos;
+  float xoffset = xpos - cam->lastX;
+  float yoffset = cam->lastY - ypos; 
+  cam->lastX = xpos;
+  cam->lastY = ypos;
 
   float sensitivity = 0.5f; 
   xoffset *= sensitivity;
   yoffset *= sensitivity;
 
-  yaw += xoffset;
-  pitch += yoffset;
+  cam->yaw += xoffset;
+  cam->pitch += yoffset;
 
-  if (pitch > 89.0f)
-      pitch = 89.0f;
-  if (pitch < -89.0f)
-      pitch = -89.0f;
+  if (cam->pitch > 89.0f)
+      cam->pitch = 89.0f;
+  if (cam->pitch < -89.0f)
+      cam->pitch = -89.0f;
 
-  camFront[0] = cos(yaw*M_PI/180) * cos(pitch*M_PI/180);
-  camFront[1] = sin(pitch*M_PI/180);
-  camFront[2] = sin(yaw*M_PI/180) * cos(pitch*M_PI/180);
-  normalize(camFront);
+  cam->camFront[0] = cos(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
+  cam->camFront[1] = sin(cam->pitch*M_PI/180);
+  cam->camFront[2] = sin(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
+  normalize(cam->camFront);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow* window, Camera* cam, GLfloat xoffset, GLfloat yoffset)
 {
   assert(window != NULL);
 
-  fov -= (float)yoffset;
-  if (fov < 1.0f)
-      fov = 1.0f;
-  if (fov > 45.0f)
-      fov = 45.0f;
+  cam->fov -= (float)yoffset;
+  if (cam->fov < 1.0f)
+      cam->fov = 1.0f;
+  if (cam->fov > 45.0f)
+      cam->fov = 45.0f;
 }
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, Camera* cam)
 {
   assert(window != NULL);
   
@@ -137,44 +155,51 @@ void processInput(GLFWwindow *window)
 
   float cameraSpeed = 5 * deltaTime;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    camPos[0] += cameraSpeed * camFront[0];
-    camPos[1] += cameraSpeed * camFront[1];
-    camPos[2] += cameraSpeed * camFront[2];
+    cam->camPos[0] += cameraSpeed * cam->camFront[0];
+    cam->camPos[1] += cameraSpeed * cam->camFront[1];
+    cam->camPos[2] += cameraSpeed * cam->camFront[2];
   }
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    camPos[0] -= cameraSpeed * camFront[0];
-    camPos[1] -= cameraSpeed * camFront[1];
-    camPos[2] -= cameraSpeed * camFront[2];
+    cam->camPos[0] -= cameraSpeed * cam->camFront[0];
+    cam->camPos[1] -= cameraSpeed * cam->camFront[1];
+    cam->camPos[2] -= cameraSpeed * cam->camFront[2];
   }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
     GLfloat temp[3];
-    crossProduct(temp, camFront, camUp);
+    crossProduct(temp, cam->camFront, cam->camUp);
     normalize(temp);
-    camPos[0] -= temp[0] * cameraSpeed;
-    camPos[1] -= temp[1] * cameraSpeed;
-    camPos[2] -= temp[2] * cameraSpeed;
+    cam->camPos[0] -= temp[0] * cameraSpeed;
+    cam->camPos[1] -= temp[1] * cameraSpeed;
+    cam->camPos[2] -= temp[2] * cameraSpeed;
   }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
     GLfloat temp[3];
-    crossProduct(temp, camFront, camUp);
+    crossProduct(temp, cam->camFront, cam->camUp);
     normalize(temp);
-    camPos[0] += temp[0] * cameraSpeed;
-    camPos[1] += temp[1] * cameraSpeed;
-    camPos[2] += temp[2] * cameraSpeed;
+    cam->camPos[0] += temp[0] * cameraSpeed;
+    cam->camPos[1] += temp[1] * cameraSpeed;
+    cam->camPos[2] += temp[2] * cameraSpeed;
   }
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    mouse_callback(window, lastX, lastY-1);
+    mouse_callback(window, cam, cam->lastX, cam->lastY-1);
   }
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    mouse_callback(window, lastX, lastY+1);
+    mouse_callback(window, cam, cam->lastX, cam->lastY+1);
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    mouse_callback(window, lastX-1, lastY);
+    mouse_callback(window, cam, cam->lastX-1, cam->lastY);
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    mouse_callback(window, lastX+1, lastY);
+    mouse_callback(window, cam, cam->lastX+1, cam->lastY);
   }
+}
+
+GLfloat distToCamera(GLfloat objPos[3], GLfloat camPos[3]) {
+    GLfloat dx = objPos[0] - camPos[0];
+    GLfloat dy = objPos[1] - camPos[1];
+    GLfloat dz = objPos[2] - camPos[2];
+    return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
 #endif

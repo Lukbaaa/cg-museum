@@ -6,14 +6,12 @@
 #include <assert.h>
 #include <GL/glew.h>
 
-#include "object.h"
-
 #define M_PI 3.14159265358979323846
 
-void copyMat(GLfloat* mat1, GLfloat* mat2) {
-  assert(mat1 != NULL);
-  assert(mat2 != NULL);
-  for (int i = 0; i < 16; i++) { mat1[i] = mat2[i]; }
+void copyMat(GLfloat* out, GLfloat* in, int n) {
+  assert(out != NULL);
+  assert(in != NULL);
+  for (int i = 0; i < n; i++) { out[i] = in[i]; }
 }
 
 void printMat4(GLfloat* mat, int transpose) { 
@@ -65,7 +63,29 @@ void mat4Multiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
       }
     }
   }
-  copyMat(out, temp);
+  copyMat(out, temp, 16);
+}
+
+void mat4VectorMultiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
+  assert(out != NULL);
+  assert(in != NULL);
+  assert(v != NULL);
+
+  GLfloat temp[4];
+  GLfloat v4[4];
+
+  v4[0] = v[0];
+  v4[1] = v[1];
+  v4[2] = v[2];
+  v4[1] = 1;
+
+  for (int i = 0; i < 4; i++) {
+      temp[i] = 0;
+      for (int j = 0; j < 4; j++) {
+          temp[i] += in[i*4 + j] * v4[j];
+      }
+  }
+  copyMat(out, temp, 4);
 }
 
 GLfloat dotProduct(GLfloat* vec1, GLfloat* vec2) {
@@ -208,7 +228,7 @@ void transpose4(GLfloat in[16], GLfloat out[16]) {
       temp[j * 4 + i] = in[i * 4 + j];
     }
   }
-  copyMat(out, temp);
+  copyMat(out, temp, 16);
 }
 
 int inverse4(GLfloat m[16], GLfloat out[16]) {
@@ -342,15 +362,16 @@ int inverse4(GLfloat m[16], GLfloat out[16]) {
   return 1;
 }
 
-void createModelFromTransform(GLfloat* model, Transform transform) {
-  GLfloat t[16];
-  GLfloat s[16];
 
-  createTransMatFP(t, transform.position);
-  createScaleMatFP(s, transform.scale);
-  translate(model, model, t);
-  rotate(model, model, transform.rotation);
-  scale(model, model, s);
+void setVec3FP(GLfloat out[3], GLfloat in[3]) {
+  out[0] = in[0];
+  out[1] = in[1];
+  out[2] = in[2];
+}
+void setVec33f(GLfloat out[3], GLfloat x, GLfloat y, GLfloat z) {
+  out[0] = x;
+  out[1] = y;
+  out[2] = z;
 }
 
 #endif

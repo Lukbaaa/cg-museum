@@ -31,25 +31,67 @@ void traverse(Object* root) {
     }
 }
 
-void traverseDraw(Object* root, GLfloat model[16]) {
+void swap(Object* x, Object* y)
+{
+    Object temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+// bubble sort
+void sortObjectsByDist(Object** objs, int count) {
+    int swapped;
+    for (int i = 0; i < count - 1; i++) {
+        swapped = 0;
+        for (int j = 0; j < count - i - 1; j++) {
+            if (distToCamera(objs[j]->globalPosition, objs[j]->camera->camPos) < distToCamera(objs[j+1]->globalPosition, objs[j+1]->camera->camPos)) {
+                swap(objs[j], objs[j + 1]);
+                swapped = 1;
+            }
+        }
+        if (swapped == 0) break;
+    }
+}
+
+void drawTransparentObjects(Object** objs, int count) {
+    sortObjectsByDist(objs, count);
+    for(int i = 0; i < count; i++) {
+        objs[i]->draw(objs[i]);
+    }
+}
+
+void traverseDraw(Object* root, GLfloat modelStack[16], Object** transparentObjects, int toCount) {
     assert(root != NULL);
 
     if(root->animate != NULL) {
         root->animate(root);
     } 
 
-    GLfloat objModel[16];
-    identity(objModel);
-    createModelFromTransform(objModel, root->transform);
-    mat4Multiplication(model, model, objModel);
     if(root->shouldRender) {
-        root->draw(root, model);
+        createModelFromTransform(root->model, root->transform);
+        mat4Multiplication(modelStack, modelStack, root->model);
+        copyMat(root->model, modelStack, 16);
+        mat4VectorMultiplication(root->globalPosition, modelStack, root->transform.position);
+
+        if(!root->isTransparent) {
+            root->draw(root);
+        } else {
+            transparentObjects = (Object**)realloc(transparentObjects, sizeof(Object*)*(toCount+1));
+            transparentObjects[toCount] = root;
+            toCount++;
+        }
     }
+
     if(root->children == NULL) {
         return;
     }
+
     for(int i = 0; i < root->childrenCount; i++) {
-        traverseDraw(root->children[i], model);
+        traverseDraw(root->children[i], modelStack, transparentObjects, toCount);
+    }
+
+    if(root->parents == NULL) {
+        drawTransparentObjects(transparentObjects, toCount);
     }
 }
 

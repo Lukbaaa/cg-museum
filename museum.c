@@ -4,14 +4,12 @@
 #include "texture.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
-#include "matrix_functions.h"
+#include "object.h"
   
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
+Camera* cam;
 Object* scene;
 
 LightSource light = 
@@ -39,12 +37,12 @@ void init(void) {
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  center[0] = camPos[0] + camFront[0];
-  center[1] = camPos[1] + camFront[1];
-  center[2] = camPos[2] + camFront[2];
-  lookAt(view, camPos, center, camUp);
-  perspective(projection, 45.0f, 800/800, 0.1, 100);
+  cam = createCamera();
+  cam->center[0] = cam->camPos[0] + cam->camFront[0];
+  cam->center[1] = cam->camPos[1] + cam->camFront[1];
+  cam->center[2] = cam->camPos[2] + cam->camFront[2];
+  lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
+  perspective(cam->projection, 45.0f, 800/800, 0.1, 100);
 
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
@@ -65,7 +63,7 @@ void drawScene(Object* obj) {
       return;
   }
    
-  changeView();
+  changeView(cam);
 
   int program = obj->shader->program;
   glUseProgram(program);
@@ -76,9 +74,9 @@ void drawScene(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawCube(Object* obj, GLfloat model[16]) {
+void drawCube(Object* obj) {
    
-  changeView();
+  changeView(cam);
 
   int program = obj->shader->program;
   glUseProgram(program);
@@ -87,27 +85,32 @@ void drawCube(Object* obj, GLfloat model[16]) {
 
   glBindVertexArray(obj->vao);
 
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, projection);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
   //printMat4(model, 1);
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
 void cube1Animation(Object* obj) {
-  setPosition(obj, 0, glfwGetTime()-5, 0);
-  setRotation(obj, 0, glfwGetTime()*100, 0);
+  setObjectPosition(obj, 0, glfwGetTime()-5, 0);
+  setObjectRotation(obj, 0, glfwGetTime()*100, 0);
 }
 
 void cube2Animation(Object* obj) {
-  setPosition(obj, 5,0,0);
-  setRotation(obj, glfwGetTime()*500, 0,0);
+  setObjectPosition(obj, 5,0,0);
+  setObjectRotation(obj, glfwGetTime()*500, 0,0);
 }
 
 void createScene(void) {
+
   Object* root = createObject("objects/cube.obj");
   Object* cube1 = createObject("objects/cube.obj");
   Object* cube2 = createObject("objects/cube.obj");
+
+  root->camera = cam;
+  cube1->camera = cam;
+  cube2->camera = cam;
 
   scAddChild(root, cube1);
   scAddChild(cube1, cube2);
@@ -159,12 +162,12 @@ int main(void) {
   createScene();
     
   while (!glfwWindowShouldClose(window)) {
-    processInput(window);
-    changeView();
+    processInput(window, cam);
+    changeView(cam);
     GLfloat model[16];
     identity(model);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    traverseDraw(scene, model);
+    traverseDraw(scene, model, NULL, 0);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
