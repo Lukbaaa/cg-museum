@@ -345,7 +345,6 @@ int inverse4(GLfloat m[16], GLfloat out[16]) {
 void createModelFromTransform(GLfloat* model, Transform transform) {
   GLfloat t[16];
   GLfloat s[16];
-  GLfloat r[16];
 
   createTransMatFP(t, transform.position);
   createScaleMatFP(s, transform.scale);
