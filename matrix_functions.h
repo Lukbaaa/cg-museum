@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <GL/glew.h>
 
+#include "object.h"
+
 #define M_PI 3.14159265358979323846
 
 void copyMat(GLfloat* mat1, GLfloat* mat2) {
@@ -106,23 +108,19 @@ void createTransMatFP(GLfloat* out, GLfloat vec[3]) {
   assert(out != NULL);
   assert(vec != NULL);
 
-  GLfloat temp[16];
-  identity(temp);
-  temp[12]  = vec[0];
-  temp[13]  = vec[1];
-  temp[14] = vec[2];
-  copyMat(out, temp);
+  identity(out);
+  out[12]  = vec[0];
+  out[13]  = vec[1];
+  out[14] = vec[2];
 }
 
 void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   assert(out != NULL);
 
-  GLfloat temp[16];
-  identity(temp);
-  temp[12] = x;
-  temp[13] = y;
-  temp[14] = z;
-  copyMat(out, temp);
+  identity(out);
+  out[12] = x;
+  out[13] = y;
+  out[14] = z;
 }
 
 void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
@@ -137,23 +135,19 @@ void createScaleMatFP(GLfloat* out, GLfloat vec[3]) {
   assert(out != NULL);
   assert(vec != NULL);
 
-  GLfloat temp[16];
-  identity(temp);
-  temp[0]  = vec[0];
-  temp[5]  = vec[1];
-  temp[10] = vec[2];
-  copyMat(out, temp);
+  identity(out);
+  out[0]  = vec[0];
+  out[5]  = vec[1];
+  out[10] = vec[2];
 }
 
 void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   assert(out != NULL);
 
-  GLfloat temp[16];
-  identity(temp);
-  temp[0]  = x;
-  temp[5]  = y;
-  temp[10] = z;
-  copyMat(out, temp);
+  identity(out);
+  out[0]  = x;
+  out[5]  = y;
+  out[10] = z;
 }
 
 void rotatex(GLfloat* out, GLfloat* in, double a) {
@@ -198,13 +192,19 @@ void rotatez(GLfloat* out, GLfloat* in, double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
+void rotate(GLfloat* out, GLfloat* in, GLfloat rotation[3]) {
+  rotatex(out, in, rotation[0]);
+  rotatey(out, in, rotation[1]);
+  rotatez(out, in, rotation[2]);
+}
+
 void transpose4(GLfloat in[16], GLfloat out[16]) {
   assert(out != NULL);
   assert(in != NULL);
 
   GLfloat temp[16];
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
       temp[j * 4 + i] = in[i * 4 + j];
     }
   }
@@ -340,6 +340,18 @@ int inverse4(GLfloat m[16], GLfloat out[16]) {
       out[i] = inv[i] * det;
 
   return 1;
+}
+
+void createModelFromTransform(GLfloat* model, Transform transform) {
+  GLfloat t[16];
+  GLfloat s[16];
+  GLfloat r[16];
+
+  createTransMatFP(t, transform.position);
+  createScaleMatFP(s, transform.scale);
+  translate(model, model, t);
+  rotate(model, model, transform.rotation);
+  scale(model, model, s);
 }
 
 #endif

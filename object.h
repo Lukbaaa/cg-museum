@@ -28,7 +28,7 @@ typedef struct Object {
     Object** children;
     int childrenCount;
     LightSource* light;
-    void (*draw)(Object*);
+    void (*draw)(Object*, GLfloat[16]);
     void (*animate)(Object*);
 } Object;
 

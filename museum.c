@@ -22,10 +22,6 @@ LightSource light =
     {1.0f, 1.0f, 1.0f, 1.0f}
   };
 
-GLfloat model[16];
-
-GLfloat normalMatrix[16];
-
 Object** objects;
 int objCount = 0;
 
@@ -44,7 +40,11 @@ void init(void) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  identity(model);
+  center[0] = camPos[0] + camFront[0];
+  center[1] = camPos[1] + camFront[1];
+  center[2] = camPos[2] + camFront[2];
+  lookAt(view, camPos, center, camUp);
+  perspective(projection, 45.0f, 800/800, 0.1, 100);
 
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
@@ -63,8 +63,7 @@ void drawTextures(Object* obj) {
 void drawScene(Object* obj) {
   if (!obj->shouldRender) {
       return;
-    }
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
    
   changeView();
 
@@ -77,11 +76,7 @@ void drawScene(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawCube(Object* obj) {
-  if (!obj->shouldRender) {
-    return;
-  }
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void drawCube(Object* obj, GLfloat model[16]) {
    
   changeView();
 
@@ -91,61 +86,45 @@ void drawCube(Object* obj) {
   drawTextures(obj);
 
   glBindVertexArray(obj->vao);
+
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, projection);
-
+  //printMat4(model, 1);
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-  printMat4(view, 0);
+}
+
+void cube1Animation(Object* obj) {
+  setPosition(obj, 0, glfwGetTime()-5, 0);
+  setRotation(obj, 0, glfwGetTime()*100, 0);
+}
+
+void cube2Animation(Object* obj) {
+  setPosition(obj, 5,0,0);
+  setRotation(obj, glfwGetTime()*500, 0,0);
 }
 
 void createScene(void) {
   Object* root = createObject("objects/cube.obj");
   Object* cube1 = createObject("objects/cube.obj");
   Object* cube2 = createObject("objects/cube.obj");
-  Object* cube3 = createObject("objects/cube.obj");
-  Object* cube4 = createObject("objects/cube.obj");
-  Object* cube5 = createObject("objects/cube.obj");
-  Object* cube6 = createObject("objects/cube.obj");
-  Object* cube7 = createObject("objects/cube.obj");
-  Object* cube8 = createObject("objects/cube.obj");
+
   scAddChild(root, cube1);
-  scAddChild(root, cube2);
-  scAddChild(root, cube3);
-  scAddChild(cube1, cube4);
-  scAddChild(cube2, cube5);
-  scAddChild(cube2, cube6);
-  scAddChild(cube6, cube7);
-  scAddChild(cube6, cube8);
+  scAddChild(cube1, cube2);
 
   root->shouldRender = 0;
 
   cube1->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
   cube2->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube3->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube4->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube5->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube6->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube7->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube8->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
 
   loadTexture(cube1, "textures/crate.png", 0);
   loadTexture(cube2, "textures/crate.png", 0);
-  loadTexture(cube3, "textures/crate.png", 0);
-  loadTexture(cube4, "textures/crate.png", 0);
-  loadTexture(cube5, "textures/crate.png", 0);
-  loadTexture(cube6, "textures/crate.png", 0);
-  loadTexture(cube7, "textures/crate.png", 0);
-  loadTexture(cube8, "textures/crate.png", 0);
 
   cube1->draw = &drawCube;
   cube2->draw = &drawCube;
-  cube3->draw = &drawCube;
-  cube4->draw = &drawCube;
-  cube5->draw = &drawCube;
-  cube6->draw = &drawCube;
-  cube7->draw = &drawCube;
-  cube8->draw = &drawCube;
+
+  cube1->animate = &cube1Animation;
+  cube2->animate = &cube2Animation;
 
   scene = root;
 } 
@@ -178,19 +157,14 @@ int main(void) {
   glewInit();
   init();
   createScene();
-
-  identity(model);
-  center[0] = camPos[0] + camFront[0];
-  center[1] = camPos[1] + camFront[1];
-  center[2] = camPos[2] + camFront[2];
-  lookAt(view, camPos, center, camUp);
-  perspective(projection, 45.0f, 800/800, 0.1, 100);
-  
+    
   while (!glfwWindowShouldClose(window)) {
-
     processInput(window);
     changeView();
-    traverseDraw(scene);
+    GLfloat model[16];
+    identity(model);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    traverseDraw(scene, model);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

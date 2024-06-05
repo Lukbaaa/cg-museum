@@ -31,20 +31,25 @@ void traverse(Object* root) {
     }
 }
 
-void traverseDraw(Object* root) {
+void traverseDraw(Object* root, GLfloat model[16]) {
     assert(root != NULL);
 
+    if(root->animate != NULL) {
+        root->animate(root);
+    } 
+
+    GLfloat objModel[16];
+    identity(objModel);
+    createModelFromTransform(objModel, root->transform);
+    mat4Multiplication(model, model, objModel);
+    if(root->shouldRender) {
+        root->draw(root, model);
+    }
     if(root->children == NULL) {
-        if (root->shouldRender) {
-            root->draw(root);
-        }
         return;
     }
     for(int i = 0; i < root->childrenCount; i++) {
-        traverseDraw(root->children[i]);
-    }
-    if (root->shouldRender) {
-        root->draw(root);
+        traverseDraw(root->children[i], model);
     }
 }
 

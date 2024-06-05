@@ -20,7 +20,7 @@ float lastFrame = 0.0f;
 GLfloat view[16];
 GLfloat projection[16];
 
-GLfloat camPos[3] = {0, 0, 10};
+GLfloat camPos[3] = {0, 0, 20};
 GLfloat camFront[3] = {0.0f, 0.0f, -1.0f};
 GLfloat camUp[3] = {0, 1, 0};
 GLfloat center[3];
