@@ -74,7 +74,7 @@ void drawScene(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawCube(Object* obj) {
+void drawSphere(Object* obj) {
    
   changeView(cam);
 
@@ -88,46 +88,59 @@ void drawCube(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
-  //printMat4(model, 1);
+
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void cube1Animation(Object* obj) {
-  setObjectPosition(obj, 0, glfwGetTime()-5, 0);
-  setObjectRotation(obj, 0, glfwGetTime()*100, 0);
+void sunAnimation(Object* obj) {
+  setObjectPosition(obj, 0, 0, 0);
+  setObjectRotation(obj, 0, glfwGetTime()*10, 0);
 }
 
-void cube2Animation(Object* obj) {
-  setObjectPosition(obj, 5,0,0);
-  setObjectRotation(obj, glfwGetTime()*500, 0,0);
+void earthAnimation(Object* obj) {
+  setObjectPosition(obj, 7,0,0);
+  setObjectRotation(obj, 0, glfwGetTime()*100,0);
+}
+
+void moonAnimation(Object* obj) {
+  setObjectPosition(obj, 2,0,0);
+  setObjectRotation(obj, 0, 0,0);
+  setObjectScale(obj, 0.3, 0.3, 0.3);
 }
 
 void createScene(void) {
 
   Object* root = createObject("objects/cube.obj");
-  Object* cube1 = createObject("objects/cube.obj");
-  Object* cube2 = createObject("objects/cube.obj");
+  Object* sun = createObject("objects/sphere.obj");
+  Object* earth = createObject("objects/sphere.obj");
+  Object* moon = createObject("objects/sphere.obj");
 
   root->camera = cam;
-  cube1->camera = cam;
-  cube2->camera = cam;
+  sun->camera = cam;
+  earth->camera = cam;
+  moon->camera = cam;
 
-  scAddChild(root, cube1);
-  scAddChild(cube1, cube2);
+  scAddChild(root, sun);
+  scAddChild(sun, earth);
+  scAddChild(earth, moon);
 
   root->shouldRender = 0;
 
-  cube1->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
-  cube2->shader = createShader("shaders/crate.vert", "shaders/crate.frag");
+  sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  moon->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
 
-  loadTexture(cube1, "textures/crate.png", 0);
-  loadTexture(cube2, "textures/crate.png", 0);
+  loadTexture(sun, "textures/sun.png", 0);
+  loadTexture(earth, "textures/earth_day.png", 0);
+  loadTexture(moon, "textures/moon.png", 0);
 
-  cube1->draw = &drawCube;
-  cube2->draw = &drawCube;
+  sun->draw = &drawSphere;
+  earth->draw = &drawSphere;
+  moon->draw = &drawSphere;
 
-  cube1->animate = &cube1Animation;
-  cube2->animate = &cube2Animation;
+  sun->animate = &sunAnimation;
+  earth->animate = &earthAnimation;
+  moon->animate = &moonAnimation;
 
   scene = root;
 } 
