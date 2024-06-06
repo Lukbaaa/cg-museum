@@ -141,8 +141,8 @@ void createScene(void) {
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
-  loadTexture(window, "textures/window.png", 0);
-  loadTexture(window2, "textures/window.png", 0);
+  loadTexture(window, "textures/window_red.png", 0);
+  loadTexture(window2, "textures/window_blue.png", 0);
 
   sun->draw = &drawSphere;
   earth->draw = &drawSphere;
