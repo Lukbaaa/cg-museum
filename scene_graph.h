@@ -60,25 +60,27 @@ void drawTransparentObjects(Object** objs, int count) {
     }
 }
 
-void traverseDraw(Object* root, GLfloat modelStack[16], Object** transparentObjects, int toCount) {
+void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObjects, int* toCount) {
     assert(root != NULL);
 
+    GLfloat temp[16];
+    copyMat(temp, modelStack, 16);
+    createModelFromTransform(root->model, root->transform);
+    mat4Multiplication(modelStack, modelStack, root->model);
+    copyMat(root->model, modelStack, 16);
+    mat4VectorMultiplication(root->globalPosition, modelStack, root->transform.position);
     if(root->animate != NULL) {
         root->animate(root);
     } 
 
     if(root->shouldRender) {
-        createModelFromTransform(root->model, root->transform);
-        mat4Multiplication(modelStack, modelStack, root->model);
-        copyMat(root->model, modelStack, 16);
-        mat4VectorMultiplication(root->globalPosition, modelStack, root->transform.position);
 
         if(!root->isTransparent) {
             root->draw(root);
         } else {
-            transparentObjects = (Object**)realloc(transparentObjects, sizeof(Object*)*(toCount+1));
-            transparentObjects[toCount] = root;
-            toCount++;
+            *transparentObjects = (Object**)realloc(*transparentObjects, sizeof(Object*)*((*toCount)+1));
+            (*transparentObjects)[*toCount] = root;
+            (*toCount)++;
         }
     }
 
@@ -88,10 +90,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], Object** transparentObje
 
     for(int i = 0; i < root->childrenCount; i++) {
         traverseDraw(root->children[i], modelStack, transparentObjects, toCount);
-    }
-
-    if(root->parents == NULL) {
-        drawTransparentObjects(transparentObjects, toCount);
+        copyMat(modelStack, temp, 16);
     }
 }
 

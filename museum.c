@@ -32,7 +32,7 @@ Object* createObject(const char* objFilePath) {
 
 void init(void) {
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
+  //glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
   glEnable(GL_BLEND);
@@ -104,7 +104,7 @@ void earthAnimation(Object* obj) {
 
 void moonAnimation(Object* obj) {
   setObjectPosition(obj, 2,0,0);
-  setObjectRotation(obj, 0, 0,0);
+  setObjectRotation(obj, 0, glfwGetTime()*50,0);
   setObjectScale(obj, 0.3, 0.3, 0.3);
 }
 
@@ -114,36 +114,64 @@ void createScene(void) {
   Object* sun = createObject("objects/sphere.obj");
   Object* earth = createObject("objects/sphere.obj");
   Object* moon = createObject("objects/sphere.obj");
+  Object* window = createObject("objects/window.obj");
+  Object* window2 = createObject("objects/window.obj");
 
   root->camera = cam;
   sun->camera = cam;
   earth->camera = cam;
   moon->camera = cam;
+  window->camera = cam;
+  window2->camera = cam;
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
   scAddChild(earth, moon);
+  scAddChild(root, window);
+  scAddChild(root, window2);
 
   root->shouldRender = 0;
 
   sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   moon->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  window->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
+  loadTexture(window, "textures/window.png", 0);
+  loadTexture(window2, "textures/window.png", 0);
 
   sun->draw = &drawSphere;
   earth->draw = &drawSphere;
   moon->draw = &drawSphere;
-
+  window->draw = &drawSphere;
+  window2->draw = &drawSphere;
+  //setObjectPosition(window, 0, 0, 5);
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
-
+  setObjectPosition(window, 3,0,0);
+  setObjectPosition(window2, 5,0,0);
+  window->isTransparent = 1;
+  window2->isTransparent = 1;
   scene = root;
+  printf("%i\n", window->vao);
+  printf("%i\n", window2->vao);
 } 
+
+void draw() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    changeView(cam);
+    GLfloat model[16];
+    identity(model);
+    int toCount = 0;
+    Object** transparentObjects = NULL;
+    traverseDraw(scene, model, &transparentObjects, &toCount);
+    drawTransparentObjects(transparentObjects, toCount);
+}
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -176,11 +204,7 @@ int main(void) {
     
   while (!glfwWindowShouldClose(window)) {
     processInput(window, cam);
-    changeView(cam);
-    GLfloat model[16];
-    identity(model);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    traverseDraw(scene, model, NULL, 0);
+    draw();
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
