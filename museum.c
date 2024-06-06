@@ -155,11 +155,11 @@ void createScene(void) {
   moon->animate = &moonAnimation;
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
+  
   window->isTransparent = 1;
   window2->isTransparent = 1;
+
   scene = root;
-  printf("%i\n", window->vao);
-  printf("%i\n", window2->vao);
 } 
 
 void draw() {

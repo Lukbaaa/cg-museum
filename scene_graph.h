@@ -62,7 +62,7 @@ void drawTransparentObjects(Object** objs, int count) {
 
 void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObjects, int* toCount) {
     assert(root != NULL);
-
+    
     GLfloat temp[16];
     copyMat(temp, modelStack, 16);
     createModelFromTransform(root->model, root->transform);
