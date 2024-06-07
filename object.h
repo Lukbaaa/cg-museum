@@ -14,7 +14,7 @@ typedef struct Object {
     GLuint vao;
     int vertCount;
     Transform transform;
-    GLfloat globalPosition[4];
+    Vec3 globalPosition;
     GLfloat model[16];
     Material material;
     GLuint* textures;

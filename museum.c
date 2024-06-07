@@ -38,9 +38,9 @@ void init(void) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   cam = createCamera();
-  cam->center[0] = cam->camPos[0] + cam->camFront[0];
-  cam->center[1] = cam->camPos[1] + cam->camFront[1];
-  cam->center[2] = cam->camPos[2] + cam->camFront[2];
+  cam->center.x = cam->camPos.x + cam->camFront.x;
+  cam->center.y = cam->camPos.y + cam->camFront.y;
+  cam->center.z = cam->camPos.z + cam->camFront.z;
   lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
   perspective(cam->projection, 45.0f, 800/800, 0.1, 100);
 

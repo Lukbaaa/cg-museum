@@ -1,6 +1,8 @@
 #ifndef TRANSFORMATIONS_H
 #define TRANSFORMATIONS_H
 
+#include "vector.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
@@ -14,7 +16,7 @@ void copyMat(GLfloat* out, GLfloat* in, int n) {
   for (int i = 0; i < n; i++) { out[i] = in[i]; }
 }
 
-void printMat4(GLfloat* mat, int transpose) { 
+void printMat4(GLfloat mat[16], int transpose) { 
   assert(mat != NULL);
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
@@ -29,10 +31,9 @@ void printMat4(GLfloat* mat, int transpose) {
   printf("\n");
 }
 
-void printVec3(GLfloat* vec) {
-  assert(vec != NULL);
+void printVec3(Vec3 vec) {
   for (int i = 0; i < 3; i++) {
-    printf("%f ", vec[i]);
+    printf("%f ", *(((float*)&(vec.x))+i));
   }
   printf("\n");
 }
@@ -48,7 +49,7 @@ void identity(GLfloat* out) {
   }
 }
 
-void mat4Multiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
+void mat4Multiplication(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
   assert(v != NULL);
@@ -66,17 +67,15 @@ void mat4Multiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
   copyMat(out, temp, 16);
 }
 
-void mat4VectorMultiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
-  assert(out != NULL);
+Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
   assert(in != NULL);
-  assert(v != NULL);
 
   GLfloat temp[4];
   GLfloat v4[4];
 
-  v4[0] = v[0];
-  v4[1] = v[1];
-  v4[2] = v[2];
+  v4[0] = v.x;
+  v4[1] = v.y;
+  v4[2] = v.z;
   v4[1] = 1;
 
   for (int i = 0; i < 4; i++) {
@@ -85,38 +84,34 @@ void mat4VectorMultiplication(GLfloat* out, GLfloat* in, GLfloat* v) {
           temp[i] += in[i*4 + j] * v4[j];
       }
   }
-  copyMat(out, temp, 4);
+  Vec3 gloablPositition = {temp[0], temp[1], temp[2]};
+  return gloablPositition;
 }
 
-GLfloat dotProduct(GLfloat* vec1, GLfloat* vec2) {
-  assert(vec1 != NULL);
-  assert(vec2 != NULL);
-
-  return vec1[0]*vec2[0]+vec1[1]*vec2[1]+vec1[2]*vec2[2];
+GLfloat dotProduct(Vec3 vec1, Vec3 vec2) {
+  return vec1.x*vec2.x+vec1.y*vec2.y+vec1.z*vec2.z;
 }
 
-void crossProduct(GLfloat* out, GLfloat* in, GLfloat* v) {
-  assert(out != NULL);
-  assert(in != NULL);
-  assert(v != NULL);
-
-  out[0] = in[1]*v[2] - in[2]*v[1];
-  out[1] = in[2]*v[0] - in[0]*v[2];
-  out[2] = in[0]*v[1] - in[1]*v[0];
+Vec3 crossProduct(Vec3 v1, Vec3 v2) {
+  Vec3 cross;
+  cross.x = v1.y*v2.z - v1.z*v2.y;
+  cross.y = v1.z*v2.x - v1.x*v2.z;
+  cross.z = v1.x*v2.y - v1.y*v2.x;
+  return cross;
 }
 
-void normalize(GLfloat* vec) {
+void normalize(Vec3* vec) {
   assert(vec != NULL);
 
-  GLfloat length = sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
+  GLfloat length = sqrt(vec->x*vec->x+vec->y*vec->y+vec->z*vec->z);
   GLfloat invLen = 1/length;
 
-  vec[0] *= invLen;
-  vec[1] *= invLen;
-  vec[2] *= invLen;
+  vec->x *= invLen;
+  vec->y *= invLen;
+  vec->z *= invLen;
 }
 
-void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
+void translate(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
   assert(v != NULL);
@@ -124,14 +119,13 @@ void translate(GLfloat* out, GLfloat* in, GLfloat* v) {
   mat4Multiplication(out, in, v);
 }
 
-void createTransMatFP(GLfloat* out, GLfloat vec[3]) {
+void createTransMatVec3(GLfloat* out, Vec3 vec) {
   assert(out != NULL);
-  assert(vec != NULL);
 
   identity(out);
-  out[12]  = vec[0];
-  out[13]  = vec[1];
-  out[14] = vec[2];
+  out[12] = vec.x;
+  out[13] = vec.y;
+  out[14] = vec.z;
 }
 
 void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
@@ -143,7 +137,7 @@ void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   out[14] = z;
 }
 
-void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
+void scale(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
   assert(v != NULL);
@@ -151,14 +145,13 @@ void scale(GLfloat* out, GLfloat* in, GLfloat* v) {
   mat4Multiplication(out, in, v);
 }
 
-void createScaleMatFP(GLfloat* out, GLfloat vec[3]) {
+void createScaleMatVec3(GLfloat* out, Vec3 vec) {
   assert(out != NULL);
-  assert(vec != NULL);
 
   identity(out);
-  out[0]  = vec[0];
-  out[5]  = vec[1];
-  out[10] = vec[2];
+  out[0]  = vec.x;
+  out[5]  = vec.y;
+  out[10] = vec.z;
 }
 
 void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
@@ -170,7 +163,7 @@ void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   out[10] = z;
 }
 
-void rotatex(GLfloat* out, GLfloat* in, double a) {
+void rotatex(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
 
@@ -184,7 +177,7 @@ void rotatex(GLfloat* out, GLfloat* in, double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
-void rotatey(GLfloat* out, GLfloat* in, double a) {
+void rotatey(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
 
@@ -198,7 +191,7 @@ void rotatey(GLfloat* out, GLfloat* in, double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
-void rotatez(GLfloat* out, GLfloat* in, double a) {
+void rotatez(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
 
@@ -212,10 +205,10 @@ void rotatez(GLfloat* out, GLfloat* in, double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
-void rotate(GLfloat* out, GLfloat* in, GLfloat rotation[3]) {
-  rotatex(out, in, rotation[0]);
-  rotatey(out, in, rotation[1]);
-  rotatez(out, in, rotation[2]);
+void rotate(GLfloat* out, GLfloat in[16], Vec3 rotation) {
+  rotatex(out, in, rotation.x);
+  rotatey(out, in, rotation.y);
+  rotatez(out, in, rotation.z);
 }
 
 void transpose4(GLfloat in[16], GLfloat out[16]) {
@@ -360,18 +353,6 @@ int inverse4(GLfloat m[16], GLfloat out[16]) {
       out[i] = inv[i] * det;
 
   return 1;
-}
-
-
-void setVec3FP(GLfloat out[3], GLfloat in[3]) {
-  out[0] = in[0];
-  out[1] = in[1];
-  out[2] = in[2];
-}
-void setVec33f(GLfloat out[3], GLfloat x, GLfloat y, GLfloat z) {
-  out[0] = x;
-  out[1] = y;
-  out[2] = z;
 }
 
 #endif

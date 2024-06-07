@@ -5,39 +5,39 @@
 #include <GL/glew.h>
 
 typedef struct Transform {
-    GLfloat position[3];
-    GLfloat scale[3];
-    GLfloat rotation[3];
+    Vec3 position;
+    Vec3 scale;
+    Vec3 rotation;
 } Transform;
 
 void setPosition(Transform* transform, GLfloat x, GLfloat y, GLfloat z) {
     assert(transform != NULL);
 
-    transform->position[0] = x;
-    transform->position[1] = y;
-    transform->position[2] = z;
+    transform->position.x = x;
+    transform->position.y = y;
+    transform->position.z = z;
 }
 
 void setScale(Transform* transform, GLfloat x, GLfloat y, GLfloat z) {
     assert(transform != NULL);
-    transform->scale[0] = x;
-    transform->scale[1] = y;
-    transform->scale[2] = y;
+    transform->scale.x = x;
+    transform->scale.y = y;
+    transform->scale.z = y;
 }
 
 void setRotation(Transform* transform, GLfloat x, GLfloat y, GLfloat z) {
     assert(transform != NULL);
-    transform->rotation[0] = x;
-    transform->rotation[1] = y;
-    transform->rotation[2] = z;
+    transform->rotation.x = x;
+    transform->rotation.y = y;
+    transform->rotation.z = z;
 }
 
 void createModelFromTransform(GLfloat* model, Transform transform) {
   GLfloat t[16];
   GLfloat s[16];
 
-  createTransMatFP(t, transform.position);
-  createScaleMatFP(s, transform.scale);
+  createTransMatVec3(t, transform.position);
+  createScaleMatVec3(s, transform.scale);
   identity(model);
   translate(model, model, t);
   rotate(model, model, transform.rotation);

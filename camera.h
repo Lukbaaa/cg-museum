@@ -5,15 +5,16 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "vector.h"
 #include "matrix_functions.h"
 
 typedef struct Camera {
   GLfloat view[16];
   GLfloat projection[16];
-  GLfloat camPos[3];
-  GLfloat camFront[3];
-  GLfloat camUp[3];
-  GLfloat center[3];
+  Vec3 camPos;
+  Vec3 camFront;
+  Vec3 camUp;
+  Vec3 center;
   GLfloat yaw;	
   GLfloat pitch;
   GLfloat lastX;
@@ -22,9 +23,12 @@ typedef struct Camera {
 } Camera;
 
 void initCamera(Camera* cam) {
-  setVec33f(cam->camPos, 0, 0, 20);
-  setVec33f(cam->camFront, 0.0f, 0.0f, -1.0f);
-  setVec33f(cam->camUp, 0, 1, 0);
+  Vec3 camPos = {0,0,20};
+  cam->camPos = camPos;
+  Vec3 camFront = {0.0f, 0.0f, -1.0};
+  cam->camFront = camFront;
+  Vec3 camUp = {0, 1, 0};
+  cam->camUp = camUp;
   cam->yaw   = -90.0f;	
   cam->pitch =  0.0f;
   cam->lastX =  800.0f / 2.0;
@@ -38,16 +42,14 @@ Camera* createCamera() {
   return cam;
 }
 
-void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
-  GLfloat n[3] = {camPos[0]-center[0],camPos[1]-center[1],camPos[2]-center[2]};
-  GLfloat u[3];
-  GLfloat v[3];
-  crossProduct(u, up, n);
-  crossProduct(v, n, u);
-  
-  normalize(n);
-  normalize(u);
-  normalize(v);
+void lookAt(GLfloat*out, Vec3 camPos, Vec3 center, Vec3 up) {
+  Vec3 n = {camPos.x-center.x, camPos.y-center.y, camPos.z-center.z};
+  Vec3 u = crossProduct(up, n);
+  Vec3 v = crossProduct(n, u);
+    
+  normalize(&n);
+  normalize(&u);
+  normalize(&v);
 
   GLfloat tx = -dotProduct(u, camPos);
   GLfloat ty = -dotProduct(v, camPos);
@@ -55,10 +57,10 @@ void lookAt(GLfloat*out,GLfloat*camPos,GLfloat*center,GLfloat*up) {
 
   GLfloat view[16] = 
     {
-      u[0],v[0],n[0],0,
-      u[1],v[1],n[1],0,
-      u[2],v[2],n[2],0,
-        tx,  ty,  tz,1
+      u.x,v.x,n.x,0,
+      u.y,v.y,n.y,0,
+      u.z,v.z,n.z,0,
+       tx, ty, tz,1
     };
   copyMat(out, view, 16);
 }
@@ -83,9 +85,9 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
 }
 
 void changeView(Camera* cam) {
-  cam->center[0] = cam->camPos[0] + cam->camFront[0];
-  cam->center[1] = cam->camPos[1] + cam->camFront[1];
-  cam->center[2] = cam->camPos[2] + cam->camFront[2];
+  cam->center.x = cam->camPos.x + cam->camFront.x;
+  cam->center.y = cam->camPos.y + cam->camFront.y;
+  cam->center.z = cam->camPos.z + cam->camFront.z;
   lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
 }
 
@@ -125,10 +127,10 @@ void mouse_callback(GLFWwindow* window, Camera* cam, double xposIn, double yposI
   if (cam->pitch < -89.0f)
       cam->pitch = -89.0f;
 
-  cam->camFront[0] = cos(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
-  cam->camFront[1] = sin(cam->pitch*M_PI/180);
-  cam->camFront[2] = sin(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
-  normalize(cam->camFront);
+  cam->camFront.x = cos(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
+  cam->camFront.y = sin(cam->pitch*M_PI/180);
+  cam->camFront.z = sin(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
+  normalize(&(cam->camFront));
 }
 
 void scroll_callback(GLFWwindow* window, Camera* cam, GLfloat xoffset, GLfloat yoffset)
@@ -155,30 +157,28 @@ void processInput(GLFWwindow *window, Camera* cam)
 
   float cameraSpeed = 5 * deltaTime;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    cam->camPos[0] += cameraSpeed * cam->camFront[0];
-    cam->camPos[1] += cameraSpeed * cam->camFront[1];
-    cam->camPos[2] += cameraSpeed * cam->camFront[2];
+    cam->camPos.x += cameraSpeed * cam->camFront.x;
+    cam->camPos.y += cameraSpeed * cam->camFront.y;
+    cam->camPos.z += cameraSpeed * cam->camFront.z;
   }
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    cam->camPos[0] -= cameraSpeed * cam->camFront[0];
-    cam->camPos[1] -= cameraSpeed * cam->camFront[1];
-    cam->camPos[2] -= cameraSpeed * cam->camFront[2];
+    cam->camPos.x -= cameraSpeed * cam->camFront.x;
+    cam->camPos.y -= cameraSpeed * cam->camFront.y;
+    cam->camPos.z -= cameraSpeed * cam->camFront.z;
   }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    GLfloat temp[3];
-    crossProduct(temp, cam->camFront, cam->camUp);
-    normalize(temp);
-    cam->camPos[0] -= temp[0] * cameraSpeed;
-    cam->camPos[1] -= temp[1] * cameraSpeed;
-    cam->camPos[2] -= temp[2] * cameraSpeed;
+    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
+    normalize(&temp);
+    cam->camPos.x -= temp.x * cameraSpeed;
+    cam->camPos.y -= temp.y * cameraSpeed;
+    cam->camPos.z -= temp.z * cameraSpeed;
   }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    GLfloat temp[3];
-    crossProduct(temp, cam->camFront, cam->camUp);
-    normalize(temp);
-    cam->camPos[0] += temp[0] * cameraSpeed;
-    cam->camPos[1] += temp[1] * cameraSpeed;
-    cam->camPos[2] += temp[2] * cameraSpeed;
+    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
+    normalize(&temp);
+    cam->camPos.x += temp.x * cameraSpeed;
+    cam->camPos.y += temp.y * cameraSpeed;
+    cam->camPos.z += temp.z * cameraSpeed;
   }
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -195,10 +195,10 @@ void processInput(GLFWwindow *window, Camera* cam)
   }
 }
 
-GLfloat distToCamera(GLfloat objPos[3], GLfloat camPos[3]) {
-    GLfloat dx = objPos[0] - camPos[0];
-    GLfloat dy = objPos[1] - camPos[1];
-    GLfloat dz = objPos[2] - camPos[2];
+GLfloat distToCamera(Vec3 objPos, Vec3 camPos) {
+    GLfloat dx = objPos.x - camPos.x;
+    GLfloat dy = objPos.y - camPos.y;
+    GLfloat dz = objPos.z - camPos.z;
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 

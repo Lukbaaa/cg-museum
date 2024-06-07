@@ -68,7 +68,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObj
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
-    mat4VectorMultiplication(root->globalPosition, modelStack, root->transform.position);
+    root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
     if(root->animate != NULL) {
         root->animate(root);
     } 

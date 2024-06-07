@@ -1,14 +1,16 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "vector.h"
+
 #include <stdlib.h>
 #include <GL/glew.h>
 
 typedef struct LightParams {
-    GLfloat position[4];
-    GLfloat ambient[4];
-    GLfloat diffuse[4];
-    GLfloat specular[4];
+    Vec4 position;
+    Vec4 ambient;
+    Vec4 diffuse;
+    Vec4 specular;
 } LightSource;
 
 LightSource* createLight(void) {
