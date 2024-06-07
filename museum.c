@@ -92,6 +92,26 @@ void drawSphere(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
+int i = 0;
+void drawWater(Object* obj) {
+
+  changeView(cam);
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
+  glUniform2f(glGetUniformLocation(program, "r"), i, i);
+  i++;
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
 void sunAnimation(Object* obj) {
   setObjectPosition(obj, 0, 0, 0);
   setObjectRotation(obj, 0, glfwGetTime()*10, 0);
@@ -116,6 +136,7 @@ void createScene(void) {
   Object* moon = createObject("objects/sphere.obj");
   Object* window = createObject("objects/window.obj");
   Object* window2 = createObject("objects/window.obj");
+  Object* water = createObject("objects/plane.obj");
 
   root->camera = cam;
   sun->camera = cam;
@@ -123,12 +144,14 @@ void createScene(void) {
   moon->camera = cam;
   window->camera = cam;
   window2->camera = cam;
+  water->camera = cam;
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
   scAddChild(earth, moon);
   scAddChild(root, window);
   scAddChild(root, window2);
+  scAddChild(root, water);
 
   root->shouldRender = 0;
 
@@ -137,6 +160,7 @@ void createScene(void) {
   moon->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   window->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  water->shader = createShader("shaders/water.vert", "shaders/water.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -149,13 +173,15 @@ void createScene(void) {
   moon->draw = &drawSphere;
   window->draw = &drawSphere;
   window2->draw = &drawSphere;
-  //setObjectPosition(window, 0, 0, 5);
+  water->draw = &drawWater;
+
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
-  
+  setObjectPosition(water, 0, 0, 5);
+
   window->isTransparent = 1;
   window2->isTransparent = 1;
 
@@ -165,11 +191,11 @@ void createScene(void) {
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     changeView(cam);
-    GLfloat model[16];
-    identity(model);
+    GLfloat modelStack[16];
+    identity(modelStack);
     int toCount = 0;
     Object** transparentObjects = NULL;
-    traverseDraw(scene, model, &transparentObjects, &toCount);
+    traverseDraw(scene, modelStack, &transparentObjects, &toCount);
     drawTransparentObjects(transparentObjects, toCount);
 }
 
