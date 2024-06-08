@@ -4,10 +4,10 @@
 #include "vector.h"
 
 typedef struct MaterialParams {
-    Vec4 emissive;
-    Vec4 ambient;
-    Vec4 diffuse;
-    Vec4 specular;
+    float emissive[4];
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
     float shininess;
 } Material;
 

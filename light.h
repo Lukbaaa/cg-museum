@@ -7,10 +7,10 @@
 #include <GL/glew.h>
 
 typedef struct LightParams {
-    Vec4 position;
-    Vec4 ambient;
-    Vec4 diffuse;
-    Vec4 specular;
+    float position[4];
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
 } LightSource;
 
 LightSource* createLight(void) {

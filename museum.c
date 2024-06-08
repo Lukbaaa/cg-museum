@@ -112,6 +112,37 @@ void drawWater(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
+void drawBjarne(Object* obj) {
+  changeView(cam);
+  light.position[0] = sin(glfwGetTime())*10 + 20;
+  light.position[1] = 2;
+  light.position[2] = cos(glfwGetTime())*10;
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
+  glUniform4fv(glGetUniformLocation(program, "light.position"), 1, light.position);
+  glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, light.ambient);
+  glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, light.diffuse);
+  glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, light.specular);
+  glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
+  glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
+  glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
+  glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
+  glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
+
+  GLfloat normalMatrix[16];
+  inverse4(obj->model, normalMatrix);
+  transpose4(normalMatrix, normalMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+
 void sunAnimation(Object* obj) {
   setObjectPosition(obj, 0, 0, 0);
   setObjectRotation(obj, 0, glfwGetTime()*10, 0);
@@ -137,6 +168,7 @@ void createScene(void) {
   Object* window = createObject("objects/window.obj");
   Object* window2 = createObject("objects/window.obj");
   Object* water = createObject("objects/plane.obj");
+  Object* bjarne = createObject("objects/bjarne.obj");
 
   root->camera = cam;
   sun->camera = cam;
@@ -145,6 +177,7 @@ void createScene(void) {
   window->camera = cam;
   window2->camera = cam;
   water->camera = cam;
+  bjarne->camera = cam;
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
@@ -152,6 +185,7 @@ void createScene(void) {
   scAddChild(root, window);
   scAddChild(root, window2);
   scAddChild(root, water);
+  scAddChild(root, bjarne);
 
   root->shouldRender = 0;
 
@@ -161,6 +195,7 @@ void createScene(void) {
   window->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
+  bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -174,13 +209,19 @@ void createScene(void) {
   window->draw = &drawSphere;
   window2->draw = &drawSphere;
   water->draw = &drawWater;
+  bjarne->draw = &drawBjarne;
+  
 
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
+
+  bjarne->material = gold;
+
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
   setObjectPosition(water, 0, 0, 5);
+  setObjectPosition(bjarne, 10, 0, 0);
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
