@@ -1,38 +1,40 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <math.h>
 #include <stdio.h>
 #include <assert.h>
+#include <GL/glew.h>
 
 typedef struct Vec2 {
-    float x;
-    float y;
+    GLfloat x;
+    GLfloat y;
 } Vec2;
 
 typedef struct Vec3 {
-    float x;
-    float y;
-    float z;
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
 } Vec3;
 
 typedef struct Vec4 {
-    float r;
-    float g;
-    float b;
-    float a;
+    GLfloat r;
+    GLfloat g;
+    GLfloat b;
+    GLfloat a;
 } Vec4;
 
-void vec2ToArr(float out[2], Vec2 vec) {
+void vec2ToArr(GLfloat out[2], Vec2 vec) {
     out[0] = vec.x;
     out[1] = vec.y;
 }
 
-void vec3ToArr(float out[3], Vec3 vec) {
+void vec3ToArr(GLfloat out[3], Vec3 vec) {
     out[0] = vec.x;
     out[1] = vec.y;
     out[2] = vec.z;
 }
-void vec4ToArr(float out[4], Vec4 vec) {
+void vec4ToArr(GLfloat out[4], Vec4 vec) {
     out[0] = vec.r;
     out[1] = vec.g;
     out[2] = vec.b;

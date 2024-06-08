@@ -216,7 +216,8 @@ void createScene(void) {
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
 
-  bjarne->material = gold;
+  bjarne->material = rubin;
+  bjarne->isTransparent = 1;
 
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
@@ -247,7 +248,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 int main(void) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  //LIBGL_ALWAYS_SOFTWARE=true
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glewExperimental = GL_TRUE;

@@ -60,9 +60,31 @@ Object* createVAOwithObj(const char* objFilePath) {
     size_t normSize = 0;
     size_t indSize = 0;
 
+    GLfloat left = 0;
+    GLfloat right = 0;
+    GLfloat top = 0;
+    GLfloat bottom = 0;
+    GLfloat front = 0;
+    GLfloat back = 0;
+
     while (fgets(line, sizeof(line), objFile) != NULL) {
         if(strncmp(line, "v ", 2) == 0) {
             sscanf(line, "v %f %f %f", vertices+vertSize, vertices+vertSize+1, vertices+vertSize+2);
+            if(vertices[vertSize] > right) {
+                right = vertices[vertSize];
+            } else if (vertices[vertSize] < left) {
+                left = vertices[vertSize];
+            }
+            if(vertices[vertSize+1] > top) {
+                top = vertices[vertSize+1];
+            } else if (vertices[vertSize+1] < bottom) {
+                bottom = vertices[vertSize+1];
+            }
+            if(vertices[vertSize+2] > front) {
+                front = vertices[vertSize+2];
+            } else if (vertices[vertSize+2] < back) {
+                back = vertices[vertSize+2];
+            }
             vertSize += 3;
         } else if (strncmp(line, "vt", 2) == 0) {
             sscanf(line, "vt %f %f", textures+textSize, textures+textSize+1);
@@ -87,7 +109,18 @@ Object* createVAOwithObj(const char* objFilePath) {
         if (indMaxSize/sizeof(int) < indSize + 9) {
             indices = (int*)realloc(indices, indMaxSize+=900);
         }
-    }
+    }         
+
+    BoundingBox boundingBox = {
+        {left,top,front},
+        {right,top,front},
+        {left,bottom,front},
+        {right,bottom,front},
+        {left,top,back},
+        {right,top,back},
+        {left,bottom,back},
+        {right,bottom,back},
+    };
 
     vertices = (GLfloat*)realloc(vertices, vertSize*sizeof(GLfloat));
     textures = (GLfloat*)realloc(textures, textSize*sizeof(GLfloat));
