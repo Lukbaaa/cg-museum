@@ -69,4 +69,26 @@ void setObjectRotation(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     assert(obj != NULL);
     setRotation(&obj->transform, x, y, z);
 }
+
+Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
+  assert(in != NULL);
+
+  GLfloat temp[4];
+  GLfloat v4[4];
+
+  v4[0] = v.x;
+  v4[1] = v.y;
+  v4[2] = v.z;
+  v4[1] = 1;
+
+  for (int i = 0; i < 4; i++) {
+      temp[i] = 0;
+      for (int j = 0; j < 4; j++) {
+          temp[i] += in[i*4 + j] * v4[j];
+      }
+  }
+  Vec3 gloablPositition = {temp[0], temp[1], temp[2]};
+  return gloablPositition;
+}
+
 #endif

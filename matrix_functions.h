@@ -31,13 +31,6 @@ void printMat4(GLfloat mat[16], int transpose) {
   printf("\n");
 }
 
-void printVec3(Vec3 vec) {
-  for (int i = 0; i < 3; i++) {
-    printf("%f ", *(((float*)&(vec.x))+i));
-  }
-  printf("\n");
-}
-
 void identity(GLfloat* out) {
   assert(out != NULL);
   for (int i = 0; i < 16; i++) {
@@ -65,50 +58,6 @@ void mat4Multiplication(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
     }
   }
   copyMat(out, temp, 16);
-}
-
-Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
-  assert(in != NULL);
-
-  GLfloat temp[4];
-  GLfloat v4[4];
-
-  v4[0] = v.x;
-  v4[1] = v.y;
-  v4[2] = v.z;
-  v4[1] = 1;
-
-  for (int i = 0; i < 4; i++) {
-      temp[i] = 0;
-      for (int j = 0; j < 4; j++) {
-          temp[i] += in[i*4 + j] * v4[j];
-      }
-  }
-  Vec3 gloablPositition = {temp[0], temp[1], temp[2]};
-  return gloablPositition;
-}
-
-GLfloat dotProduct(Vec3 vec1, Vec3 vec2) {
-  return vec1.x*vec2.x+vec1.y*vec2.y+vec1.z*vec2.z;
-}
-
-Vec3 crossProduct(Vec3 v1, Vec3 v2) {
-  Vec3 cross;
-  cross.x = v1.y*v2.z - v1.z*v2.y;
-  cross.y = v1.z*v2.x - v1.x*v2.z;
-  cross.z = v1.x*v2.y - v1.y*v2.x;
-  return cross;
-}
-
-void normalize(Vec3* vec) {
-  assert(vec != NULL);
-
-  GLfloat length = sqrt(vec->x*vec->x+vec->y*vec->y+vec->z*vec->z);
-  GLfloat invLen = 1/length;
-
-  vec->x *= invLen;
-  vec->y *= invLen;
-  vec->z *= invLen;
 }
 
 void translate(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
