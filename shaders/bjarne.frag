@@ -19,6 +19,8 @@ in vec3 fragPos;
 in vec3 normal;
 in vec2 texCoord;
 
+out vec4 FragColor;
+
 uniform vec3 viewPos; 
 uniform Material material;
 uniform LightSource light;
@@ -49,5 +51,5 @@ void main() {
 
     vec4 result = emissive + ambient + diffuse + specular;
 
-    gl_FragColor = result; //vec4(1,0,0,1);
+    FragColor = result; //vec4(1,0,0,1);
 }

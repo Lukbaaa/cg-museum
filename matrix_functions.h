@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <GL/glew.h>
 
-#define M_PI 3.14159265358979323846
+//#define M_PI 3.14159265358979323846
 
 void copyMat(GLfloat* out, GLfloat* in, int n) {
   assert(out != NULL);

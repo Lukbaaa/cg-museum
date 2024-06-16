@@ -30,6 +30,8 @@ typedef struct Object {
     Camera* camera;
     void (*draw)(Object*);
     void (*animate)(Object*);
+    // hinzugefügt:
+    void* userData; // partikeln
 } Object;
 
 void initObject(Object* obj) {
@@ -53,6 +55,7 @@ void initObject(Object* obj) {
     obj->camera = NULL;
     obj->draw = NULL;
     obj->animate = NULL;
+    obj->userData = NULL;
 }
 
 void setObjectPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {

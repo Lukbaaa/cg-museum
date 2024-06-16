@@ -1,3 +1,7 @@
+#include <GL/glew.h>
+#include <OpenGL/gl3.h>
+#include <GLFW/glfw3.h>
+
 #include "light.h"
 #include "shader.h"
 #include "camera.h"
@@ -5,9 +9,9 @@
 #include "scene_graph.h"
 #include "objectLoader.h"
 #include "object.h"
-  
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "particle.h"
+#include "skybox.h"
+
 
 Camera* cam;
 Object* scene;
@@ -22,6 +26,11 @@ LightSource light =
 
 Object** objects;
 int objCount = 0;
+Object* campfire;
+
+
+// -----
+
 
 Object* createObject(const char* objFilePath) {
   objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
@@ -92,6 +101,7 @@ void drawSphere(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
+
 int i = 0;
 void drawWater(Object* obj) {
 
@@ -140,6 +150,32 @@ void drawBjarne(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
 
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawCampfire(Object* obj) {
+  changeView(cam);
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+  
+}
+
+void drawSkybox() {
+  glDepthFunc(GL_LEQUAL);
+  glUseProgram(scene->shader->program);
+  glBindVertexArray(getVAO());
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, getCubemapTexture());
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+  glDepthFunc(GL_LESS);
+
 }
 
 
@@ -229,7 +265,53 @@ void createScene(void) {
   scene = root;
 } 
 
-void draw() {
+void createFlorinScene(void) {
+    Object* root = createObject("objects/cube.obj");
+    // Object* water = createObject("objects/plane.obj");
+    campfire = createObject("objects/gtr.obj");
+    // Object* particlesObj = (Object*)malloc(sizeof(Object));
+
+    // ParticleGenerator* particles = (ParticleGenerator*)malloc(sizeof(ParticleGenerator));
+    // Shader* particleShader = createShader("shaders/particle.vert", "shaders/particle.frag");
+ 
+  
+    // loadTexture(particlesObj, "textures/particle.png", 0);
+
+    // Initialize Particle Generator
+    // ParticleGenerator_Init(particles, *particleShader, particlesObj->textures, (void (*)(void*))&glBindTexture, 1000);
+
+
+    root->camera = cam;
+    // water->camera = cam;
+    campfire->camera = cam;
+    // particlesObj->camera = cam;
+
+    // scAddChild(root, water);
+    scAddChild(root, campfire);
+
+    root->shouldRender = 0;
+
+    // water->shader = createShader("shaders/water.vert", "shaders/water.frag");
+    campfire->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+
+    // water->draw = &drawWater;
+    campfire->draw = &drawCampfire;
+
+    // setObjectPosition(water, 0, 0, -5);
+    setObjectPosition(campfire, 0, 5, 0);
+
+    // loadTexture(campfire, "textures/FirePit_Albedo.png", 0);
+    setObjectScale(campfire, 0.1, 0.1, 0.1);
+    // root->userData = particles;
+    scene = root;
+
+    // Store the particle generator in the scene or root object
+}
+
+
+
+void draw(void) {
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     changeView(cam);
     GLfloat modelStack[16];
@@ -261,17 +343,33 @@ int main(void) {
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
-  //glfwSetCursorPosCallback(window, mouse_callback);
-  //glfwSetScrollCallback(window, scroll_callback);
+  // glfwSetCursorPosCallback(window, mouse_callback);
+  // glfwSetScrollCallback(window, scroll_callback);
 
   glfwMakeContextCurrent(window);
   glewInit();
   init();
-  createScene();
-    
+  // createScene();
+  createFlorinScene();
+
+  // skybox---
+  initializeSkybox();
+  loadCubemapTexture();
+  scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
+  
+
+
+
+  float time = glfwGetTime();
+
   while (!glfwWindowShouldClose(window)) {
+    float currentTime = glfwGetTime();
+    float deltaTime = currentTime - time;
+    time = currentTime;;
     processInput(window, cam);
+    drawSkybox();
     draw();
+    setObjectPosition(campfire, sinf(glfwGetTime()) *2, 0.0f, 0.0f);  
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

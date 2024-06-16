@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
+#include <GL/glew.h>
 
 typedef struct Vec2 {
     float x;

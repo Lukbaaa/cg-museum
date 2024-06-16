@@ -36,7 +36,7 @@ void initCamera(Camera* cam) {
   cam->fov   =  45.0f;
 }
 
-Camera* createCamera() {
+Camera* createCamera(void) {
   Camera* cam = (Camera*)malloc(sizeof(Camera));
   initCamera(cam);
   return cam;
