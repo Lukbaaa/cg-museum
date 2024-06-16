@@ -27,6 +27,7 @@ typedef struct Object {
     Transform transform;
     Vec3 globalPosition;
     BoundingBox boundingBox;
+    GLuint boundingBoxVao;
     GLfloat model[16];
     Material material;
     GLuint* textures;
@@ -39,6 +40,8 @@ typedef struct Object {
     Object** children;
     int childrenCount;
     LightSource* light;
+    LightSource** lightsAffectedBy;
+    int lightCount;
     Camera* camera;
     void (*draw)(Object*);
     void (*animate)(Object*);
@@ -62,6 +65,8 @@ void initObject(Object* obj) {
     obj->parentCount = 0;
     obj->childrenCount = 0;
     obj->light = NULL;
+    obj->lightsAffectedBy = NULL;
+    obj->lightCount = 0;
     obj->camera = NULL;
     obj->draw = NULL;
     obj->animate = NULL;
@@ -120,6 +125,12 @@ int isColliding(BoundingBox box1, BoundingBox box2) {
         return 1;
     }
     return 0;
+}
+
+void addLightAffectedBy(Object* obj, LightSource* light) {
+  obj->lightsAffectedBy = (LightSource**)realloc(obj->lightsAffectedBy, sizeof(LightSource*)*(obj->lightCount+1));
+  obj->lightsAffectedBy[obj->lightCount] = light;
+  obj->lightCount++;
 }
 
 #endif

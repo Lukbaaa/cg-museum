@@ -1,27 +1,112 @@
 #include "light.h"
 #include "shader.h"
 #include "camera.h"
+#include "object.h"
 #include "texture.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
-#include "object.h"
   
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-Camera* cam;
-Object* scene;
+void processInput(GLFWwindow *window, Camera* cam);
 
-LightSource light = 
-  {
-    {-12.0f, 2.0f, 2.0f, 1.0f},
-    {1.0f, 1.0f, 1.0f, 1.0f},
-    {1.0f, 1.0f, 1.0f, 1.0f},
-    {1.0f, 1.0f, 1.0f, 1.0f}
-  };
+Object* scene;
 
 Object** objects;
 int objCount = 0;
+
+void drawTextures(Object* obj) {
+  for (int j = 0; j < obj->textureCount; j++) {
+    char uniformName[15]; 
+    sprintf(uniformName, "tex%d", j);
+    glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), j);
+    glActiveTexture(GL_TEXTURE0+j);
+    glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
+  } 
+}
+
+void drawSphere(Object* obj) {
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+int i = 0;
+void drawWater(Object* obj) {
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform2f(glGetUniformLocation(program, "r"), i, i);
+  i++;
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawBjarne(Object* obj) {
+
+  int program = obj->shader->program;
+  glUseProgram(program);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniformMatrix4fv(glGetUniformLocation(program, "viewPos"), 1, GL_FALSE, (float*)&(camera->position));
+  glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
+  glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
+  glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
+  glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
+  glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
+  for(int i = 0; i < obj->lightCount; i++) {
+    //printVec3(obj->lightsAffectedBy[i]->position);
+    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(obj->lightsAffectedBy[i]->position));
+    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->lightsAffectedBy[i]->ambient));
+    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->lightsAffectedBy[i]->diffuse));
+    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->lightsAffectedBy[i]->specular));
+  }
+
+  GLfloat normalMatrix[16];
+  inverse4(obj->model, normalMatrix);
+  transpose4(normalMatrix, normalMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+
+}
+
+void drawBjarneLight(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  //printVec3(obj->globalPosition);
+  //printMat4(obj->model, 1);
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform4fv(glGetUniformLocation(program, "ambient"), 1, (float*)&(obj->light->ambient.r));
+  glUniform4fv(glGetUniformLocation(program, "diffuse"), 1, (float*)&(obj->light->diffuse.r));
+  glUniform4fv(glGetUniformLocation(program, "specular"), 1, (float*)&(obj->light->specular.r));
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
 
 Object* createObject(const char* objFilePath) {
   objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
@@ -34,114 +119,20 @@ void init(void) {
   glEnable(GL_DEPTH_TEST);
   //glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  cam = createCamera();
-  cam->center.x = cam->camPos.x + cam->camFront.x;
-  cam->center.y = cam->camPos.y + cam->camFront.y;
-  cam->center.z = cam->camPos.z + cam->camFront.z;
-  lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
-  perspective(cam->projection, 45.0f, 800/800, 0.1, 100);
+  camera = createCamera();
+  camera->center.x = camera->position.x + camera->camFront.x;
+  camera->center.y = camera->position.y + camera->camFront.y;
+  camera->center.z = camera->position.z + camera->camFront.z;
+  lookAt(camera->view, camera->position, camera->center, camera->camUp);
+  perspective(camera->projection, 45.0f, 800/800, 0.1, 100);
+
+  boundingBoxProgram = createShader("shaders/boundingbox.vert", "shaders/boundingbox.frag")->program;
 
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
 }
-
-void drawTextures(Object* obj) {
-  for (int j = 0; j < obj->textureCount; j++) {
-    char uniformName[15]; 
-    sprintf(uniformName, "tex%d", j);
-    glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), j);
-    glActiveTexture(GL_TEXTURE0+j);
-    glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
-  } 
-}
-
-void drawScene(Object* obj) {
-  if (!obj->shouldRender) {
-      return;
-  }
-   
-  changeView(cam);
-
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  drawTextures(obj);
-
-  glBindVertexArray(obj->vao);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawSphere(Object* obj) {
-   
-  changeView(cam);
-
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  drawTextures(obj);
-
-  glBindVertexArray(obj->vao);
-
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
-
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-int i = 0;
-void drawWater(Object* obj) {
-
-  changeView(cam);
-
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  drawTextures(obj);
-
-  glBindVertexArray(obj->vao);
-
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
-  glUniform2f(glGetUniformLocation(program, "r"), i, i);
-  i++;
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawBjarne(Object* obj) {
-  changeView(cam);
-  light.position[0] = sin(glfwGetTime())*10 + 20;
-  light.position[1] = 2;
-  light.position[2] = cos(glfwGetTime())*10;
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, cam->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, cam->projection);
-  glUniform4fv(glGetUniformLocation(program, "light.position"), 1, light.position);
-  glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, light.ambient);
-  glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, light.diffuse);
-  glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, light.specular);
-  glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
-  glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
-  glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
-  glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
-  glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
-
-  GLfloat normalMatrix[16];
-  inverse4(obj->model, normalMatrix);
-  transpose4(normalMatrix, normalMatrix);
-  glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
-
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
 
 void sunAnimation(Object* obj) {
   setObjectPosition(obj, 0, 0, 0);
@@ -159,8 +150,14 @@ void moonAnimation(Object* obj) {
   setObjectScale(obj, 0.3, 0.3, 0.3);
 }
 
-void createScene(void) {
+void bjarneLightAnimation(Object* obj) {
+  setObjectPosition(obj, sin(glfwGetTime())*3,0,cos(glfwGetTime())*3);
+  obj->light->position = obj->transform.position;
+  //printVec3(obj->light->position);
+}
 
+void createScene(void) {
+  
   Object* root = createObject("objects/cube.obj");
   Object* sun = createObject("objects/sphere.obj");
   Object* earth = createObject("objects/sphere.obj");
@@ -169,15 +166,7 @@ void createScene(void) {
   Object* window2 = createObject("objects/window.obj");
   Object* water = createObject("objects/plane.obj");
   Object* bjarne = createObject("objects/bjarne.obj");
-
-  root->camera = cam;
-  sun->camera = cam;
-  earth->camera = cam;
-  moon->camera = cam;
-  window->camera = cam;
-  window2->camera = cam;
-  water->camera = cam;
-  bjarne->camera = cam;
+  Object* bjarneLight = createObject("objects/sphere.obj");
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
@@ -186,6 +175,7 @@ void createScene(void) {
   scAddChild(root, window2);
   scAddChild(root, water);
   scAddChild(root, bjarne);
+  scAddChild(bjarne, bjarneLight);
 
   root->shouldRender = 0;
 
@@ -196,6 +186,7 @@ void createScene(void) {
   window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
+  bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -210,19 +201,33 @@ void createScene(void) {
   window2->draw = &drawSphere;
   water->draw = &drawWater;
   bjarne->draw = &drawBjarne;
+  bjarneLight->draw = &drawBjarneLight;
   
-
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
+  bjarneLight->animate = &bjarneLightAnimation;
 
   bjarne->material = rubin;
-  bjarne->isTransparent = 1;
 
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
   setObjectPosition(water, 0, 0, 5);
   setObjectPosition(bjarne, 10, 0, 0);
+  setObjectPosition(bjarneLight, 10, 0, 0);
+  setObjectScale(bjarneLight, 0.3,0.3,0.3);
+
+  LightSource* light = createLight();
+  Vec4 ambient = {1,1,1,1};
+  Vec4 diffuse = {1,1,1,1};
+  Vec4 specular = {1,1,1,1};
+  light->ambient = ambient;
+  light->diffuse = diffuse;
+  light->specular = specular;
+
+  bjarneLight->light=light;
+
+  addLightAffectedBy(bjarne, light);
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
@@ -232,7 +237,7 @@ void createScene(void) {
 
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    changeView(cam);
+    changeView(camera);
     GLfloat modelStack[16];
     identity(modelStack);
     int toCount = 0;
@@ -272,7 +277,7 @@ int main(void) {
   createScene();
     
   while (!glfwWindowShouldClose(window)) {
-    processInput(window, cam);
+    processInput(window, camera);
     draw();
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -281,4 +286,58 @@ int main(void) {
   free(objects);
   glfwTerminate();
   return 0;
+}
+
+void processInput(GLFWwindow *window, Camera* cam)
+{
+  assert(window != NULL);
+  
+  float currentFrame = glfwGetTime();
+  deltaTime = currentFrame - lastFrame;
+  lastFrame = currentFrame;
+
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, 1);
+
+  float cameraSpeed = 5 * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    cam->position.x += cameraSpeed * cam->camFront.x;
+    cam->position.y += cameraSpeed * cam->camFront.y;
+    cam->position.z += cameraSpeed * cam->camFront.z;
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    cam->position.x -= cameraSpeed * cam->camFront.x;
+    cam->position.y -= cameraSpeed * cam->camFront.y;
+    cam->position.z -= cameraSpeed * cam->camFront.z;
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
+    normalize(&temp);
+    cam->position.x -= temp.x * cameraSpeed;
+    cam->position.y -= temp.y * cameraSpeed;
+    cam->position.z -= temp.z * cameraSpeed;
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
+    normalize(&temp);
+    cam->position.x += temp.x * cameraSpeed;
+    cam->position.y += temp.y * cameraSpeed;
+    cam->position.z += temp.z * cameraSpeed;
+  }
+
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    mouse_callback(window, cam, cam->lastX, cam->lastY-1);
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    mouse_callback(window, cam, cam->lastX, cam->lastY+1);
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    mouse_callback(window, cam, cam->lastX-1, cam->lastY);
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    mouse_callback(window, cam, cam->lastX+1, cam->lastY);
+  }
+  if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+    drawBoundingBoxes = !drawBoundingBoxes;
+  }
 }

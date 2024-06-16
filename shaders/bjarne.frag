@@ -9,7 +9,7 @@
 };
 
 struct LightSource {
-    vec4 position;
+    vec3 position;
     vec4 ambient;
     vec4 diffuse;
     vec4 specular;
@@ -17,7 +17,6 @@ struct LightSource {
 
 in vec3 fragPos;
 in vec3 normal;
-in vec2 texCoord;
 
 uniform vec3 viewPos; 
 uniform Material material;
@@ -35,7 +34,7 @@ void main() {
     // diffuse 
     float diffuseStrength = 1;
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(vec3(light.position) - fragPos);
+    vec3 lightDir = normalize(light.position - fragPos);
     float diff = max(dot(lightDir, norm), 0.0);
     vec4 diffuse = diffuseStrength * diff * material.diffuse * light.diffuse;
 
@@ -49,5 +48,5 @@ void main() {
 
     vec4 result = emissive + ambient + diffuse + specular;
 
-    gl_FragColor = result; //vec4(1,0,0,1);
+    gl_FragColor = result; 
 }

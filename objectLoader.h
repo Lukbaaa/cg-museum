@@ -122,6 +122,64 @@ Object* createVAOwithObj(const char* objFilePath) {
         {right,bottom,back},
     };
 
+    GLfloat boundingBoxVerts[36*3] = {
+        //front
+        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
+        boundingBox.toprightfront.x,boundingBox.toprightfront.y,boundingBox.toprightfront.z,
+        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
+
+        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
+        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
+        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
+        
+        //left
+        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
+        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
+        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
+
+        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
+        boundingBox.bottomleftback.x,boundingBox.bottomleftback.y,boundingBox.bottomleftback.z,
+        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
+
+        //back
+        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
+        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
+        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
+
+        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
+        boundingBox.bottomleftback.x,boundingBox.bottomleftback.y,boundingBox.bottomleftback.z,
+        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
+
+        //right
+        boundingBox.toprightfront.x,boundingBox.toprightfront.y,boundingBox.toprightfront.z,
+        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
+        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
+
+        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
+        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
+        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
+
+        //top
+        boundingBox.topleftfront.x, boundingBox.topleftfront.y, boundingBox.topleftfront.z,
+        boundingBox.topleftback.x, boundingBox.topleftback.y, boundingBox.topleftback.z,
+        boundingBox.toprightback.x, boundingBox.toprightback.y, boundingBox.toprightback.z,
+
+        boundingBox.toprightback.x, boundingBox.toprightback.y, boundingBox.toprightback.z,
+        boundingBox.toprightfront.x, boundingBox.toprightfront.y, boundingBox.toprightfront.z,
+        boundingBox.topleftfront.x, boundingBox.topleftfront.y, boundingBox.topleftfront.z,
+
+        //bottom
+        boundingBox.bottomleftfront.x, boundingBox.bottomleftfront.y, boundingBox.bottomleftfront.z,
+        boundingBox.bottomleftback.x, boundingBox.bottomleftback.y, boundingBox.bottomleftback.z,
+        boundingBox.bottomrightback.x, boundingBox.bottomrightback.y, boundingBox.bottomrightback.z,
+
+        boundingBox.bottomrightback.x, boundingBox.bottomrightback.y, boundingBox.bottomrightback.z,
+        boundingBox.bottomrightfront.x, boundingBox.bottomrightfront.y, boundingBox.bottomrightfront.z,
+        boundingBox.bottomleftfront.x, boundingBox.bottomleftfront.y, boundingBox.bottomleftfront.z,
+
+
+    };
+
     vertices = (GLfloat*)realloc(vertices, vertSize*sizeof(GLfloat));
     textures = (GLfloat*)realloc(textures, textSize*sizeof(GLfloat));
     normals = (GLfloat*)realloc(normals, normSize*sizeof(GLfloat));
@@ -175,6 +233,16 @@ Object* createVAOwithObj(const char* objFilePath) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    GLuint boundingBoxVAO;
+    GLuint boundingBoxVBO;
+    glGenVertexArrays(1, &boundingBoxVAO);
+    glBindVertexArray(boundingBoxVAO);
+    glGenBuffers(1, &boundingBoxVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, boundingBoxVBO);
+    glBufferData(GL_ARRAY_BUFFER, 108*sizeof(GLfloat), boundingBoxVerts, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+    glEnableVertexAttribArray(0);
+
     free(vertices);
     free(textures);
     free(normals);
@@ -185,6 +253,9 @@ Object* createVAOwithObj(const char* objFilePath) {
 
     obj->vao = vao;
     obj->vertCount = indSize/3;
+    obj->boundingBox = boundingBox;
+    obj->boundingBoxVao = boundingBoxVAO;
+
     fclose(objFile);
     //clock_t end = clock();
     //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

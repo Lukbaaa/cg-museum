@@ -11,7 +11,7 @@
 typedef struct Camera {
   GLfloat view[16];
   GLfloat projection[16];
-  Vec3 camPos;
+  Vec3 position;
   Vec3 camFront;
   Vec3 camUp;
   Vec3 center;
@@ -20,11 +20,14 @@ typedef struct Camera {
   GLfloat lastX;
   GLfloat lastY;
   GLfloat fov;
+  int active;
 } Camera;
 
+Camera* camera;
+
 void initCamera(Camera* cam) {
-  Vec3 camPos = {0,0,20};
-  cam->camPos = camPos;
+  Vec3 camPos = {0,0,0};
+  cam->position = camPos;
   Vec3 camFront = {0.0f, 0.0f, -1.0};
   cam->camFront = camFront;
   Vec3 camUp = {0, 1, 0};
@@ -40,6 +43,10 @@ Camera* createCamera() {
   Camera* cam = (Camera*)malloc(sizeof(Camera));
   initCamera(cam);
   return cam;
+}
+
+void switchCamera(Camera* cam) {
+    camera = cam;
 }
 
 void lookAt(GLfloat*out, Vec3 camPos, Vec3 center, Vec3 up) {
@@ -85,10 +92,10 @@ void perspective(GLfloat* out, GLfloat fovy, GLfloat aspect, GLfloat near, GLflo
 }
 
 void changeView(Camera* cam) {
-  cam->center.x = cam->camPos.x + cam->camFront.x;
-  cam->center.y = cam->camPos.y + cam->camFront.y;
-  cam->center.z = cam->camPos.z + cam->camFront.z;
-  lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
+  cam->center.x = cam->position.x + cam->camFront.x;
+  cam->center.y = cam->position.y + cam->camFront.y;
+  cam->center.z = cam->position.z + cam->camFront.z;
+  lookAt(cam->view, cam->position, cam->center, cam->camUp);
 }
 
 int firstMouse = 0;
@@ -142,57 +149,6 @@ void scroll_callback(GLFWwindow* window, Camera* cam, GLfloat xoffset, GLfloat y
       cam->fov = 1.0f;
   if (cam->fov > 45.0f)
       cam->fov = 45.0f;
-}
-
-void processInput(GLFWwindow *window, Camera* cam)
-{
-  assert(window != NULL);
-  
-  float currentFrame = glfwGetTime();
-  deltaTime = currentFrame - lastFrame;
-  lastFrame = currentFrame;
-
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, 1);
-
-  float cameraSpeed = 5 * deltaTime;
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    cam->camPos.x += cameraSpeed * cam->camFront.x;
-    cam->camPos.y += cameraSpeed * cam->camFront.y;
-    cam->camPos.z += cameraSpeed * cam->camFront.z;
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    cam->camPos.x -= cameraSpeed * cam->camFront.x;
-    cam->camPos.y -= cameraSpeed * cam->camFront.y;
-    cam->camPos.z -= cameraSpeed * cam->camFront.z;
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
-    normalize(&temp);
-    cam->camPos.x -= temp.x * cameraSpeed;
-    cam->camPos.y -= temp.y * cameraSpeed;
-    cam->camPos.z -= temp.z * cameraSpeed;
-  }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    Vec3 temp = crossProduct(cam->camFront, cam->camUp);
-    normalize(&temp);
-    cam->camPos.x += temp.x * cameraSpeed;
-    cam->camPos.y += temp.y * cameraSpeed;
-    cam->camPos.z += temp.z * cameraSpeed;
-  }
-
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX, cam->lastY-1);
-  }
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX, cam->lastY+1);
-  }
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX-1, cam->lastY);
-  }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX+1, cam->lastY);
-  }
 }
 
 GLfloat distToCamera(Vec3 objPos, Vec3 camPos) {

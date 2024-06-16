@@ -44,7 +44,7 @@ void sortObjectsByDist(Object** objs, int count) {
     for (int i = 0; i < count - 1; i++) {
         swapped = 0;
         for (int j = 0; j < count - i - 1; j++) {
-            if (distToCamera(objs[j]->globalPosition, objs[j]->camera->camPos) < distToCamera(objs[j+1]->globalPosition, objs[j+1]->camera->camPos)) {
+            if (distToCamera(objs[j]->globalPosition, camera->position) < distToCamera(objs[j+1]->globalPosition, camera->position)) {
                 swap(objs[j], objs[j + 1]);
                 swapped = 1;
             }
@@ -60,21 +60,51 @@ void drawTransparentObjects(Object** objs, int count) {
     }
 }
 
+int drawBoundingBoxes = 1;
+GLuint boundingBoxProgram;
+
+void drawBoundingBox(Object* obj) {
+  if (drawBoundingBoxes) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glUseProgram(boundingBoxProgram);
+    glBindVertexArray(obj->boundingBoxVao);
+    glUniformMatrix4fv(glGetUniformLocation(boundingBoxProgram, "model"), 1, GL_FALSE, obj->model);
+    glUniformMatrix4fv(glGetUniformLocation(boundingBoxProgram, "view"), 1, GL_FALSE, camera->view);
+    glUniformMatrix4fv(glGetUniformLocation(boundingBoxProgram, "projection"), 1, GL_TRUE, camera->projection);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+}
+
 void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObjects, int* toCount) {
     assert(root != NULL);
+    assert(transparentObjects != NULL);
+    assert(toCount != NULL);
     
     GLfloat temp[16];
     copyMat(temp, modelStack, 16);
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
+
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
+    printVec3(root->globalPosition);
+
     if(root->animate != NULL) {
         root->animate(root);
     } 
-
+    if (root->camera != NULL) {
+        //root->camera->camPos = getGlobalPosition(modelStack, root->camera->camPos);
+    }
+    if (root->light != NULL) {
+        root->light->position = root->transform.position;
+        //printVec3(root->light->position);
+    }
     if(root->shouldRender) {
-
+        if (drawBoundingBoxes) {
+            drawBoundingBox(root);
+        }
         if(!root->isTransparent) {
             root->draw(root);
         } else {

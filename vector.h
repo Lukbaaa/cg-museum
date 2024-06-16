@@ -48,6 +48,13 @@ void printVec3(Vec3 vec) {
   printf("\n");
 }
 
+void printVec4(Vec4 vec) {
+  for (int i = 0; i < 4; i++) {
+    printf("%f ", *(((float*)&(vec.r))+i));
+  }
+  printf("\n");
+}
+
 GLfloat dotProduct(Vec3 vec1, Vec3 vec2) {
   return vec1.x*vec2.x+vec1.y*vec2.y+vec1.z*vec2.z;
 }
