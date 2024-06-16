@@ -47,6 +47,7 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "shader.h": "c"
+        "shader.h": "c",
+        "matrix_functions.h": "c"
     }
 }

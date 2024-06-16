@@ -1,8 +1,15 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 typedef struct Vec2 {
     float x;
