@@ -1,5 +1,7 @@
 #include <GL/glew.h>
+#ifndef __APPLE__
 #include <OpenGL/gl3.h>
+#endif // !__APPLE__
 #include <GLFW/glfw3.h>
 
 #include "light.h"

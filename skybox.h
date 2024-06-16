@@ -1,10 +1,15 @@
 #ifndef SKYBOX_H
 #define SKYBOX_H
 
-#include <GL/glew.h>
-#include <OpenGL/gl3.h>
-#include <GLFW/glfw3.h>
 
+#include <GL/glew.h>
+#ifndef __APPLE__
+#include <OpenGL/gl3.h>
+#endif // !__APPLE__
+
+
+
+#include <GLFW/glfw3.h>
 
 
 // declare fucntions
