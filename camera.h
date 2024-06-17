@@ -23,7 +23,7 @@ typedef struct Camera {
 } Camera;
 
 void initCamera(Camera* cam) {
-  Vec3 camPos = {0,0,20};
+  Vec3 camPos = {0,0,0};
   cam->camPos = camPos;
   Vec3 camFront = {0.0f, 0.0f, -1.0};
   cam->camFront = camFront;

@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#ifndef __APPLE__
+#ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #endif // !__APPLE__
 #include <GLFW/glfw3.h>
@@ -170,13 +170,16 @@ void drawCampfire(Object* obj) {
 }
 
 void drawSkybox() {
-  glDepthFunc(GL_LEQUAL);
-  glUseProgram(scene->shader->program);
+  glDepthMask(GL_FALSE);
   glBindVertexArray(getVAO());
+  glUseProgram(scene->shader->program);
+  glUniform1i(glGetUniformLocation(scene->shader->program, "skybox"), 0);
+  glUniformMatrix4fv(glGetUniformLocation(scene->shader->program, "view"), 1, GL_FALSE, cam->view);
+  glUniformMatrix4fv(glGetUniformLocation(scene->shader->program, "projection"), 1, GL_TRUE, cam->projection);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_CUBE_MAP, getCubemapTexture());
-  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-  glDepthFunc(GL_LESS);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  glDepthMask(GL_TRUE);
 
 }
 
@@ -270,7 +273,7 @@ void createScene(void) {
 void createFlorinScene(void) {
     Object* root = createObject("objects/cube.obj");
     // Object* water = createObject("objects/plane.obj");
-    campfire = createObject("objects/gtr.obj");
+    campfire = createObject("objects/cube.obj");
     // Object* particlesObj = (Object*)malloc(sizeof(Object));
 
     // ParticleGenerator* particles = (ParticleGenerator*)malloc(sizeof(ParticleGenerator));
@@ -303,10 +306,11 @@ void createFlorinScene(void) {
     setObjectPosition(campfire, 0, 5, 0);
 
     // loadTexture(campfire, "textures/FirePit_Albedo.png", 0);
-    setObjectScale(campfire, 0.1, 0.1, 0.1);
+    //setObjectScale(campfire, 0.1, 0.1, 0.1);
     // root->userData = particles;
     scene = root;
 
+    //campfire->shouldRender = 0;
     // Store the particle generator in the scene or root object
 }
 
@@ -358,9 +362,6 @@ int main(void) {
   initializeSkybox();
   loadCubemapTexture();
   scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
-  
-
-
 
   float time = glfwGetTime();
 
@@ -369,8 +370,8 @@ int main(void) {
     float deltaTime = currentTime - time;
     time = currentTime;;
     processInput(window, cam);
-    drawSkybox();
     draw();
+    drawSkybox();
     setObjectPosition(campfire, sinf(glfwGetTime()) *2, 0.0f, 0.0f);  
     glfwSwapBuffers(window);
     glfwPollEvents();
