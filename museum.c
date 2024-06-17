@@ -53,7 +53,7 @@ void init(void) {
   cam->center.y = cam->camPos.y + cam->camFront.y;
   cam->center.z = cam->camPos.z + cam->camFront.z;
   lookAt(cam->view, cam->camPos, cam->center, cam->camUp);
-  perspective(cam->projection, 45.0f, 800/800, 0.1, 100);
+  perspective(cam->projection, 45.0f, 800/800, 0.1, 300);
 
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
@@ -171,6 +171,7 @@ void drawCampfire(Object* obj) {
 
 void drawSkybox() {
   glDepthMask(GL_FALSE);
+  glDepthFunc(GL_LEQUAL);
   glBindVertexArray(getVAO());
   glUseProgram(scene->shader->program);
   glUniform1i(glGetUniformLocation(scene->shader->program, "skybox"), 0);
@@ -179,8 +180,8 @@ void drawSkybox() {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_CUBE_MAP, getCubemapTexture());
   glDrawArrays(GL_TRIANGLES, 0, 36);
+  glDepthFunc(GL_LESS);
   glDepthMask(GL_TRUE);
-
 }
 
 
@@ -273,7 +274,7 @@ void createScene(void) {
 void createFlorinScene(void) {
     Object* root = createObject("objects/cube.obj");
     // Object* water = createObject("objects/plane.obj");
-    campfire = createObject("objects/cube.obj");
+    // campfire = createObject("objects/x-35.obj");
     // Object* particlesObj = (Object*)malloc(sizeof(Object));
 
     // ParticleGenerator* particles = (ParticleGenerator*)malloc(sizeof(ParticleGenerator));
@@ -288,22 +289,22 @@ void createFlorinScene(void) {
 
     root->camera = cam;
     // water->camera = cam;
-    campfire->camera = cam;
+    // campfire->camera = cam;
     // particlesObj->camera = cam;
 
     // scAddChild(root, water);
-    scAddChild(root, campfire);
+    // scAddChild(root, campfire);
 
     root->shouldRender = 0;
 
     // water->shader = createShader("shaders/water.vert", "shaders/water.frag");
-    campfire->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+    // campfire->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
 
     // water->draw = &drawWater;
-    campfire->draw = &drawCampfire;
+    // campfire->draw = &drawCampfire;
 
     // setObjectPosition(water, 0, 0, -5);
-    setObjectPosition(campfire, 0, 5, 0);
+    // setObjectPosition(campfire, 0, 5, 0);
 
     // loadTexture(campfire, "textures/FirePit_Albedo.png", 0);
     //setObjectScale(campfire, 0.1, 0.1, 0.1);
@@ -319,6 +320,7 @@ void createFlorinScene(void) {
 void draw(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawSkybox();
     changeView(cam);
     GLfloat modelStack[16];
     identity(modelStack);
@@ -356,7 +358,7 @@ int main(void) {
   glewInit();
   init();
   // createScene();
-  createFlorinScene();
+  createScene();
 
   // skybox---
   initializeSkybox();
@@ -371,8 +373,6 @@ int main(void) {
     time = currentTime;;
     processInput(window, cam);
     draw();
-    drawSkybox();
-    setObjectPosition(campfire, sinf(glfwGetTime()) *2, 0.0f, 0.0f);  
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
