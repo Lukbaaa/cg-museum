@@ -7,10 +7,6 @@
 #include <OpenGL/gl3.h>
 #endif // !__APPLE__
 
-
-// declare fucntions
-
-
 GLuint cubemapTexture;
 GLuint skyboxVAO, skyboxVBO;
 

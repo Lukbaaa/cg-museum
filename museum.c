@@ -210,7 +210,7 @@ void createScene(void) {
   Object* window = createObject("objects/window.obj");
   Object* window2 = createObject("objects/window.obj");
   Object* water = createObject("objects/plane.obj");
-  Object* bjarne = createObject("objects/bjarne.obj");
+  Object* bjarne = createObject("objects/piper.obj");
 
   root->camera = cam;
   sun->camera = cam;
@@ -274,7 +274,7 @@ void createScene(void) {
 void createFlorinScene(void) {
     Object* root = createObject("objects/cube.obj");
     // Object* water = createObject("objects/plane.obj");
-    // campfire = createObject("objects/x-35.obj");
+    campfire = createObject("objects/gtr.obj");
     // Object* particlesObj = (Object*)malloc(sizeof(Object));
 
     // ParticleGenerator* particles = (ParticleGenerator*)malloc(sizeof(ParticleGenerator));
@@ -289,24 +289,24 @@ void createFlorinScene(void) {
 
     root->camera = cam;
     // water->camera = cam;
-    // campfire->camera = cam;
+    campfire->camera = cam;
     // particlesObj->camera = cam;
 
     // scAddChild(root, water);
-    // scAddChild(root, campfire);
+    scAddChild(root, campfire);
 
     root->shouldRender = 0;
 
     // water->shader = createShader("shaders/water.vert", "shaders/water.frag");
-    // campfire->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+    campfire->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
 
     // water->draw = &drawWater;
-    // campfire->draw = &drawCampfire;
+    campfire->draw = &drawBjarne;
 
     // setObjectPosition(water, 0, 0, -5);
     // setObjectPosition(campfire, 0, 5, 0);
 
-    // loadTexture(campfire, "textures/FirePit_Albedo.png", 0);
+    loadTexture(campfire, "textures/FirePit_Albedo.png", 0);
     //setObjectScale(campfire, 0.1, 0.1, 0.1);
     // root->userData = particles;
     scene = root;
@@ -357,8 +357,8 @@ int main(void) {
   glfwMakeContextCurrent(window);
   glewInit();
   init();
-  // createScene();
   createScene();
+  // createFlorinScene();
 
   // skybox---
   initializeSkybox();
