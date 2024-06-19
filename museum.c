@@ -192,7 +192,7 @@ void createScene(void) {
   Object* water = createObject("objects/plane.obj");
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
-  Object* boat = createObject("objects/boat2.obj");
+  Object* boat = createObject("objects/boat.obj");
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
