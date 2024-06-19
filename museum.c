@@ -14,7 +14,9 @@ void processInput(GLFWwindow *window, Camera* cam);
 Object* scene;
 
 Object** objects;
-int objCount = 0;
+int objCount = 0;   
+
+double timeAtDraw = 0;
 
 void drawTextures(Object* obj) {
   for (int j = 0; j < obj->textureCount; j++) {
@@ -42,7 +44,6 @@ void drawSphere(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-int i = 0;
 void drawWater(Object* obj) {
 
   int program = obj->shader->program;
@@ -55,8 +56,32 @@ void drawWater(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform2f(glGetUniformLocation(program, "r"), i, i);
-  i++;
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawBoat(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  drawTextures(obj);
+
+  glBindVertexArray(obj->vao);
+  
+  float displacement = (sin(timeAtDraw)+sin(timeAtDraw))*0.2;
+  Vec3 rot = {
+    -cos(timeAtDraw)*10,//(normal.x*up.x+normal.y*up.y)/(length3d(&normal)*length3d(&up))*2,
+    0,//(normal.x*up.x+normal.y*up.y)/(length(normal)*length(up));
+    cos(timeAtDraw)*10//(normal.z*up.z+normal.y*up.y)/(length3d(&normal)*length3d(&up))*2
+  };
+  rotate(obj->model, obj->model, rot);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "yDisplacement"), displacement);
+
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
@@ -167,6 +192,7 @@ void createScene(void) {
   Object* water = createObject("objects/plane.obj");
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
+  Object* boat = createObject("objects/boat2.obj");
 
   scAddChild(root, sun);
   scAddChild(sun, earth);
@@ -176,6 +202,7 @@ void createScene(void) {
   scAddChild(root, water);
   scAddChild(root, bjarne);
   scAddChild(bjarne, bjarneLight);
+  scAddChild(water, boat);
 
   root->shouldRender = 0;
 
@@ -187,12 +214,15 @@ void createScene(void) {
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
+  boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
   loadTexture(window, "textures/window_red.png", 0);
   loadTexture(window2, "textures/window_blue.png", 0);
+  loadTexture(boat, "textures/boat.png", 0);
+  loadTexture(water, "textures/water.png", 0);
 
   sun->draw = &drawSphere;
   earth->draw = &drawSphere;
@@ -202,6 +232,7 @@ void createScene(void) {
   water->draw = &drawWater;
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
+  boat->draw = &drawBoat;
   
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
@@ -212,10 +243,10 @@ void createScene(void) {
 
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
-  setObjectPosition(water, 0, 0, 5);
+  setObjectPosition(water, 0, 0, 20);
   setObjectPosition(bjarne, 10, 0, 0);
-  setObjectPosition(bjarneLight, 10, 0, 0);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
+  setObjectScale(boat, 0.5, 0.5, 0.5);
 
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
@@ -277,6 +308,7 @@ int main(void) {
   createScene();
     
   while (!glfwWindowShouldClose(window)) {
+    timeAtDraw = glfwGetTime();
     processInput(window, camera);
     draw();
     glfwSwapBuffers(window);

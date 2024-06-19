@@ -89,7 +89,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObj
     copyMat(root->model, modelStack, 16);
 
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
-    printVec3(root->globalPosition);
+    //printVec3(root->globalPosition);
 
     if(root->animate != NULL) {
         root->animate(root);

@@ -67,10 +67,22 @@ Vec3 crossProduct(Vec3 v1, Vec3 v2) {
   return cross;
 }
 
+float length2d(Vec2* vec) {
+  return sqrt(vec->x*vec->x+vec->y*vec->y);
+}
+
+float length3d(Vec3* vec) {
+  return sqrt(vec->x*vec->x+vec->y*vec->y+vec->z*vec->z);
+}
+
+float length2f(float x, float y) {
+  return sqrt(x*x+y*y);
+}
+
 void normalize(Vec3* vec) {
   assert(vec != NULL);
 
-  GLfloat length = sqrt(vec->x*vec->x+vec->y*vec->y+vec->z*vec->z);
+  GLfloat length = length3d(vec); 
   GLfloat invLen = 1/length;
 
   vec->x *= invLen;
