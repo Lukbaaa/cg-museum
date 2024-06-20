@@ -193,15 +193,15 @@ void createScene(void) {
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
 
-  scAddChild(root, sun);
-  scAddChild(sun, earth);
-  scAddChild(earth, moon);
-  scAddChild(root, window);
-  scAddChild(root, window2);
-  scAddChild(root, water);
-  scAddChild(root, bjarne);
-  scAddChild(bjarne, bjarneLight);
-  scAddChild(water, boat);
+  sgAddChild(root, sun);
+  sgAddChild(sun, earth);
+  sgAddChild(earth, moon);
+  sgAddChild(root, window);
+  sgAddChild(root, window2);
+  sgAddChild(root, water);
+  sgAddChild(root, bjarne);
+  sgAddChild(bjarne, bjarneLight);
+  sgAddChild(water, boat);
 
   root->shouldRender = 0;
 

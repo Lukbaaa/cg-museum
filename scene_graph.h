@@ -9,7 +9,7 @@
 #include "matrix_functions.h"
 
 
-void scAddChild(Object* parent, Object* child) {
+void sgAddChild(Object* parent, Object* child) {
     assert(parent != NULL);
     assert(child != NULL);
     child->parents = (Object**)realloc(child->parents, sizeof(Object*)*(parent->parentCount+1));
