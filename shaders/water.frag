@@ -11,5 +11,5 @@ void main() {
         color = 0;
     }
 
-    gl_FragColor = texture(tex, texCoord*10);//vec2((int(texCoord.x*1000000))%100)/1000000.0, (int(texCoord.y*1000000)%100)/1000000.0);//vec4(1/255.0+color, 93/255.0+color, 185/255.0+color,1);
+    gl_FragColor = texture(tex, texCoord*10);
 }

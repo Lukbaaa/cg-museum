@@ -71,9 +71,9 @@ void drawBoat(Object* obj) {
   
   float displacement = (sin(timeAtDraw)+sin(timeAtDraw))*0.2;
   Vec3 rot = {
-    -cos(timeAtDraw)*10,//(normal.x*up.x+normal.y*up.y)/(length3d(&normal)*length3d(&up))*2,
-    0,//(normal.x*up.x+normal.y*up.y)/(length(normal)*length(up));
-    cos(timeAtDraw)*10//(normal.z*up.z+normal.y*up.y)/(length3d(&normal)*length3d(&up))*2
+    -cos(timeAtDraw)*10,
+    0,
+    cos(timeAtDraw)*10
   };
   rotate(obj->model, obj->model, rot);
 
@@ -246,6 +246,7 @@ void createScene(void) {
   setObjectPosition(bjarne, 10, 0, 0);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(boat, 0.5, 0.5, 0.5);
+  setObjectScale(water, 0.1, 0.1, 0.1);
 
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
