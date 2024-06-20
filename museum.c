@@ -100,7 +100,6 @@ void drawBjarne(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
   for(int i = 0; i < obj->lightCount; i++) {
-    //printVec3(obj->lightsAffectedBy[i]->position);
     glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(obj->lightsAffectedBy[i]->position));
     glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->lightsAffectedBy[i]->ambient));
     glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->lightsAffectedBy[i]->diffuse));

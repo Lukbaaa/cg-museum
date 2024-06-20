@@ -55,16 +55,13 @@ void sortObjectsByDist(ObjectList* objects) {
 }
 
 void drawIlluminatedObjects(ObjectList* objects) {
-    for(int i = 0; i < objects->length; i++) {
-        olGet(objects, i)->draw(olGet(objects, i));
-    }
+    //printf("draw\n");
+    drawObjectsFromList(objects);
 }
 
 void drawTransparentObjects(ObjectList* objects) {
     sortObjectsByDist(objects);
-    for(int i = 0; i < objects->length; i++) {
-        olGet(objects, i)->draw(olGet(objects, i));
-    }
+    drawObjectsFromList(objects);
 }
 
 int drawBoundingBoxes = 1;
@@ -104,7 +101,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
         //root->camera->camPos = getGlobalPosition(modelStack, root->camera->camPos);
     }
     if (root->light != NULL) {
-        root->light->position = root->transform.position;
+        root->light->position = root->globalPosition;
     }
     if(root->shouldRender) {
         if (drawBoundingBoxes) {

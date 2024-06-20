@@ -91,11 +91,6 @@ Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
   assert(in != NULL);
 
   Vec3 globalPosition = {v.x + in[12], v.y + in[13], v.z + in[14]};
-  printVec3(v);
-  printf("%f %f %f \n", in[12], in[13], in[14]);
-  printVec3(globalPosition);
-  //printMat4(in, 1);
-  printf("\n");
   return globalPosition;
 }
 

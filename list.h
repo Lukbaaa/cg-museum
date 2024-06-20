@@ -28,4 +28,10 @@ Object* olGet(ObjectList* list, int i) {
     return list->objects[i];
 }
 
+void drawObjectsFromList(ObjectList* list) {
+    for(int i = 0; i < list->length; i++) {
+        olGet(list, i)->draw(olGet(list, i));
+    }
+}
+
 #endif
