@@ -90,22 +90,13 @@ void setObjectRotation(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
 Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
   assert(in != NULL);
 
-  GLfloat temp[4];
-  GLfloat v4[4];
-
-  v4[0] = v.x;
-  v4[1] = v.y;
-  v4[2] = v.z;
-  v4[1] = 1;
-
-  for (int i = 0; i < 4; i++) {
-      temp[i] = 0;
-      for (int j = 0; j < 4; j++) {
-          temp[i] += in[i*4 + j] * v4[j];
-      }
-  }
-  Vec3 gloablPositition = {temp[0], temp[1], temp[2]};
-  return gloablPositition;
+  Vec3 globalPosition = {v.x + in[12], v.y + in[13], v.z + in[14]};
+  printVec3(v);
+  printf("%f %f %f \n", in[12], in[13], in[14]);
+  printVec3(globalPosition);
+  //printMat4(in, 1);
+  printf("\n");
+  return globalPosition;
 }
 
 int isInside(Vec3 point, BoundingBox box) {

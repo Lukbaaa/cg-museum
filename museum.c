@@ -108,7 +108,7 @@ void drawBjarne(Object* obj) {
   }
 
   GLfloat normalMatrix[16];
-  inverse4(obj->model, normalMatrix);
+  inverse4(normalMatrix, obj->model);
   transpose4(normalMatrix, normalMatrix);
   glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
 
@@ -271,10 +271,15 @@ void draw() {
     changeView(camera);
     GLfloat modelStack[16];
     identity(modelStack);
-    int toCount = 0;
-    Object** transparentObjects = NULL;
-    traverseDraw(scene, modelStack, &transparentObjects, &toCount);
-    drawTransparentObjects(transparentObjects, toCount);
+
+    ObjectList transparentObjects;
+    initObjectList(&transparentObjects);
+    ObjectList illuminatedObjects;
+    initObjectList(&illuminatedObjects);
+
+    traverseDraw(scene, modelStack, &transparentObjects, &illuminatedObjects);
+    drawIlluminatedObjects(&illuminatedObjects);
+    drawTransparentObjects(&transparentObjects);
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {

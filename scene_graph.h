@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <GL/glew.h>
+#include "list.h"
 #include "object.h"
 #include "matrix_functions.h"
 
@@ -39,13 +40,13 @@ void swap(Object* x, Object* y)
 }
 
 // bubble sort
-void sortObjectsByDist(Object** objs, int count) {
+void sortObjectsByDist(ObjectList* objects) {
     int swapped;
-    for (int i = 0; i < count - 1; i++) {
+    for (int i = 0; i < objects->length - 1; i++) {
         swapped = 0;
-        for (int j = 0; j < count - i - 1; j++) {
-            if (distToCamera(objs[j]->globalPosition, camera->position) < distToCamera(objs[j+1]->globalPosition, camera->position)) {
-                swap(objs[j], objs[j + 1]);
+        for (int j = 0; j < objects->length - i - 1; j++) {
+            if (distToCamera(olGet(objects, j)->globalPosition, camera->position) < distToCamera(olGet(objects, j+1)->globalPosition, camera->position)) {
+                swap(olGet(objects, j), olGet(objects, j+1));
                 swapped = 1;
             }
         }
@@ -53,10 +54,16 @@ void sortObjectsByDist(Object** objs, int count) {
     }
 }
 
-void drawTransparentObjects(Object** objs, int count) {
-    sortObjectsByDist(objs, count);
-    for(int i = 0; i < count; i++) {
-        objs[i]->draw(objs[i]);
+void drawIlluminatedObjects(ObjectList* objects) {
+    for(int i = 0; i < objects->length; i++) {
+        olGet(objects, i)->draw(olGet(objects, i));
+    }
+}
+
+void drawTransparentObjects(ObjectList* objects) {
+    sortObjectsByDist(objects);
+    for(int i = 0; i < objects->length; i++) {
+        olGet(objects, i)->draw(olGet(objects, i));
     }
 }
 
@@ -77,40 +84,38 @@ void drawBoundingBox(Object* obj) {
   }
 }
 
-void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObjects, int* toCount) {
+void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentObjects, ObjectList* illuminatedObjects) {
     assert(root != NULL);
     assert(transparentObjects != NULL);
-    assert(toCount != NULL);
+    assert(illuminatedObjects != NULL);
     
+    if(root->animate != NULL) {
+        root->animate(root);
+    } 
+
     GLfloat temp[16];
     copyMat(temp, modelStack, 16);
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
-
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
-    //printVec3(root->globalPosition);
 
-    if(root->animate != NULL) {
-        root->animate(root);
-    } 
     if (root->camera != NULL) {
         //root->camera->camPos = getGlobalPosition(modelStack, root->camera->camPos);
     }
     if (root->light != NULL) {
         root->light->position = root->transform.position;
-        //printVec3(root->light->position);
     }
     if(root->shouldRender) {
         if (drawBoundingBoxes) {
             drawBoundingBox(root);
         }
-        if(!root->isTransparent) {
-            root->draw(root);
+        if(root->isTransparent) {
+            olAdd(transparentObjects, root);
+        } else if(root->lightCount > 0) {
+            olAdd(illuminatedObjects, root);
         } else {
-            *transparentObjects = (Object**)realloc(*transparentObjects, sizeof(Object*)*((*toCount)+1));
-            (*transparentObjects)[*toCount] = root;
-            (*toCount)++;
+            root->draw(root);
         }
     }
 
@@ -119,7 +124,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], Object*** transparentObj
     }
 
     for(int i = 0; i < root->childrenCount; i++) {
-        traverseDraw(root->children[i], modelStack, transparentObjects, toCount);
+        traverseDraw(root->children[i], modelStack, transparentObjects, illuminatedObjects);
         copyMat(modelStack, temp, 16);
     }
 }
