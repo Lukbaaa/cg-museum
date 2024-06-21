@@ -5,12 +5,11 @@
 #include "texture.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
+#include "particle2.h"
   
 #ifdef __APPLE__
-#include <GL/glew.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
-#include <GLFW/glfw3.h>
 #endif
 
 #include <GL/glew.h>
@@ -24,6 +23,7 @@ Object** objects;
 int objCount = 0;   
 
 double timeAtDraw = 0;
+double timeAtStart;
 
 void drawTextures(Object* obj) {
   for (int j = 0; j < obj->textureCount; j++) {
@@ -32,7 +32,7 @@ void drawTextures(Object* obj) {
     glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), j);
     glActiveTexture(GL_TEXTURE0+j);
     glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
-  } 
+  }
 }
 
 void drawSphere(Object* obj) {
@@ -198,6 +198,7 @@ void createScene(void) {
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
+  Object* houseFloor = createObject("objects/house/house_floor.obj");
 
   sgAddChild(root, sun);
   sgAddChild(sun, earth);
@@ -208,6 +209,7 @@ void createScene(void) {
   sgAddChild(root, bjarne);
   sgAddChild(bjarne, bjarneLight);
   sgAddChild(water, boat);
+  sgAddChild(root,houseFloor);
 
   root->shouldRender = 0;
 
@@ -220,6 +222,7 @@ void createScene(void) {
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
+  houseFloor->shader = createShader("shader/house_shader/floor.vert","shader/house_shader/floor.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -238,6 +241,10 @@ void createScene(void) {
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
+
+  GLuint particlesProgram = createShader("shaders/particle.vert", "shaders/particle.frag")->program;
+  glUseProgram(particlesProgram);
+  renderParticles(particlesProgram, camera);
   
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
@@ -273,6 +280,7 @@ void createScene(void) {
 } 
 
 void draw() {
+    updateParticles(deltaTime);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     changeView(camera);
     GLfloat modelStack[16];
@@ -293,6 +301,10 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 int main(void) {
+  timeAtStart = glfwGetTime();
+  
+
+
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -317,11 +329,15 @@ int main(void) {
   glewInit();
   init();
   createScene();
+
     
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
+    float deltaTime = timeAtDraw - timeAtStart;
+
     processInput(window, camera);
     draw();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
