@@ -4,12 +4,12 @@ in vec2 texCoord;
 in float y;
 
 uniform sampler2D tex;
-
+out vec4 FragColor;
 void main() {
     float color = y*0.5;
     if (color < 0) {
         color = 0;
     }
 
-    gl_FragColor = texture(tex, texCoord*10);
+    FragColor = texture(tex, texCoord*10);
 }

@@ -1,6 +1,13 @@
 #ifndef LIST_H
 #define LIST_H
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
+
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>

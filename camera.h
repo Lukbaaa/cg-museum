@@ -1,6 +1,13 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
+
 #include <assert.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>

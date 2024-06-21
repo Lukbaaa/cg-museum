@@ -1,6 +1,12 @@
 #ifndef TRANSFORMATIONS_H
 #define TRANSFORMATIONS_H
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
 #include "vector.h"
 
 #include <math.h>

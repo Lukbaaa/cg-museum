@@ -4,6 +4,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
+
 #include <GL/glew.h>
 #include <stdlib.h>
 #include <assert.h>

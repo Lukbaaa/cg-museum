@@ -6,6 +6,13 @@
 #include "scene_graph.h"
 #include "objectLoader.h"
   
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 

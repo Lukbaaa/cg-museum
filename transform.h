@@ -4,6 +4,13 @@
 #include <assert.h>
 #include <GL/glew.h>
 
+#ifdef __APPLE__
+#include <GL/glew.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <GLFW/glfw3.h>
+#endif
+
 typedef struct Transform {
     Vec3 position;
     Vec3 scale;

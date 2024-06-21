@@ -3,7 +3,7 @@
 uniform vec4 ambient;
 uniform vec4 diffuse;
 uniform vec4 specular;
-
+out vec4 FragColor;
 void main() {
-    gl_FragColor = ambient + diffuse + specular;
+    FragColor = ambient + diffuse + specular;
 }
