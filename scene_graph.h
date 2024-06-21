@@ -12,23 +12,19 @@
 void sgAddChild(Object* parent, Object* child) {
     assert(parent != NULL);
     assert(child != NULL);
-    child->parents = (Object**)realloc(child->parents, sizeof(Object*)*(parent->parentCount+1));
-    child->parents[child->parentCount] = parent;
-    child->parentCount++;
-    parent->children = (Object**)realloc(parent->children, sizeof(Object*)*(parent->childrenCount+1));
-    parent->children[parent->childrenCount] = child;
-    parent->childrenCount++;
+    objectListAdd(&child->parents, parent);
+    objectListAdd(&parent->children, child);
 }
 
 void traverse(Object* root) {
     assert(root != NULL);
     printf("%i\n", root->vao);
-    if(root->children == NULL) {
+    if(root->children.length == 0) {
         printf("rock bottom\n");
         return;
     }
-    for(int i = 0; i < root->childrenCount; i++) {
-        traverse(root->children[i]);
+    for(int i = 0; i < root->children.length; i++) {
+        traverse(objectListGet(&root->children, i));
     }
 }
 
@@ -45,12 +41,18 @@ void sortObjectsByDist(ObjectList* objects) {
     for (int i = 0; i < objects->length - 1; i++) {
         swapped = 0;
         for (int j = 0; j < objects->length - i - 1; j++) {
-            if (distToCamera(olGet(objects, j)->globalPosition, camera->position) < distToCamera(olGet(objects, j+1)->globalPosition, camera->position)) {
-                swap(olGet(objects, j), olGet(objects, j+1));
+            if (distToCamera(objectListGet(objects, j)->globalPosition, camera->position) < distToCamera(objectListGet(objects, j+1)->globalPosition, camera->position)) {
+                swap(objectListGet(objects, j), objectListGet(objects, j+1));
                 swapped = 1;
             }
         }
         if (swapped == 0) break;
+    }
+}
+
+void drawObjectsFromList(ObjectList* list) {
+    for(int i = 0; i < list->length; i++) {
+        objectListGet(list, i)->draw(objectListGet(list, i));
     }
 }
 
@@ -108,20 +110,20 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
             drawBoundingBox(root);
         }
         if(root->isTransparent) {
-            olAdd(transparentObjects, root);
-        } else if(root->lightCount > 0) {
-            olAdd(illuminatedObjects, root);
+            objectListAdd(transparentObjects, root);
+        } else if(root->lightsAffectedBy.length > 0) {
+            objectListAdd(illuminatedObjects, root);
         } else {
             root->draw(root);
         }
     }
 
-    if(root->children == NULL) {
+    if(root->children.length == 0) {
         return;
     }
 
-    for(int i = 0; i < root->childrenCount; i++) {
-        traverseDraw(root->children[i], modelStack, transparentObjects, illuminatedObjects);
+    for(int i = 0; i < root->children.length; i++) {
+        traverseDraw(objectListGet(&root->children, i), modelStack, transparentObjects, illuminatedObjects);
         copyMat(modelStack, temp, 16);
     }
 }

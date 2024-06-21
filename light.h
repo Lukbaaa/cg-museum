@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <GL/glew.h>
 
-typedef struct LightParams {
+typedef struct LightSource {
     Vec3 position;
     Vec4 ambient;
     Vec4 diffuse;

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <GL/glew.h>
 
+#include "list.h"
 #include "light.h"
 #include "shader.h"
 #include "camera.h"
@@ -35,13 +36,10 @@ typedef struct Object {
     Shader* shader;
     int shouldRender;
     int isTransparent;
-    Object** parents;
-    int parentCount;
-    Object** children;
-    int childrenCount;
+    ObjectList parents;
+    ObjectList children;
     LightSource* light;
-    LightSource** lightsAffectedBy;
-    int lightCount;
+    LightSourceList lightsAffectedBy;
     Camera* camera;
     void (*draw)(Object*);
     void (*animate)(Object*);
@@ -60,13 +58,10 @@ void initObject(Object* obj) {
     obj->shader = NULL;
     obj->shouldRender = 1;
     obj->isTransparent = 0;
-    obj->parents = NULL;
-    obj->children = NULL;
-    obj->parentCount = 0;
-    obj->childrenCount = 0;
+    initObjectList(&obj->parents);
+    initObjectList(&obj->children);
     obj->light = NULL;
-    obj->lightsAffectedBy = NULL;
-    obj->lightCount = 0;
+    initLightSourceList(&obj->lightsAffectedBy);
     obj->camera = NULL;
     obj->draw = NULL;
     obj->animate = NULL;
@@ -114,9 +109,7 @@ int isColliding(BoundingBox box1, BoundingBox box2) {
 }
 
 void addLightAffectedBy(Object* obj, LightSource* light) {
-  obj->lightsAffectedBy = (LightSource**)realloc(obj->lightsAffectedBy, sizeof(LightSource*)*(obj->lightCount+1));
-  obj->lightsAffectedBy[obj->lightCount] = light;
-  obj->lightCount++;
+  lightSourceListAdd(&obj->lightsAffectedBy, light);
 }
 
 #endif
