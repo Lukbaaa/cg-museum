@@ -3,6 +3,8 @@
 in vec2 texCoord;
 in float y;
 
+out vec4 fragColor;
+
 uniform sampler2D tex;
 
 void main() {
@@ -11,5 +13,5 @@ void main() {
         color = 0;
     }
 
-    gl_FragColor = texture(tex, texCoord*10);
+    fragColor = texture(tex, texCoord*10);
 }
