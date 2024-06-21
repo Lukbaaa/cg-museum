@@ -47,6 +47,12 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "shader.h": "c"
+        "shader.h": "c",
+        "objectloader.h": "c",
+        "object.h": "c",
+        "texture.h": "c",
+        "scene_graph.h": "c",
+        "camera.h": "c",
+        "skybox.h": "c"
     }
 }
