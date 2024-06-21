@@ -6,8 +6,20 @@
 
 #include "object.h"
 #include "matrix_functions.h"
+#include "light.h"
+#include "materials.h"
 
 #define NUM_PARTICLES 100
+
+LightSource* light;
+Vec4 ambient = {1,1,1,1};
+Vec4 diffuse = {1,1,1,1};
+Vec4 specular = {1,1,1,1};
+Vec3 lightPosition = {0.0,0.0,-0.4};
+Material material;
+
+
+
 
 typedef struct {
     float position[3];
@@ -15,7 +27,15 @@ typedef struct {
     float life;
 } Particle;
 
-Particle particles[NUM_PARTICLES];
+typedef struct {
+    Particle particles[NUM_PARTICLES];
+    float dt;
+    float position[3];
+} ParticleSystem;
+
+// Particle particles[NUM_PARTICLES];
+
+ParticleSystem ps;
 
 const GLfloat cube_vertices[] = {
     -0.05f, -0.05f, -0.05f,
@@ -38,32 +58,48 @@ const GLuint cube_indices[] = {
 };
 
 void initParticles() {
+    material = rubin;
+    light = createLight();
+    light->ambient = ambient;
+    light->diffuse = diffuse;
+    light->specular = specular;
+    ps.position[0] = 1.0;
+    ps.position[1] = 2.0;
+    ps.position[2] = 0.4;
+    lightPosition= arrayToVec3(ps.position);
+
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
-        particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
-        particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
-        particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
-        particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
-        particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
-        particles[i].life = 5.0f;
+        // particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
+        // particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
+        // particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
+        ps.particles[i].position[0] = ps.position[0];
+        ps.particles[i].position[1] = ps.position[1];
+        ps.particles[i].position[2] = ps.position[2];
+        ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
+        ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
+        ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
+        ps.particles[i].life = 10.0f;
     }
 }
 
 void updateParticles(float deltaTime) {
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        particles[i].life -= deltaTime;
-        if (particles[i].life > 0.0f) {
-            particles[i].position[0] += particles[i].velocity[0] * deltaTime;
-            particles[i].position[1] += particles[i].velocity[1] * deltaTime;
-            particles[i].position[2] += particles[i].velocity[2] * deltaTime;
+        ps.particles[i].life -= deltaTime;
+        if (ps.particles[i].life > 0.0f) {
+            ps.particles[i].position[0] += ps.particles[i].velocity[0] * deltaTime;
+            ps.particles[i].position[1] += ps.particles[i].velocity[1] * deltaTime;
+            ps.particles[i].position[2] += ps.particles[i].velocity[2] * deltaTime;
         } else {
-            particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
-            particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
-            particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
-            particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
-            particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
-            particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
-            particles[i].life = 5.0f;
+            // particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
+            // particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
+            // particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
+            ps.particles[i].position[0] = ps.position[0];
+            ps.particles[i].position[1] = ps.position[1];
+            ps.particles[i].position[2] = ps.position[2];
+            ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
+            ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
+            ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
+            ps.particles[i].life = 10.0f;
         }
     }
 }
@@ -71,6 +107,7 @@ void updateParticles(float deltaTime) {
 GLuint VertexArrayID, vertexbuffer, elementbuffer;
 
 void initBuffers() {
+
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
@@ -81,9 +118,10 @@ void initBuffers() {
     glGenBuffers(1, &elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
+
 }
 
-void translate(GLfloat* out, GLfloat in[16], GLfloat v[3]) {
+void translate1(GLfloat* out, GLfloat in[16], GLfloat v[3]) {
     assert(out != NULL);
     assert(in != NULL);
     assert(v != NULL);
@@ -100,18 +138,34 @@ void renderParticles(GLuint MatrixID, Camera* camera) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        if (particles[i].life > 0.0f) {
+        if (ps.particles[i].life > 0.0f) {
             GLfloat model[16];
             identity(model);
-            translate(model, model, particles[i].position);
-            // translate(model, particles[i].position[0], particles[i].position[1], particles[i].position[2]);
-            // translate(mat4(1.0f), vec3(particles[i].position[0], particles[i].position[1], particles[i].position[2]));
-            // mat4 MVP = Projection * View * Model;
+            translate1(model, model, ps.particles[i].position);
+
+            GLfloat normalMatrix[16];
+            inverse4(normalMatrix, model);
+            transpose4(normalMatrix, normalMatrix);
+            glUniformMatrix4fv(glGetUniformLocation(MatrixID, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+            glUniform1f(glGetUniformLocation(MatrixID,"dt"),ps.particles[i].life);
             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "model"), 1, GL_FALSE, model);
             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "view"), 1, GL_FALSE, camera->view);
             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "projection"), 1, GL_TRUE, camera->projection);
+
+            glUniform4fv(glGetUniformLocation(MatrixID, "material.emissive"), 1, material.emissive);
+            glUniform4fv(glGetUniformLocation(MatrixID, "material.ambient"), 1, material.ambient);
+            glUniform4fv(glGetUniformLocation(MatrixID, "material.diffuse"), 1, material.diffuse);
+            glUniform4fv(glGetUniformLocation(MatrixID, "material.specular"), 1, material.specular);
+            glUniform1f(glGetUniformLocation(MatrixID, "material.shininess"), material.shininess);
+            
+            glUniform3fv(glGetUniformLocation(MatrixID, "light.position"), 1, (float*)&lightPosition); 
+            glUniform4fv(glGetUniformLocation(MatrixID, "light.ambient"), 1, (float*)&(light->ambient.r));
+            glUniform4fv(glGetUniformLocation(MatrixID, "light.diffuse"), 1, (float*)&(light->diffuse.r));
+            glUniform4fv(glGetUniformLocation(MatrixID, "light.specular"), 1, (float*)&(light->specular.r));
+
+            
 
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)0);
         }

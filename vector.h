@@ -97,4 +97,9 @@ void normalize(Vec3* vec) {
   vec->z *= invLen;
 }
 
+Vec3 arrayToVec3(float* array) {
+  Vec3 out = {array[0],array[1],array[2]};
+  return out;
+}
+
 #endif

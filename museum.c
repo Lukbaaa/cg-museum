@@ -17,6 +17,7 @@
 
 void processInput(GLFWwindow *window, Camera* cam);
 
+GLuint particlesProgram;
 Object* scene;
 
 Object** objects;
@@ -122,6 +123,8 @@ void drawBjarne(Object* obj) {
 
 }
 
+
+
 void drawBjarneLight(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
@@ -186,6 +189,28 @@ void bjarneLightAnimation(Object* obj) {
   //printVec3(obj->light->position);
 }
 
+void drawFloor(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawFundament(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
 void createScene(void) {
   
   Object* root = createObject("objects/cube.obj");
@@ -199,6 +224,9 @@ void createScene(void) {
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* houseFloor = createObject("objects/house/house_floor.obj");
+  Object* houseFundament = createObject("objects/house/house_walls.obj");
+  //Object* houseRoof = createObject("objects/house/house_roof.obj");
+  Object* particleLight = createObject("objects/sphere.obj");
 
   sgAddChild(root, sun);
   sgAddChild(sun, earth);
@@ -206,12 +234,15 @@ void createScene(void) {
   sgAddChild(root, window);
   sgAddChild(root, window2);
   sgAddChild(root, water);
+  sgAddChild(water, boat);
   sgAddChild(root, bjarne);
   sgAddChild(bjarne, bjarneLight);
-  sgAddChild(water, boat);
   sgAddChild(root,houseFloor);
+  sgAddChild(houseFloor,houseFundament);
+  sgAddChild(root, particleLight);
 
   root->shouldRender = 0;
+  sun->shouldRender = 0;
 
   sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
@@ -222,7 +253,9 @@ void createScene(void) {
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
-  houseFloor->shader = createShader("shader/house_shader/floor.vert","shader/house_shader/floor.frag");
+  houseFloor->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
+  houseFundament->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+  particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -241,11 +274,10 @@ void createScene(void) {
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
+  houseFloor->draw = &drawFloor;
+  houseFundament->draw = &drawFundament;
+  particleLight->draw = &drawFundament;
 
-  GLuint particlesProgram = createShader("shaders/particle.vert", "shaders/particle.frag")->program;
-  glUseProgram(particlesProgram);
-  renderParticles(particlesProgram, camera);
-  
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
@@ -257,16 +289,18 @@ void createScene(void) {
   setObjectPosition(window2, 5,0,0);
   setObjectPosition(water, 0, 0, 20);
   setObjectPosition(bjarne, 10, 0, 0);
+  setObjectPosition(particleLight, 1.0,2.0,0.4);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(boat, 0.5, 0.5, 0.5);
   setObjectScale(water, 0.1, 0.1, 0.1);
+  setObjectScale(houseFloor, 0.1,0.1,0.1);
+  setObjectScale(particleLight,0.1,0.1,0.1);
+
 
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
   Vec4 diffuse = {1,1,1,1};
-  Vec4 specular = {1,1,1,1};
-  light->ambient = ambient;
-  light->diffuse = diffuse;
+  Vec4 specular = {1,1,1,1};  light->diffuse = diffuse;
   light->specular = specular;
 
   bjarneLight->light=light;
@@ -275,9 +309,14 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
-
+  
   scene = root;
-} 
+}
+  
+void drawParticles() {
+  glUseProgram(particlesProgram);
+  renderParticles(particlesProgram, camera);
+}
 
 void draw() {
     updateParticles(deltaTime);
@@ -294,6 +333,8 @@ void draw() {
     traverseDraw(scene, modelStack, &transparentObjects, &illuminatedObjects);
     drawIlluminatedObjects(&illuminatedObjects);
     drawTransparentObjects(&transparentObjects);
+
+    drawParticles();
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -302,9 +343,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 int main(void) {
   timeAtStart = glfwGetTime();
-  
-
-
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -313,7 +351,7 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glewExperimental = GL_TRUE;
   GLFWwindow *window =
-      glfwCreateWindow(800, 800, "Computergrafik 1", NULL, NULL);
+      glfwCreateWindow(1000, 1000, "Computergrafik 1", NULL, NULL);
   if (!window) {
     printf("Failed to create window\n");
     glfwTerminate();
@@ -329,6 +367,9 @@ int main(void) {
   glewInit();
   init();
   createScene();
+  particlesProgram = createShader("shaders/particle.vert", "shaders/particle.frag")->program;
+  initParticles();
+  initBuffers();
 
     
   while (!glfwWindowShouldClose(window)) {
@@ -337,7 +378,6 @@ int main(void) {
 
     processInput(window, camera);
     draw();
-
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

@@ -47,6 +47,8 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "shader.h": "c"
+        "shader.h": "c",
+        "light.h": "c",
+        "materials.h": "c"
     }
 }
