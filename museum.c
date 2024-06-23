@@ -398,8 +398,6 @@ void createScene(void) {
   setObjectScale(houseFloor, 0.1,0.1,0.1);
   // setObjectScale(particleLight,0.1,0.1,0.1);
 
-
-
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
   Vec4 diffuse = {1,1,1,1};
@@ -423,7 +421,6 @@ void createScene(void) {
     // partList[i]->draw = &drawParticles;
     
     // partList[i]->material = wood;
-
 
   }
   
