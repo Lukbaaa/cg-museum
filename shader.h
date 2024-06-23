@@ -73,8 +73,8 @@ Shader* createShader(const char* vertexPath, const char* fragmentPath) {
     checkCompileErrors(vertexShaderID, "VERTEX", vertexPath);
 
     // Compile Fragment Shader
-    char fragmentShaderCode[5096];
-    len = fread(fragmentShaderCode, sizeof(char), 5096, fragmentShaderFile);
+    char fragmentShaderCode[5096*5];
+    len = fread(fragmentShaderCode, sizeof(char), 5096*5, fragmentShaderFile);
     char* pFragmentShaderCode = fragmentShaderCode;
     pFragmentShaderCode[len] = '\0';
     glShaderSource(fragmentShaderID, 1, (const GLchar**)&pFragmentShaderCode, NULL);

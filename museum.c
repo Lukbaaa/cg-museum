@@ -61,12 +61,6 @@ void drawBoat(Object* obj) {
   glBindVertexArray(obj->vao);
   
   float displacement = (sin(timeAtDraw)+sin(timeAtDraw))*0.2;
-  Vec3 rot = {
-    -cos(timeAtDraw)*10,
-    0,
-    cos(timeAtDraw)*10
-  };
-  rotate(obj->model, obj->model, rot);
 
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -130,6 +124,7 @@ void drawRMRenderer(Object* obj) {
 
   glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
 
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -173,12 +168,13 @@ void bjarneLightAnimation(Object* obj) {
 }
 
 void boatAnimation(Object* obj) {
-  Vec3 rot = {
-    -cos(timeAtDraw)*10,
-    0,
-    cos(timeAtDraw)*10
-  };
-  rotate(obj->model, obj->model, rot);
+  setObjectRotation(obj, -cos(timeAtDraw)*10, 0, cos(timeAtDraw)*10);
+}
+
+void rmDisplayAnimation(Object* obj) {
+  float x = obj->transform.position.x - camera->position.x;
+  float y = obj->transform.position.z - camera->position.z;
+  setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI,0);
 }
 
 void createScene(void) {
@@ -199,7 +195,6 @@ void createScene(void) {
   rmRenderer->renderTarget = createRenderTarget();
 
   sgAddChild(root, rmRenderer);
-  sgAddChild(root, rmDisplay);
   sgAddChild(root, sun);
   sgAddChild(sun, earth);
   sgAddChild(earth, moon);
@@ -209,6 +204,7 @@ void createScene(void) {
   sgAddChild(root, bjarne);
   sgAddChild(bjarne, bjarneLight);
   sgAddChild(water, boat);
+  sgAddChild(root, rmDisplay);
 
   root->shouldRender = 0;
   rmDisplay->shouldRender = 1;
@@ -252,6 +248,8 @@ void createScene(void) {
   moon->animate = &moonAnimation;
   bjarneLight->animate = &bjarneLightAnimation;
   boat->animate = &boatAnimation;
+  rmDisplay->animate = &rmDisplayAnimation;
+
 
   bjarne->material = rubin;
 
@@ -279,6 +277,7 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
+  rmDisplay->isTransparent = 1;
 
   scene = root;
 } 
