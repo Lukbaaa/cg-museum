@@ -5,6 +5,7 @@
 #include "texture.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
+#include "skybox.h"
 #include "particle2.h"
   
 #ifdef __APPLE__
@@ -139,6 +140,21 @@ void drawBjarneLight(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "specular"), 1, (float*)&(obj->light->specular.r));
 
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawSkybox() {
+  glDepthMask(GL_FALSE);
+  glDepthFunc(GL_LEQUAL);
+  glBindVertexArray(getVAO());
+  glUseProgram(scene->shader->program);
+  glUniform1i(glGetUniformLocation(scene->shader->program, "skybox"), 0);
+  glUniformMatrix4fv(glGetUniformLocation(scene->shader->program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(scene->shader->program, "projection"), 1, GL_TRUE, camera->projection);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, getCubemapTexture());
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
 }
 
 Object* createObject(const char* objFilePath) {
@@ -465,6 +481,7 @@ void drawParticles() {
 void draw() {
     updateParticles(deltaTime);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawSkybox();
     changeView(camera);
     GLfloat modelStack[16];
     identity(modelStack);
@@ -511,6 +528,10 @@ int main(void) {
   glewInit();
   init();
   createScene();
+
+  initializeSkybox();
+  loadCubemapTexture();
+  scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
   particlesProgram = createShader("shaders/particle.vert", "shaders/particle.frag")->program;
   initParticles();
   initBuffers();

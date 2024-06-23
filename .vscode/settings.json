@@ -49,6 +49,12 @@
         "typeinfo": "cpp",
         "shader.h": "c",
         "light.h": "c",
-        "materials.h": "c"
+        "materials.h": "c",
+        "objectloader.h": "c",
+        "object.h": "c",
+        "texture.h": "c",
+        "scene_graph.h": "c",
+        "camera.h": "c",
+        "skybox.h": "c"
     }
 }
