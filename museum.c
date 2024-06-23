@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "object.h"
 #include "texture.h"
+#include "framebuffer.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
   
@@ -13,10 +14,16 @@ void processInput(GLFWwindow *window, Camera* cam);
 
 Object* scene;
 
+double timeAtDraw = 0;
+
 Object** objects;
 int objCount = 0;   
-
-double timeAtDraw = 0;
+Object* createObject(const char* objFilePath) {
+  objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
+  objects[objCount] = createVAOwithObj(objFilePath);
+  objCount++;
+  return objects[objCount-1];
+}
 
 void drawTextures(Object* obj) {
   for (int j = 0; j < obj->textureCount; j++) {
@@ -26,22 +33,6 @@ void drawTextures(Object* obj) {
     glActiveTexture(GL_TEXTURE0+j);
     glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
   } 
-}
-
-void drawSphere(Object* obj) {
-
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  drawTextures(obj);
-
-  glBindVertexArray(obj->vao);
-
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
 void drawWater(Object* obj) {
@@ -131,31 +122,34 @@ void drawBjarneLight(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-Object* createObject(const char* objFilePath) {
-  objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
-  objects[objCount] = createVAOwithObj(objFilePath);
-  objCount++;
-  return objects[objCount-1];
+void drawRMRenderer(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void init(void) {
-  glEnable(GL_DEPTH_TEST);
-  //glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  camera = createCamera();
-  camera->center.x = camera->position.x + camera->camFront.x;
-  camera->center.y = camera->position.y + camera->camFront.y;
-  camera->center.z = camera->position.z + camera->camFront.z;
-  lookAt(camera->view, camera->position, camera->center, camera->camUp);
-  perspective(camera->projection, 45.0f, 800/800, 0.1, 100);
+void drawWithTexture(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
 
-  boundingBoxProgram = createShader("shaders/boundingbox.vert", "shaders/boundingbox.frag")->program;
+  drawTextures(obj);
 
-  glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
-  glViewport(0, 0, 800, 800);
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
+
 
 void sunAnimation(Object* obj) {
   setObjectPosition(obj, 0, 0, 0);
@@ -176,7 +170,15 @@ void moonAnimation(Object* obj) {
 void bjarneLightAnimation(Object* obj) {
   setObjectPosition(obj, sin(glfwGetTime())*3,0,cos(glfwGetTime())*3);
   obj->light->position = obj->transform.position;
-  //printVec3(obj->light->position);
+}
+
+void boatAnimation(Object* obj) {
+  Vec3 rot = {
+    -cos(timeAtDraw)*10,
+    0,
+    cos(timeAtDraw)*10
+  };
+  rotate(obj->model, obj->model, rot);
 }
 
 void createScene(void) {
@@ -191,7 +193,13 @@ void createScene(void) {
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
+  Object* rmRenderer = createObject("objects/cube.obj");
+  Object* rmDisplay = createObject("objects/cube.obj");
 
+  rmRenderer->renderTarget = createRenderTarget();
+
+  sgAddChild(root, rmRenderer);
+  sgAddChild(root, rmDisplay);
   sgAddChild(root, sun);
   sgAddChild(sun, earth);
   sgAddChild(earth, moon);
@@ -203,16 +211,19 @@ void createScene(void) {
   sgAddChild(water, boat);
 
   root->shouldRender = 0;
+  rmDisplay->shouldRender = 1;
 
-  sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  moon->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  window->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  sun->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  earth->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  moon->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  window->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  window2->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
+  rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
+  rmDisplay->shader = createShader("shaders/texture.vert", "shaders/rmDisplay.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -221,21 +232,26 @@ void createScene(void) {
   loadTexture(window2, "textures/window_blue.png", 0);
   loadTexture(boat, "textures/boat.png", 0);
   loadTexture(water, "textures/water.png", 0);
+  Texture rmTexture = loadTexture(rmDisplay, NULL, 0);
+  attachRenderTexture(rmRenderer->renderTarget, rmTexture);
 
-  sun->draw = &drawSphere;
-  earth->draw = &drawSphere;
-  moon->draw = &drawSphere;
-  window->draw = &drawSphere;
-  window2->draw = &drawSphere;
+  sun->draw = &drawWithTexture;
+  earth->draw = &drawWithTexture;
+  moon->draw = &drawWithTexture;
+  window->draw = &drawWithTexture;
+  window2->draw = &drawWithTexture;
   water->draw = &drawWater;
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
+  rmDisplay->draw = &drawWithTexture;
+  rmRenderer->draw = &drawRMRenderer;
   
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
   bjarneLight->animate = &bjarneLightAnimation;
+  boat->animate = &boatAnimation;
 
   bjarne->material = rubin;
 
@@ -243,6 +259,8 @@ void createScene(void) {
   setObjectPosition(window2, 5,0,0);
   setObjectPosition(water, 0, 0, 20);
   setObjectPosition(bjarne, 10, 0, 0);
+  setObjectPosition(rmRenderer, -15, 0, 0);
+  setObjectPosition(rmDisplay, -10, 0, 0);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(boat, 0.5, 0.5, 0.5);
   setObjectScale(water, 0.1, 0.1, 0.1);
@@ -262,31 +280,27 @@ void createScene(void) {
   window->isTransparent = 1;
   window2->isTransparent = 1;
 
-  unsigned int framebuffer;
-  glGenFramebuffers(1, &framebuffer);
-  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);    
-
-  unsigned int textureColorbuffer;
-  glGenTextures(1, &textureColorbuffer);
-  glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  // attach it to currently bound framebuffer object
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-  
-  unsigned int rbo;
-  glGenRenderbuffers(1, &rbo);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo); 
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);  
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);  
-
   scene = root;
 } 
+
+void init(void) {
+  glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  camera = createCamera();
+  camera->center.x = camera->position.x + camera->camFront.x;
+  camera->center.y = camera->position.y + camera->camFront.y;
+  camera->center.z = camera->position.z + camera->camFront.z;
+  lookAt(camera->view, camera->position, camera->center, camera->camUp);
+  perspective(camera->projection, 45.0f, 800/800, 0.1, 100);
+
+  boundingBoxProgram = createShader("shaders/boundingbox.vert", "shaders/boundingbox.frag")->program;
+
+  glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
+  glViewport(0, 0, 800, 800);
+}
 
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

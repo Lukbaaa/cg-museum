@@ -34,6 +34,7 @@ typedef struct Object {
     GLuint* textures;
     int textureCount;
     Shader* shader;
+    GLuint renderTarget;
     int shouldRender;
     int isTransparent;
     ObjectList parents;
@@ -56,6 +57,7 @@ void initObject(Object* obj) {
     obj->textures = NULL;
     obj->textureCount = 0;
     obj->shader = NULL;
+    obj->renderTarget = 0;
     obj->shouldRender = 1;
     obj->isTransparent = 0;
     initObjectList(&obj->parents);

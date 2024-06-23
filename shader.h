@@ -12,10 +12,9 @@ typedef struct Shader {
     GLuint program;
 } Shader;
 
-void checkCompileErrors(unsigned int shader, const char* type) {
+void checkCompileErrors(unsigned int shader, const char* type, const char* path) {
     assert(shader > 0);
     assert(type != NULL);
-    
     int success;
     char infoLog[1024];
     if (strcmp(type, "PROGRAM") != 0)
@@ -23,6 +22,7 @@ void checkCompileErrors(unsigned int shader, const char* type) {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success)
         {
+            printf("%s\n", path);
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
             printf("ERROR::SHADER_COMPILATION_ERROR of type: %s\n%s \n -- --------------------------------------------------- -- \n", type, infoLog);
         }
@@ -32,6 +32,7 @@ void checkCompileErrors(unsigned int shader, const char* type) {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if (!success)
         {
+            printf("%s\n", path);
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
             printf("ERROR::SHADER_COMPILATION_ERROR of type: %s\n%s \n -- --------------------------------------------------- -- \n", type, infoLog);
         }
@@ -69,7 +70,7 @@ Shader* createShader(const char* vertexPath, const char* fragmentPath) {
     pVertexShaderCode[len] = '\0';
     glShaderSource(vertexShaderID, 1, (const GLchar**)&pVertexShaderCode, NULL);
     glCompileShader(vertexShaderID);
-    checkCompileErrors(vertexShaderID, "VERTEX");
+    checkCompileErrors(vertexShaderID, "VERTEX", vertexPath);
 
     // Compile Fragment Shader
     char fragmentShaderCode[5096];
@@ -78,14 +79,14 @@ Shader* createShader(const char* vertexPath, const char* fragmentPath) {
     pFragmentShaderCode[len] = '\0';
     glShaderSource(fragmentShaderID, 1, (const GLchar**)&pFragmentShaderCode, NULL);
     glCompileShader(fragmentShaderID);
-    checkCompileErrors(fragmentShaderID, "FRAGMENT");
+    checkCompileErrors(fragmentShaderID, "FRAGMENT", fragmentPath);
 
     // Link the program
     GLuint programID = glCreateProgram();
     glAttachShader(programID, vertexShaderID);
     glAttachShader(programID, fragmentShaderID);
     glLinkProgram(programID);
-    checkCompileErrors(programID, "PROGRAM");
+    checkCompileErrors(programID, "PROGRAM", vertexPath);
 
     // Clean up
     glDeleteShader(vertexShaderID);

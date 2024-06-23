@@ -66,7 +66,7 @@ void drawTransparentObjects(ObjectList* objects) {
     drawObjectsFromList(objects);
 }
 
-int drawBoundingBoxes = 1;
+int drawBoundingBoxes = 0;
 GLuint boundingBoxProgram;
 
 void drawBoundingBox(Object* obj) {
