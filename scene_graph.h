@@ -100,10 +100,10 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
     } 
 
     GLfloat temp[16];
-    copyMat(temp, modelStack, 16);
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
+    copyMat(temp, root->model, 16);
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
 
     if (root->camera != NULL) {
