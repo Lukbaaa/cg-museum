@@ -168,7 +168,7 @@ void init(void) {
 }
 
 void sunAnimation(Object* obj) {
-  setObjectPosition(obj, 0, 0, 0);
+  //setObjectPosition(obj, 0, 0, 0);
   setObjectRotation(obj, 0, glfwGetTime()*10, 0);
 }
 
@@ -192,7 +192,7 @@ void bjarneLightAnimation(Object* obj) {
 void drawFloor(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
-
+  drawTextures(obj);
   glBindVertexArray(obj->vao);
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -203,11 +203,46 @@ void drawFloor(Object* obj) {
 void drawFundament(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawPodest(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawRopes(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
 
   glBindVertexArray(obj->vao);
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawPodestPanels(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
@@ -223,26 +258,91 @@ void createScene(void) {
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
-  Object* houseFloor = createObject("objects/house/house_floor.obj");
-  Object* houseFundament = createObject("objects/house/house_walls.obj");
-  //Object* houseRoof = createObject("objects/house/house_roof.obj");
+
+  Object* house = createObject("objects/cube.obj");
+  Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
+  Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
+  Object* houseRoof = createObject("objects/house_objects/house_roof.obj");
+  Object* ropes = createObject("objects/house_objects/house_ropes.obj");
+  Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
   Object* particleLight = createObject("objects/sphere.obj");
 
-  sgAddChild(root, sun);
-  sgAddChild(sun, earth);
-  sgAddChild(earth, moon);
+  Object* vitrineFront= createObject("objects/house_objects/vitrine/glas_front.obj"); //vitrineFront
+  Object* vitrineRigth= createObject("objects/house_objects/vitrine/glas_right.obj"); //vitrineRigth
+  Object* vitrineLeft= createObject("objects/house_objects/vitrine/glas_left.obj"); //vitrineLeft
+  Object* vitrineBack= createObject("objects/house_objects/vitrine/glas_back.obj"); //vitrineBack
+  Object* vitrineTop= createObject("objects/house_objects/vitrine/top.obj"); //vitrineTop
+  Object* vitrinePodest= createObject("objects/house_objects/vitrine/podest.obj"); //vitrinePodest
+
+  Object* vitrine1=createObject("objects/cube.obj");
+  Object* vitrine2=createObject("objects/cube.obj");
+  Object* vitrine3=createObject("objects/cube.obj");
+  Object* vitrine4=createObject("objects/cube.obj");
+
   sgAddChild(root, window);
   sgAddChild(root, window2);
-  sgAddChild(root, water);
-  sgAddChild(water, boat);
   sgAddChild(root, bjarne);
+  sgAddChild(root,house);
+
+  sgAddChild(house,houseFundament);
+  sgAddChild(house,houseFloor);
+  sgAddChild(house,houseRoof);
+  sgAddChild(house,ropes);
+  sgAddChild(house,baloon1);
+  sgAddChild(house,vitrine1);
+
   sgAddChild(bjarne, bjarneLight);
-  sgAddChild(root,houseFloor);
-  sgAddChild(houseFloor,houseFundament);
-  sgAddChild(root, particleLight);
+  sgAddChild(vitrine1, sun);
+  sgAddChild(vitrine1,vitrinePodest);
+  sgAddChild(sun, earth);
+  sgAddChild(earth, moon);
+  sgAddChild(vitrinePodest,vitrineFront);
+  sgAddChild(vitrineFront,vitrineBack);
+  sgAddChild(vitrineBack,vitrineLeft);
+  sgAddChild(vitrineLeft,vitrineRigth);
+  sgAddChild(vitrineRigth,vitrineTop);
+
+  sgAddChild(house,vitrine2);
+  sgAddChild(vitrine2, water);
+  sgAddChild(vitrine2,vitrinePodest);
+  sgAddChild(water, boat);
+  sgAddChild(vitrinePodest,vitrineFront);
+  sgAddChild(vitrineFront,vitrineBack);
+  sgAddChild(vitrineBack,vitrineLeft);
+  sgAddChild(vitrineLeft,vitrineRigth);
+  sgAddChild(vitrineRigth,vitrineTop);
+
+  sgAddChild(house,vitrine3);
+  sgAddChild(vitrine3, water);
+  sgAddChild(vitrine3,vitrinePodest);
+  sgAddChild(water, boat);
+  sgAddChild(vitrinePodest,vitrineFront);
+  sgAddChild(vitrineFront,vitrineBack);
+  sgAddChild(vitrineBack,vitrineLeft);
+  sgAddChild(vitrineLeft,vitrineRigth);
+  sgAddChild(vitrineRigth,vitrineTop);
+
+  sgAddChild(house,vitrine4);
+  sgAddChild(vitrine4, water);
+  sgAddChild(vitrine4,vitrinePodest);
+  sgAddChild(water, boat);
+  sgAddChild(vitrinePodest,vitrineFront);
+  sgAddChild(vitrineFront,vitrineBack);
+  sgAddChild(vitrineBack,vitrineLeft);
+  sgAddChild(vitrineLeft,vitrineRigth);
+  sgAddChild(vitrineRigth,vitrineTop);
+
+
+  //sgAddChild(root, particleLight);
+
 
   root->shouldRender = 0;
-  sun->shouldRender = 0;
+  house->shouldRender = 0;
+  vitrine1->shouldRender =0;
+  vitrine2->shouldRender =0;
+  vitrine3->shouldRender =0;
+  vitrine4->shouldRender =0;
+  sun->shouldRender = 1;
 
   sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
@@ -255,7 +355,20 @@ void createScene(void) {
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   houseFloor->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
   houseFundament->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+  houseRoof->shader = houseFloor->shader;
+  ropes->shader = createShader("shaders/house_shader/ropes.vert","shaders/house_shader/ropes.frag");
+  baloon1->shader = houseFloor->shader;
+
+  //Vitrine 1, gibt es eine Möglichkeit, diese wiederzuverwenden?
+  vitrinePodest->shader = createShader("shaders/house_shader/podest.vert","shaders/house_shader/podest.frag");
+  vitrineFront->shader = createShader("shaders/house_shader/vitrine_glas.vert","shaders/house_shader/vitrine_glas.frag");
+  vitrineBack->shader = vitrineFront->shader;
+  vitrineRigth->shader = vitrineFront->shader;
+  vitrineLeft->shader = vitrineFront->shader;
+  vitrineTop->shader = vitrinePodest->shader;
+
   particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
+
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -264,6 +377,14 @@ void createScene(void) {
   loadTexture(window2, "textures/window_blue.png", 0);
   loadTexture(boat, "textures/boat.png", 0);
   loadTexture(water, "textures/water.png", 0);
+  loadTexture(houseFloor, "textures/wood_floor.png",0);
+  loadTexture(houseFundament, "textures/brick_texture.png",0);
+  loadTexture(vitrinePodest, "textures/black_marble_texture.jpg",0);
+  loadTexture(vitrineTop,"textures/black_marble_texture.jpg",0);
+  loadTexture(vitrineFront,"textures/podest_glass.png",0);
+  loadTexture(vitrineBack,"textures/podest_glass.png",0);
+  loadTexture(vitrineRigth,"textures/podest_glass.png",0);
+  loadTexture(vitrineLeft,"textures/podest_glass.png",0);
 
   sun->draw = &drawSphere;
   earth->draw = &drawSphere;
@@ -276,7 +397,16 @@ void createScene(void) {
   boat->draw = &drawBoat;
   houseFloor->draw = &drawFloor;
   houseFundament->draw = &drawFundament;
-  particleLight->draw = &drawFundament;
+  houseRoof->draw = &drawFloor;
+  ropes->draw = &drawRopes;
+  baloon1->draw = &drawFloor;
+  vitrinePodest->draw = &drawPodest;
+  particleLight->draw = &drawFloor;
+  vitrineFront->draw = &drawPodestPanels;
+  vitrineBack->draw = &drawPodestPanels;
+  vitrineRigth->draw = &drawPodestPanels;
+  vitrineLeft->draw = &drawPodestPanels;
+  vitrineTop->draw = drawPodest;
 
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
@@ -285,16 +415,25 @@ void createScene(void) {
 
   bjarne->material = rubin;
 
+
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
-  setObjectPosition(water, 0, 0, 20);
+  // setObjectPosition(water, 0, 0, 20);
   setObjectPosition(bjarne, 10, 0, 0);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
+  setObjectPosition(vitrine1,11.25,-15,16);
+  setObjectPosition(vitrine2,11.25,-15,-16);
+  setObjectPosition(vitrine3,-11.25,-15,16);
+  setObjectPosition(vitrine4,-11.25,-15,-16);
+  setObjectScale(sun, 0.5,0.5,0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
-  setObjectScale(boat, 0.5, 0.5, 0.5);
-  setObjectScale(water, 0.1, 0.1, 0.1);
-  setObjectScale(houseFloor, 0.1,0.1,0.1);
+  setObjectScale(house,0.1,0.1,0.1);
+  // setObjectScale(boat, 0.5, 0.5, 0.5);
+  // setObjectScale(water, 0.1, 0.1, 0.1);
+  //setObjectScale(houseFloor, 0.2,0.2,0.2);
+  // setObjectScale(vitrinePodest,1.2,1.2,1.2);
   setObjectScale(particleLight,0.1,0.1,0.1);
+  
 
 
   LightSource* light = createLight();
@@ -309,6 +448,11 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
+  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  vitrineFront->isTransparent = 1;
+  vitrineLeft->isTransparent = 1;
+  vitrineRigth->isTransparent = 1;
+  
   
   scene = root;
 }
