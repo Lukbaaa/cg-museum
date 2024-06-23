@@ -41,14 +41,4 @@ void lightSourceListAdd(LightSourceList* list, LightSource* lightSource) {
     (list->length)++;
 }
 
-Object* objectListGet(ObjectList* list, int i) {
-    assert(i<list->length);
-    return list->objects[i];
-}
-
-LightSource* lightSourceListGet(LightSourceList* list, int i) {
-    assert(i<list->length);
-    return list->objects[i];
-}
-
 #endif

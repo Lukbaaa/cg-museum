@@ -85,10 +85,10 @@ void drawBjarne(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
   for(int i = 0; i < obj->lightsAffectedBy.length; i++) {
-    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->position));
-    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->ambient));
-    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->diffuse));
-    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->specular));
+    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->position));
+    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->ambient));
+    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->diffuse));
+    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->specular));
   }
 
   GLfloat normalMatrix[16];
@@ -347,10 +347,10 @@ int main(void) {
   init();
   createScene();
     
+    draw();
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
     processInput(window, camera);
-    draw();
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

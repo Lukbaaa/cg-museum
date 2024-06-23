@@ -24,7 +24,7 @@ void traverse(Object* root) {
         return;
     }
     for(int i = 0; i < root->children.length; i++) {
-        traverse(objectListGet(&root->children, i));
+        traverse(root->children.objects[i]);
     }
 }
 
@@ -41,8 +41,8 @@ void sortObjectsByDist(ObjectList* objects) {
     for (int i = 0; i < objects->length - 1; i++) {
         swapped = 0;
         for (int j = 0; j < objects->length - i - 1; j++) {
-            if (distToCamera(objectListGet(objects, j)->globalPosition, camera->position) < distToCamera(objectListGet(objects, j+1)->globalPosition, camera->position)) {
-                swap(objectListGet(objects, j), objectListGet(objects, j+1));
+            if (distToCamera(objects->objects[i]->globalPosition, camera->position) < distToCamera(objects->objects[j+1]->globalPosition, camera->position)) {
+                swap(objects->objects[j], objects->objects[j+1]);
                 swapped = 1;
             }
         }
@@ -52,7 +52,7 @@ void sortObjectsByDist(ObjectList* objects) {
 
 void drawObjectsFromList(ObjectList* list) {
     for(int i = 0; i < list->length; i++) {
-        objectListGet(list, i)->draw(objectListGet(list, i));
+        list->objects[i]->draw(list->objects[i]);
     }
 }
 
@@ -87,7 +87,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
     assert(root != NULL);
     assert(transparentObjects != NULL);
     assert(illuminatedObjects != NULL);
-    
+    //printf("%d\n", root->vao);
     if(root->animate != NULL) {
         root->animate(root);
     } 
@@ -97,6 +97,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
+    copyMat(temp, modelStack);
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
 
     if (root->camera != NULL) {
@@ -122,8 +123,9 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
         return;
     }
 
+    printf("%d %d\n", root->vao, root->children.length);
     for(int i = 0; i < root->children.length; i++) {
-        traverseDraw(objectListGet(&root->children, i), modelStack, transparentObjects, illuminatedObjects);
+        traverseDraw(root->children.objects[i], modelStack, transparentObjects, illuminatedObjects);
         copyMat(modelStack, temp, 16);
     }
 }
