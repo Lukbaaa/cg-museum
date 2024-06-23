@@ -340,21 +340,21 @@ void drawPodestPanels(Object* obj) {
   glUseProgram(program);
   drawTextures(obj);
 }
-void drawPart(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  for (int i = 0; i < NUM_PARTICLES; i++) {
-    setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
-    // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
-    // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
-  }
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
+// void drawPart(Object* obj) {
+//   int program = obj->shader->program;
+//   glUseProgram(program);
+//   for (int i = 0; i < NUM_PARTICLES; i++) {
+//     setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
+//     // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
+//     // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
+//   }
+//   glBindVertexArray(obj->vao);
+//   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+//   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+//   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+//   glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+//   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+// }
 
 void createScene(void) {
   
@@ -389,6 +389,8 @@ void createScene(void) {
   Object* vitrine2=createObject("objects/cube.obj");
   Object* vitrine3=createObject("objects/cube.obj");
   Object* vitrine4=createObject("objects/cube.obj");
+
+  // particleObject = createObject("objects/cube.obj");
 
   sgAddChild(root, window);
   sgAddChild(root, window2);
@@ -444,7 +446,7 @@ void createScene(void) {
   sgAddChild(vitrineRigth,vitrineTop);
 
 
-  //sgAddChild(root, particleLight);
+  sgAddChild(root, particleLight);
 
 
   root->shouldRender = 0;
@@ -454,23 +456,8 @@ void createScene(void) {
   vitrine3->shouldRender =0;
   vitrine4->shouldRender =0;
   sun->shouldRender = 1;
-  sgAddChild(root,houseFloor);
-  sgAddChild(houseFloor,houseFundament);
-  // sgAddChild(root, particleLight);
-  sgAddChild(root, particleObject);
-
-  root->shouldRender = 0;
-  house->shouldRender = 0;
-  vitrine1->shouldRender =0;
-  vitrine2->shouldRender =0;
-  vitrine3->shouldRender =0;
-  vitrine4->shouldRender =0;
-  sun->shouldRender = 1;
-  houseFloor->shouldRender = 0;
-  houseFundament->shouldRender = 0;
-
-
-  particleObject->shouldRender = 1;
+  
+  // particleObject->shouldRender = 1;
 
   sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
@@ -496,8 +483,8 @@ void createScene(void) {
   vitrineTop->shader = vitrinePodest->shader;
 
   particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
-  // particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
-  particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
+  
+  // particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
 
 
   loadTexture(sun, "textures/sun.png", 0);
@@ -538,7 +525,7 @@ void createScene(void) {
   vitrineLeft->draw = &drawPodestPanels;
   vitrineTop->draw = drawPodest;
   
-  particleObject->draw = &drawParticles;
+  // particleObject->draw = &drawParticles;
   
 
   sun->animate = &sunAnimation;
@@ -548,7 +535,7 @@ void createScene(void) {
 
 
   bjarne->material = rubin;
-  particleObject->material = wood;
+  // particleObject->material = wood;
 
 
   setObjectPosition(window, 3,0,0);
@@ -589,18 +576,18 @@ void createScene(void) {
   vitrineRigth->isTransparent = 1;
   
   
-  for (int i = 0; i < NUM_PARTICLES; i++) {
-    // init
-    partList[i] = createObject("objects/leer.obj");
-    sgAddChild(particleObject, partList[i]);
-    partList[i]->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
-    partList[i]->draw = &drawPart;
-    // partList[i]->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
-    // partList[i]->draw = &drawParticles;
+  // for (int i = 0; i < NUM_PARTICLES; i++) {
+  //   // init
+  //   partList[i] = createObject("objects/leer.obj");
+  //   sgAddChild(particleObject, partList[i]);
+  //   partList[i]->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+  //   partList[i]->draw = &drawPart;
+  //   // partList[i]->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
+  //   // partList[i]->draw = &drawParticles;
     
-    // partList[i]->material = wood;
+  //   // partList[i]->material = wood;
 
-  }
+  // }
   
   scene = root;
 }
@@ -664,9 +651,6 @@ int main(void) {
     float deltaTime = timeAtDraw - timeAtStart;
 
     processInput(window, camera);
-
-    
-    
     draw();
 
     glfwSwapBuffers(window);
