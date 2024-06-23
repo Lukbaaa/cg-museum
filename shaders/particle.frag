@@ -45,7 +45,7 @@ void main() {
     // diffuse
     float diffuseStrength = 1;
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(vec3(0, 0, 0) - fragPos); //vec3 ist light.position
     float diff = max(dot(lightDir, norm), 0.0);
     vec4 diffuse = diffuseStrength * diff * material.diffuse * light.diffuse;
 
@@ -59,5 +59,6 @@ void main() {
 
     vec4 result = emissive + ambient + diffuse + specular;
 
-    FragColor = result;
+    FragColor = result; 
+    // FragColor = vec4(1,0,0,1);
 }

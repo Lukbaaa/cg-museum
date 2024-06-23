@@ -16,9 +16,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+
 void processInput(GLFWwindow *window, Camera* cam);
 
-GLuint particlesProgram;
 Object* scene;
 
 Object** objects;
@@ -37,6 +37,66 @@ void drawTextures(Object* obj) {
   }
 }
 
+void drawParticles(Object* obj) {
+    updateParticles(deltaTime*1.5);  
+    int program = obj->shader->program;
+    glUseProgram(program);
+    
+    // ist das notw?
+    glBindVertexArray(obj->vao);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2); 
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbufferparticles);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbufferparticles);
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        if (ps.particles[i].life > 0.0f) {
+
+            GLfloat model[16];
+            identity(model);
+            translateParticleVector(model, model, ps.particles[i].position);
+            // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
+            // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
+            // setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
+            GLfloat normalMatrix[16];
+            inverse4(normalMatrix, model);
+            transpose4(normalMatrix, normalMatrix);
+            glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+            glUniform1f(glGetUniformLocation(program,"dt"),ps.particles[i].life);
+            glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, model);
+            glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+            glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+
+            glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
+            glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
+            glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
+            glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
+            glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
+            
+            // glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&obj->light->position); 
+            glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->light->ambient.r));
+            glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->light->diffuse.r));
+            glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->light->specular.r));
+
+            
+
+            glDrawElements(GL_TRIANGLES, obj->vertCount, GL_UNSIGNED_INT, (void*)0);
+            
+        }
+    }
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+}
 void drawSphere(Object* obj) {
 
   int program = obj->shader->program;
@@ -93,7 +153,6 @@ void drawBoat(Object* obj) {
 
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
-
 void drawBjarne(Object* obj) {
 
   int program = obj->shader->program;
@@ -123,9 +182,6 @@ void drawBjarne(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 
 }
-
-
-
 void drawBjarneLight(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
@@ -163,6 +219,22 @@ Object* createObject(const char* objFilePath) {
   objCount++;
   return objects[objCount-1];
 }
+
+Object* createObjectwithEBO(const char* objFilePath) {
+  objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
+  objects[objCount] = createVAOwithObj_forElementBuffer(objFilePath);
+  objCount++;
+  return objects[objCount-1];
+}
+
+// Object* createObjectWithoutFile() {
+//   objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
+//   Object* obj = (Object*)malloc(sizeof(Object));
+//   initObject(obj);
+//   objects[objCount-1] = obj;
+//   objCount++;
+//   return objects[objCount-1];
+// }
 
 void init(void) {
   glEnable(GL_DEPTH_TEST);
@@ -235,6 +307,19 @@ void drawPodest(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+}
+void drawPart(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  for (int i = 0; i < NUM_PARTICLES; i++) {
+    setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
+    // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
+    // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
+  }
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
@@ -254,6 +339,15 @@ void drawPodestPanels(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
   drawTextures(obj);
+}
+void drawPart(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  for (int i = 0; i < NUM_PARTICLES; i++) {
+    setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
+    // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
+    // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
+  }
   glBindVertexArray(obj->vao);
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -281,6 +375,7 @@ void createScene(void) {
   Object* houseRoof = createObject("objects/house_objects/house_roof.obj");
   Object* ropes = createObject("objects/house_objects/house_ropes.obj");
   Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
+  
   Object* particleLight = createObject("objects/sphere.obj");
 
   Object* vitrineFront= createObject("objects/house_objects/vitrine/glas_front.obj"); //vitrineFront
@@ -359,6 +454,23 @@ void createScene(void) {
   vitrine3->shouldRender =0;
   vitrine4->shouldRender =0;
   sun->shouldRender = 1;
+  sgAddChild(root,houseFloor);
+  sgAddChild(houseFloor,houseFundament);
+  // sgAddChild(root, particleLight);
+  sgAddChild(root, particleObject);
+
+  root->shouldRender = 0;
+  house->shouldRender = 0;
+  vitrine1->shouldRender =0;
+  vitrine2->shouldRender =0;
+  vitrine3->shouldRender =0;
+  vitrine4->shouldRender =0;
+  sun->shouldRender = 1;
+  houseFloor->shouldRender = 0;
+  houseFundament->shouldRender = 0;
+
+
+  particleObject->shouldRender = 1;
 
   sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
   earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
@@ -384,6 +496,8 @@ void createScene(void) {
   vitrineTop->shader = vitrinePodest->shader;
 
   particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
+  // particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
+  particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
 
 
   loadTexture(sun, "textures/sun.png", 0);
@@ -423,13 +537,18 @@ void createScene(void) {
   vitrineRigth->draw = &drawPodestPanels;
   vitrineLeft->draw = &drawPodestPanels;
   vitrineTop->draw = drawPodest;
+  
+  particleObject->draw = &drawParticles;
+  
 
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
   bjarneLight->animate = &bjarneLightAnimation;
 
+
   bjarne->material = rubin;
+  particleObject->material = wood;
 
 
   setObjectPosition(window, 3,0,0);
@@ -470,16 +589,24 @@ void createScene(void) {
   vitrineRigth->isTransparent = 1;
   
   
-  scene = root;
-}
+  for (int i = 0; i < NUM_PARTICLES; i++) {
+    // init
+    partList[i] = createObject("objects/leer.obj");
+    sgAddChild(particleObject, partList[i]);
+    partList[i]->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+    partList[i]->draw = &drawPart;
+    // partList[i]->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
+    // partList[i]->draw = &drawParticles;
+    
+    // partList[i]->material = wood;
+
+  }
   
-void drawParticles() {
-  glUseProgram(particlesProgram);
-  renderParticles(particlesProgram, camera);
+  scene = root;
 }
 
 void draw() {
-    updateParticles(deltaTime);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawSkybox();
     changeView(camera);
@@ -494,8 +621,7 @@ void draw() {
     traverseDraw(scene, modelStack, &transparentObjects, &illuminatedObjects);
     drawIlluminatedObjects(&illuminatedObjects);
     drawTransparentObjects(&transparentObjects);
-
-    drawParticles();
+    
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -512,7 +638,7 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   //glewExperimental = GL_TRUE;
   GLFWwindow *window =
-      glfwCreateWindow(1000, 1000, "Computergrafik 1", NULL, NULL);
+      glfwCreateWindow(800, 800, "Computergrafik 1", NULL, NULL);
   if (!window) {
     printf("Failed to create window\n");
     glfwTerminate();
@@ -532,17 +658,17 @@ int main(void) {
   initializeSkybox();
   loadCubemapTexture();
   scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
-  particlesProgram = createShader("shaders/particle.vert", "shaders/particle.frag")->program;
-  initParticles();
-  initBuffers();
-
     
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
     float deltaTime = timeAtDraw - timeAtStart;
 
     processInput(window, camera);
+
+    
+    
     draw();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

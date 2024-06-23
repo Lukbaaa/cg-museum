@@ -29,6 +29,8 @@ typedef struct BoundingBox {
     Vec3 bottomrightback;
 } BoundingBox;
 
+
+
 typedef struct Object {
     GLuint vao;
     int vertCount;

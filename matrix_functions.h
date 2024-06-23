@@ -73,6 +73,17 @@ void translate(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   mat4Multiplication(out, in, v);
 }
 
+void translateParticleVector(GLfloat* out, GLfloat in[16], GLfloat v[3]) {
+    assert(out != NULL);
+    assert(in != NULL);
+    assert(v != NULL);
+
+    out[12] = in[12] + v[0];
+    out[13] = in[13] + v[1];
+    out[14] = in[14] + v[2];
+    out[15] = 1.0f;
+}
+
 void createTransMatVec3(GLfloat* out, Vec3 vec) {
   assert(out != NULL);
 
