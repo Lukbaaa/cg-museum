@@ -330,7 +330,11 @@ void createScene(void) {
 
   Object* house = createObject("objects/cube.obj");
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
-  Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
+  // Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
+  Object* houseFundamentFront = createObject("objects/house_objects/house_fundament_front.obj");
+  Object* houseFundamentBack = createObject("objects/house_objects/house_fundament_back.obj");
+  Object* houseFundamentLeft = createObject("objects/house_objects/house_fundament_left.obj");
+  Object* houseFundamentRight = createObject("objects/house_objects/house_fundament_right.obj");
   Object* houseRoof = createObject("objects/house_objects/house_roof.obj");
   Object* ropes = createObject("objects/house_objects/house_ropes.obj");
   Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
@@ -364,7 +368,12 @@ void createScene(void) {
   sgAddChild(root,house);
   sgAddChild(root, rmRenderer);
   sgAddChild(root, rmDisplay);
-  sgAddChild(house,houseFundament);
+
+  sgAddChild(house,houseFundamentFront);
+  sgAddChild(house,houseFundamentBack);
+  sgAddChild(house,houseFundamentLeft);
+  sgAddChild(house,houseFundamentRight);
+  
   sgAddChild(house,houseFloor);
   sgAddChild(house,houseRoof);
   sgAddChild(house,ropes);
@@ -441,7 +450,10 @@ void createScene(void) {
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
   rmDisplay->shader = createShader("shaders/rmDisplay.vert", "shaders/rmDisplay.frag");
   houseFloor->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
-  houseFundament->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+  houseFundamentBack->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
+  houseFundamentFront->shader = houseFundamentBack->shader;
+  houseFundamentLeft->shader = houseFundamentBack->shader;
+  houseFundamentRight->shader = houseFundamentBack->shader;
   ropes->shader = createShader("shaders/house_shader/ropes.vert","shaders/house_shader/ropes.frag");
   houseRoof->shader = houseFloor->shader;
   baloon1->shader = houseFloor->shader;
@@ -472,7 +484,11 @@ void createScene(void) {
   loadTexture(boat, "textures/boat.png", 0);
   loadTexture(water, "textures/water.png", 0);
   loadTexture(houseFloor, "textures/wood_floor.png",0);
-  loadTexture(houseFundament, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentFront, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentBack, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentLeft, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentRight, "textures/brick_texture.png",0);
+  
   loadTexture(vitrinePodest, "textures/black_marble_texture.jpg",0);
   loadTexture(vitrineTop,"textures/black_marble_texture.jpg",0);
   loadTexture(vitrineFront,"textures/podest_glass.png",0);
@@ -495,7 +511,10 @@ void createScene(void) {
   rmRenderer->draw = &drawRMRenderer;
   rmDisplay->draw = &drawTextures;
   houseFloor->draw = &simpleDrawWithTexture;
-  houseFundament->draw = &simpleDrawWithTexture;
+  houseFundamentFront->draw = &simpleDrawWithTexture;
+  houseFundamentBack->draw = &simpleDrawWithTexture;
+  houseFundamentLeft->draw = &simpleDrawWithTexture;
+  houseFundamentRight->draw = &simpleDrawWithTexture;
   houseRoof->draw = &simpleDrawWithTexture;
   ropes->draw = &drawRopes;
   baloon1->draw = &simpleDrawWithTexture;
@@ -564,10 +583,10 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
-  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
-  vitrineFront->isTransparent = 1;
-  vitrineLeft->isTransparent = 1;
-  vitrineRigth->isTransparent = 1;
+  // vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  // vitrineFront->isTransparent = 1;
+  // vitrineLeft->isTransparent = 1;
+  // vitrineRigth->isTransparent = 1;
   
   
   // for (int i = 0; i < NUM_PARTICLES; i++) {
