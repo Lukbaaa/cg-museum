@@ -97,7 +97,6 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
     createModelFromTransform(root->model, root->transform);
     mat4Multiplication(modelStack, modelStack, root->model);
     copyMat(root->model, modelStack, 16);
-    copyMat(temp, modelStack);
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
 
     if (root->camera != NULL) {
@@ -123,7 +122,6 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
         return;
     }
 
-    printf("%d %d\n", root->vao, root->children.length);
     for(int i = 0; i < root->children.length; i++) {
         traverseDraw(root->children.objects[i], modelStack, transparentObjects, illuminatedObjects);
         copyMat(modelStack, temp, 16);

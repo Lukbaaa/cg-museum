@@ -124,7 +124,12 @@ void drawRMRenderer(Object* obj) {
 
   glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  float x = obj->transform.position.x - camera->position.x;
+  float y = obj->transform.position.z - camera->position.z;
+  float angle = atan2(y,x)*180/M_PI;
   glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glUniform1f(glGetUniformLocation(program, "angle"), angle);
 
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -174,7 +179,7 @@ void boatAnimation(Object* obj) {
 void rmDisplayAnimation(Object* obj) {
   float x = obj->transform.position.x - camera->position.x;
   float y = obj->transform.position.z - camera->position.z;
-  setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI,0);
+  setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI, 0);
 }
 
 void createScene(void) {
@@ -190,11 +195,12 @@ void createScene(void) {
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* rmRenderer = createObject("objects/cube.obj");
-  Object* rmDisplay = createObject("objects/cube.obj");
+  Object* rmDisplay = createObject("objects/window.obj");
 
   rmRenderer->renderTarget = createRenderTarget();
 
   sgAddChild(root, rmRenderer);
+  sgAddChild(root, rmDisplay);
   sgAddChild(root, sun);
   sgAddChild(sun, earth);
   sgAddChild(earth, moon);
@@ -204,10 +210,8 @@ void createScene(void) {
   sgAddChild(root, bjarne);
   sgAddChild(bjarne, bjarneLight);
   sgAddChild(water, boat);
-  sgAddChild(root, rmDisplay);
 
   root->shouldRender = 0;
-  rmDisplay->shouldRender = 1;
 
   sun->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   earth->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
@@ -277,7 +281,7 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
-  rmDisplay->isTransparent = 1;
+  rmDisplay->isTransparent = 0;
 
   scene = root;
 } 
@@ -347,10 +351,10 @@ int main(void) {
   init();
   createScene();
     
-    draw();
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
     processInput(window, camera);
+    draw();
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
