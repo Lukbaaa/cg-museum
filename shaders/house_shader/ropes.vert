@@ -1,6 +1,10 @@
 #version 330 core
 
 layout (location = 0) in vec3 aPosition;
+layout (location = 1) in vec2 aTexCoord;
+layout (location = 2) in vec3 aNormal;
+
+out vec2 texCoord;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -14,6 +18,7 @@ float rand(vec2 co){
 }
 
 void main() {
+    texCoord = aTexCoord;
     float xOffset = time + aPosition.x;
     float yOffset = time + aPosition.y;
     float zOffset = time + aPosition.z;

@@ -323,6 +323,7 @@ void createScene(void) {
   Object* water = createObject("objects/plane.obj");
   Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
+  Object* skyboxSun = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* rmRenderer = createObject("objects/cube.obj");
   Object* rmDisplay = createObject("objects/window.obj");
@@ -379,10 +380,11 @@ void createScene(void) {
   sgAddChild(house,ropes);
   sgAddChild(house,baloon1);
   sgAddChild(house,baloon2);
+  sgAddChild(root,skyboxSun);
   sgAddChild(house,vitrine1);
 
   
-  
+  // Solar System
   sgAddChild(vitrine1, sun);
   sgAddChild(vitrine1,vitrinePodest);
   sgAddChild(sun, earth);
@@ -393,6 +395,7 @@ void createScene(void) {
   sgAddChild(vitrineLeft,vitrineRigth);
   sgAddChild(vitrineRigth,vitrineTop);
 
+  // Boat
   sgAddChild(house,vitrine2);
   sgAddChild(vitrine2, water);
   sgAddChild(vitrine2,vitrinePodest);
@@ -403,6 +406,7 @@ void createScene(void) {
   sgAddChild(vitrineLeft,vitrineRigth);
   sgAddChild(vitrineRigth,vitrineTop);
 
+  // mount Rushmore
   sgAddChild(house,vitrine3);
   sgAddChild(vitrine3, mountRushmore);
   sgAddChild(mountRushmore, bjarneLight);
@@ -413,10 +417,13 @@ void createScene(void) {
   sgAddChild(vitrineLeft,vitrineRigth);
   sgAddChild(vitrineRigth,vitrineTop);
 
+  // 
   sgAddChild(house,vitrine4);
-  sgAddChild(vitrine4, water);
+  // sgAddChild(vitrine4, rmRenderer); 
+  // sgAddChild(vitrine4, rmDisplay);
+
+  sgAddChild(vitrine4, particleObject);
   sgAddChild(vitrine4,vitrinePodest);
-  sgAddChild(water, boat);
   sgAddChild(vitrinePodest,vitrineFront);
   sgAddChild(vitrineFront,vitrineBack);
   sgAddChild(vitrineBack,vitrineLeft);
@@ -446,6 +453,7 @@ void createScene(void) {
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   mountRushmore->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
+  skyboxSun->shader = bjarneLight->shader;
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
   rmDisplay->shader = createShader("shaders/rmDisplay.vert", "shaders/rmDisplay.frag");
@@ -456,8 +464,8 @@ void createScene(void) {
   houseFundamentRight->shader = houseFundamentBack->shader;
   ropes->shader = createShader("shaders/house_shader/ropes.vert","shaders/house_shader/ropes.frag");
   houseRoof->shader = houseFloor->shader;
-  baloon1->shader = houseFloor->shader;
-  baloon2->shader = houseFloor->shader;
+  baloon1->shader = createShader("shaders/baloon.vert","shaders/baloon.frag");
+  baloon2->shader = baloon1->shader;
   //mountRushmore->shader = createShader("shaders/mountRushmore.vert","shaders/mountRushmore.frag");
 
   //Vitrine 1, gibt es eine Möglichkeit, diese wiederzuverwenden?
@@ -488,6 +496,9 @@ void createScene(void) {
   loadTexture(houseFundamentBack, "textures/brick_texture.png",0);
   loadTexture(houseFundamentLeft, "textures/brick_texture.png",0);
   loadTexture(houseFundamentRight, "textures/brick_texture.png",0);
+  loadTexture(houseRoof, "textures/roof.jpg",0);
+  loadTexture(ropes, "textures/rope1.jpg",0);
+  
   
   loadTexture(vitrinePodest, "textures/black_marble_texture.jpg",0);
   loadTexture(vitrineTop,"textures/black_marble_texture.jpg",0);
@@ -507,6 +518,7 @@ void createScene(void) {
   water->draw = &drawWater;
   mountRushmore->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
+  skyboxSun->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
   rmRenderer->draw = &drawRMRenderer;
   rmDisplay->draw = &drawTextures;
@@ -516,9 +528,9 @@ void createScene(void) {
   houseFundamentLeft->draw = &simpleDrawWithTexture;
   houseFundamentRight->draw = &simpleDrawWithTexture;
   houseRoof->draw = &simpleDrawWithTexture;
-  ropes->draw = &drawRopes;
-  baloon1->draw = &simpleDrawWithTexture;
-  baloon2->draw = &simpleDrawWithTexture;
+  ropes->draw = &simpleDrawWithTexture;
+  baloon1->draw = &drawBjarne;
+  baloon2->draw = &drawBjarne;
   vitrinePodest->draw = &simpleDrawWithTexture;
   particleLight->draw = &simpleDrawWithTexture;
   vitrineFront->draw = &simpleDrawWithTexture;
@@ -542,7 +554,8 @@ void createScene(void) {
 
   // materials
   mountRushmore->material = rubin;
-  mountRushmore->material = rubin;
+  baloon1->material = rubin;
+  baloon2->material = rubin;
   particleObject->material = rubin;
 
 
@@ -555,10 +568,15 @@ void createScene(void) {
   setObjectPosition(vitrine2,11.25,-15,-16);
   setObjectPosition(vitrine3,-11.25,-15,16);
   setObjectPosition(vitrine4,-11.25,-15,-16);
+
   setObjectPosition(rmRenderer, -15, 0, 0);
   setObjectPosition(rmDisplay, -10, 0, 0);
-  setObjectPosition(particleObject, PARTICLES_X, PARTICLES_Y, PARTICLES_Z);
+  // setObjectPosition(rmRenderer, 0, 1, 0);
+  // setObjectPosition(rmDisplay, 0, 1, 0); 
+  setObjectPosition(particleObject, -1, -1, 1);
 
+  setObjectPosition(skyboxSun,10.0,40.0,50.0);
+  setObjectScale(particleObject, 0.2, 0.2, 0.2);
   setObjectScale(sun, 0.5,0.5,0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
@@ -570,6 +588,7 @@ void createScene(void) {
   setObjectScale(particleLight,0.1,0.1,0.1);
   setObjectRotation(mountRushmore,0.0,180.0,0.0);
 
+
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
   Vec4 diffuse = {1,1,1,1};
@@ -578,8 +597,19 @@ void createScene(void) {
   light->specular = specular;
 
   bjarneLight->light=light;
-
   addLightAffectedBy(mountRushmore, light);
+
+  LightSource* sunLight = createLight();
+  Vec4 sun_ambient = {1,1,1,1};
+  Vec4 sun_diffuse = {1,1,1,1};
+  Vec4 sun_specular = {1,1,1,1};  
+  sunLight->diffuse = sun_diffuse;
+  sunLight->specular = sun_specular;
+
+  skyboxSun->light = sunLight;
+  addLightAffectedBy(baloon1,sunLight);
+  addLightAffectedBy(baloon2,sunLight);
+
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
@@ -588,20 +618,7 @@ void createScene(void) {
   // vitrineLeft->isTransparent = 1;
   // vitrineRigth->isTransparent = 1;
   
-  
-  // for (int i = 0; i < NUM_PARTICLES; i++) {
-  //   // init
-  //   partList[i] = createObject("objects/leer.obj");
-  //   sgAddChild(particleObject, partList[i]);
-  //   partList[i]->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
-  //   partList[i]->draw = &drawPart;
-  //   // partList[i]->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
-  //   // partList[i]->draw = &drawParticles;
-    
-  //   // partList[i]->material = wood;
-
-  // }
-    rmDisplay->isTransparent = 0;
+  rmDisplay->isTransparent = 0;
 
   scene = root;
 } 

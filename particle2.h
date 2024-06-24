@@ -13,9 +13,9 @@
 #include "materials.h"
 
 #define NUM_PARTICLES 100
-#define PARTICLES_X 10
-#define PARTICLES_Y 10
-#define PARTICLES_Z 10
+#define PARTICLES_X 0
+#define PARTICLES_Y 0
+#define PARTICLES_Z 0
 
 #define PARTICLE_SIZE 0.01
 
