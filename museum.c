@@ -289,10 +289,21 @@ void drawRopes(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawPodestPanels(Object* obj) {
+void simpleDrawWithTexture(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
   drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void simpleDrawWithOutTexture(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
   glBindVertexArray(obj->vao);
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -310,7 +321,7 @@ void createScene(void) {
   Object* window = createObject("objects/window.obj");
   Object* window2 = createObject("objects/window.obj");
   Object* water = createObject("objects/plane.obj");
-  Object* bjarne = createObject("objects/bjarne.obj");
+  Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* rmRenderer = createObject("objects/cube.obj");
@@ -324,7 +335,7 @@ void createScene(void) {
   Object* ropes = createObject("objects/house_objects/house_ropes.obj");
   Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
   Object* baloon2 = createObject("objects/house_objects/house_baloon2.obj");
-  Object* mountRushmore = createObject("objects/mt_rushmore.obj");
+  //Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   
   Object* particleLight = createObject("objects/sphere.obj");
 
@@ -349,7 +360,7 @@ void createScene(void) {
   sgAddChild(root, particleObject);
   sgAddChild(root, window);
   sgAddChild(root, window2);
-  sgAddChild(root, bjarne);
+  //sgAddChild(root, mountRushmore);
   sgAddChild(root,house);
   sgAddChild(root, rmRenderer);
   sgAddChild(root, rmDisplay);
@@ -361,7 +372,8 @@ void createScene(void) {
   sgAddChild(house,baloon2);
   sgAddChild(house,vitrine1);
 
-  sgAddChild(bjarne, bjarneLight);
+  
+  
   sgAddChild(vitrine1, sun);
   sgAddChild(vitrine1,vitrinePodest);
   sgAddChild(sun, earth);
@@ -384,6 +396,7 @@ void createScene(void) {
 
   sgAddChild(house,vitrine3);
   sgAddChild(vitrine3, mountRushmore);
+  sgAddChild(mountRushmore, bjarneLight);
   sgAddChild(vitrine3,vitrinePodest);
   sgAddChild(vitrinePodest,vitrineFront);
   sgAddChild(vitrineFront,vitrineBack);
@@ -422,7 +435,7 @@ void createScene(void) {
   window->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   window2->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
-  bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
+  mountRushmore->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
@@ -433,7 +446,7 @@ void createScene(void) {
   houseRoof->shader = houseFloor->shader;
   baloon1->shader = houseFloor->shader;
   baloon2->shader = houseFloor->shader;
-  mountRushmore->shader = houseFloor->shader;
+  //mountRushmore->shader = createShader("shaders/mountRushmore.vert","shaders/mountRushmore.frag");
 
   //Vitrine 1, gibt es eine Möglichkeit, diese wiederzuverwenden?
   vitrinePodest->shader = createShader("shaders/house_shader/podest.vert","shaders/house_shader/podest.frag");
@@ -476,25 +489,25 @@ void createScene(void) {
   window->draw = &drawWithTexture;
   window2->draw = &drawWithTexture;
   water->draw = &drawWater;
-  bjarne->draw = &drawBjarne;
+  mountRushmore->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
   rmRenderer->draw = &drawRMRenderer;
   rmDisplay->draw = &drawTextures;
-  houseFloor->draw = &drawTextures;
-  houseFundament->draw = &drawTextures;
-  houseRoof->draw = &drawTextures;
+  houseFloor->draw = &simpleDrawWithTexture;
+  houseFundament->draw = &simpleDrawWithTexture;
+  houseRoof->draw = &simpleDrawWithTexture;
   ropes->draw = &drawRopes;
-  baloon1->draw = &drawFloor;
-  baloon2->draw = &drawFloor;
-  vitrinePodest->draw = &drawPodest;
-  particleLight->draw = &drawFloor;
-  vitrineFront->draw = &drawPodestPanels;
-  vitrineBack->draw = &drawPodestPanels;
-  vitrineRigth->draw = &drawPodestPanels;
-  vitrineLeft->draw = &drawPodestPanels;
-  vitrineTop->draw = &&drawTextures;
-  mountRushmore->draw = &drawPodest;
+  baloon1->draw = &simpleDrawWithTexture;
+  baloon2->draw = &simpleDrawWithTexture;
+  vitrinePodest->draw = &simpleDrawWithTexture;
+  particleLight->draw = &simpleDrawWithTexture;
+  vitrineFront->draw = &simpleDrawWithTexture;
+  vitrineBack->draw = &simpleDrawWithTexture;
+  vitrineRigth->draw = &simpleDrawWithTexture;
+  vitrineLeft->draw = &simpleDrawWithTexture;
+  vitrineTop->draw = &simpleDrawWithTexture;
+  mountRushmore->draw = &drawBjarne;
   particleObject->draw = &drawParticles;
   
   rmDisplay->draw = &drawWithTexture;
@@ -509,20 +522,20 @@ void createScene(void) {
   rmDisplay->animate = &rmDisplayAnimation;
 
   // materials
-  bjarne->material = rubin;
+  mountRushmore->material = rubin;
+  mountRushmore->material = rubin;
   particleObject->material = rubin;
 
 
   setObjectPosition(window, 3,0,0);
   setObjectPosition(window2, 5,0,0);
   // setObjectPosition(water, 0, 0, 20);
-  setObjectPosition(bjarne, 10, 0, 0);
+  setObjectPosition(mountRushmore, 0, 0.9, 0);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
   setObjectPosition(vitrine1,11.25,-15,16);
   setObjectPosition(vitrine2,11.25,-15,-16);
   setObjectPosition(vitrine3,-11.25,-15,16);
   setObjectPosition(vitrine4,-11.25,-15,-16);
-  setObjectPosition(mountRushmore, 0.0,1.0,0.0);
   setObjectPosition(rmRenderer, -15, 0, 0);
   setObjectPosition(rmDisplay, -10, 0, 0);
   setObjectPosition(particleObject, PARTICLES_X, PARTICLES_Y, PARTICLES_Z);
@@ -541,19 +554,20 @@ void createScene(void) {
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
   Vec4 diffuse = {1,1,1,1};
-  Vec4 specular = {1,1,1,1};  light->diffuse = diffuse;
+  Vec4 specular = {1,1,1,1};  
+  light->diffuse = diffuse;
   light->specular = specular;
 
   bjarneLight->light=light;
 
-  addLightAffectedBy(bjarne, light);
+  addLightAffectedBy(mountRushmore, light);
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
-  // vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
-  // vitrineFront->isTransparent = 1;
-  // vitrineLeft->isTransparent = 1;
-  // vitrineRigth->isTransparent = 1;
+  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  vitrineFront->isTransparent = 1;
+  vitrineLeft->isTransparent = 1;
+  vitrineRigth->isTransparent = 1;
   
   
   // for (int i = 0; i < NUM_PARTICLES; i++) {
