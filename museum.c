@@ -304,7 +304,9 @@ void createScene(void) {
   Object* house = createObject(NULL);
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
   // Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
-  Object* houseFundamentFront = createObject("objects/house_objects/house_fundament_front.obj");
+  Object* houseFundamentFront_L = createObject("objects/house_objects/house_fundament_front_L.obj");
+  Object* houseFundamentFront_R = createObject("objects/house_objects/house_fundament_front_R.obj");
+  Object* houseFundamentFront_M = createObject("objects/house_objects/house_fundament_front_M.obj");
   Object* houseFundamentBack = createObject("objects/house_objects/house_fundament_back.obj");
   Object* houseFundamentLeft = createObject("objects/house_objects/house_fundament_left.obj");
   Object* houseFundamentRight = createObject("objects/house_objects/house_fundament_right.obj");
@@ -349,7 +351,9 @@ void createScene(void) {
   sgAddChild(root, rmRenderer);
   sgAddChild(root, rmDisplay);
 
-  sgAddChild(house,houseFundamentFront);
+  sgAddChild(house,houseFundamentFront_L);
+  sgAddChild(house,houseFundamentFront_M);
+  sgAddChild(house,houseFundamentFront_R);
   sgAddChild(house,houseFundamentBack);
   sgAddChild(house,houseFundamentLeft);
   sgAddChild(house,houseFundamentRight);
@@ -455,7 +459,9 @@ void createScene(void) {
   Shader* houseShader = createShader("shaders/texture.vert", "shaders/house.frag");
   houseFloor->shader = textureShader;
   houseFundamentBack->shader = houseShader;
-  houseFundamentFront->shader = houseShader;
+  houseFundamentFront_L->shader = houseShader;
+  houseFundamentFront_M->shader = houseShader;
+  houseFundamentFront_R->shader = houseShader;
   houseFundamentLeft->shader = houseShader;
   houseFundamentRight->shader = houseShader;
   houseRoof->shader = textureShader;
@@ -495,7 +501,9 @@ void createScene(void) {
   loadTexture(boat, "textures/boat.png", 0);
   loadTexture(water, "textures/water.png", 0);
   loadTexture(houseFloor, "textures/wood_floor.png",0);
-  loadTexture(houseFundamentFront, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentFront_L, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentFront_M, "textures/brick_texture.png",0);
+  loadTexture(houseFundamentFront_R, "textures/brick_texture.png",0);
   loadTexture(houseFundamentBack, "textures/brick_texture.png",0);
   loadTexture(houseFundamentLeft, "textures/brick_texture.png",0);
   loadTexture(houseFundamentRight, "textures/brick_texture.png",0);
@@ -532,7 +540,9 @@ void createScene(void) {
   rmRenderer->draw = &drawRMRenderer;
   rmDisplay->draw = &drawTextures;
   houseFloor->draw = &drawWithTexture;
-  houseFundamentFront->draw = &drawWithTexture;
+  houseFundamentFront_L->draw = &drawWithTexture;
+  houseFundamentFront_M->draw = &drawWithTexture;
+  houseFundamentFront_R->draw = &drawWithTexture;
   houseFundamentBack->draw = &drawWithTexture;
   houseFundamentLeft->draw = &drawWithTexture;
   houseFundamentRight->draw = &drawWithTexture;
