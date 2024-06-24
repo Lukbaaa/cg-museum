@@ -282,6 +282,8 @@ void createScene(void) {
   Object* houseRoof = createObject("objects/house_objects/house_roof.obj");
   Object* ropes = createObject("objects/house_objects/house_ropes.obj");
   Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
+  Object* baloon2 = createObject("objects/house_objects/house_baloon2.obj");
+  Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   
   Object* particleLight = createObject("objects/sphere.obj");
 
@@ -309,6 +311,7 @@ void createScene(void) {
   sgAddChild(house,houseRoof);
   sgAddChild(house,ropes);
   sgAddChild(house,baloon1);
+  sgAddChild(house,baloon2);
   sgAddChild(house,vitrine1);
 
   sgAddChild(bjarne, bjarneLight);
@@ -333,9 +336,8 @@ void createScene(void) {
   sgAddChild(vitrineRigth,vitrineTop);
 
   sgAddChild(house,vitrine3);
-  sgAddChild(vitrine3, water);
+  sgAddChild(vitrine3, mountRushmore);
   sgAddChild(vitrine3,vitrinePodest);
-  sgAddChild(water, boat);
   sgAddChild(vitrinePodest,vitrineFront);
   sgAddChild(vitrineFront,vitrineBack);
   sgAddChild(vitrineBack,vitrineLeft);
@@ -377,9 +379,11 @@ void createScene(void) {
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   houseFloor->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
   houseFundament->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
-  houseRoof->shader = houseFloor->shader;
   ropes->shader = createShader("shaders/house_shader/ropes.vert","shaders/house_shader/ropes.frag");
+  houseRoof->shader = houseFloor->shader;
   baloon1->shader = houseFloor->shader;
+  baloon2->shader = houseFloor->shader;
+  mountRushmore->shader = houseFloor->shader;
 
   //Vitrine 1, gibt es eine Möglichkeit, diese wiederzuverwenden?
   vitrinePodest->shader = createShader("shaders/house_shader/podest.vert","shaders/house_shader/podest.frag");
@@ -424,14 +428,15 @@ void createScene(void) {
   houseRoof->draw = &drawFloor;
   ropes->draw = &drawRopes;
   baloon1->draw = &drawFloor;
+  baloon2->draw = &drawFloor;
   vitrinePodest->draw = &drawPodest;
   particleLight->draw = &drawFloor;
   vitrineFront->draw = &drawPodestPanels;
   vitrineBack->draw = &drawPodestPanels;
   vitrineRigth->draw = &drawPodestPanels;
   vitrineLeft->draw = &drawPodestPanels;
-  vitrineTop->draw = drawPodest;
-  
+  vitrineTop->draw = &drawPodest;
+  mountRushmore->draw = &drawPodest;
   // particleObject->draw = &drawParticles;
   
 
@@ -454,14 +459,17 @@ void createScene(void) {
   setObjectPosition(vitrine2,11.25,-15,-16);
   setObjectPosition(vitrine3,-11.25,-15,16);
   setObjectPosition(vitrine4,-11.25,-15,-16);
+  setObjectPosition(mountRushmore, 0.0,1.0,0.0);
   setObjectScale(sun, 0.5,0.5,0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
+  setObjectScale(mountRushmore,0.1,0.1,0.1);
   //setObjectScale(boat, 0.5, 0.5, 0.5);
   setObjectScale(water, 0.5, 0.5, 0.5);
   //setObjectScale(houseFloor, 0.2,0.2,0.2);
   // setObjectScale(vitrinePodest,1.2,1.2,1.2);
   setObjectScale(particleLight,0.1,0.1,0.1);
+  setObjectRotation(mountRushmore,0.0,180.0,0.0);
   
 
 
@@ -477,10 +485,10 @@ void createScene(void) {
 
   window->isTransparent = 1;
   window2->isTransparent = 1;
-  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
-  vitrineFront->isTransparent = 1;
-  vitrineLeft->isTransparent = 1;
-  vitrineRigth->isTransparent = 1;
+  // vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  // vitrineFront->isTransparent = 1;
+  // vitrineLeft->isTransparent = 1;
+  // vitrineRigth->isTransparent = 1;
   
   
   // for (int i = 0; i < NUM_PARTICLES; i++) {
