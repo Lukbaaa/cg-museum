@@ -653,7 +653,7 @@ void createScene(void) {
   houseWindow7->isTransparent = 1;
   houseWindow8->isTransparent = 1;
   
-  rmDisplay->isTransparent = 0;
+  rmDisplay->isTransparent = 1;
 
   scene = root;
 } 
