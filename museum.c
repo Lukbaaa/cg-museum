@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "object.h"
 #include "texture.h"
+#include "framebuffer.h"
 #include "scene_graph.h"
 #include "objectLoader.h"
 #include"skybox.h"
@@ -21,10 +22,16 @@ void processInput(GLFWwindow *window, Camera* cam);
 GLuint particlesProgram;
 Object* scene;
 
+double timeAtDraw = 0;
+
 Object** objects;
 int objCount = 0;   
-
-double timeAtDraw = 0;
+Object* createObject(const char* objFilePath) {
+  objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
+  objects[objCount] = createVAOwithObj(objFilePath);
+  objCount++;
+  return objects[objCount-1];
+}
 double timeAtStart;
 
 void drawTextures(Object* obj) {
@@ -35,22 +42,6 @@ void drawTextures(Object* obj) {
     glActiveTexture(GL_TEXTURE0+j);
     glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
   }
-}
-
-void drawSphere(Object* obj) {
-
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  drawTextures(obj);
-
-  glBindVertexArray(obj->vao);
-
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
 void drawSkybox() {
@@ -95,12 +86,6 @@ void drawBoat(Object* obj) {
   glBindVertexArray(obj->vao);
   
   float displacement = (sin(timeAtDraw)+sin(timeAtDraw))*0.2;
-  Vec3 rot = {
-    -cos(timeAtDraw)*10,
-    0,
-    cos(timeAtDraw)*10
-  };
-  rotate(obj->model, obj->model, rot);
 
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -125,10 +110,10 @@ void drawBjarne(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
   for(int i = 0; i < obj->lightsAffectedBy.length; i++) {
-    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->position));
-    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->ambient));
-    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->diffuse));
-    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(lightSourceListGet(&obj->lightsAffectedBy, i)->specular));
+    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->position));
+    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->ambient));
+    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->diffuse));
+    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->specular));
   }
 
   GLfloat normalMatrix[16];
@@ -158,31 +143,40 @@ void drawBjarneLight(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-Object* createObject(const char* objFilePath) {
-  objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
-  objects[objCount] = createVAOwithObj(objFilePath);
-  objCount++;
-  return objects[objCount-1];
+void drawRMRenderer(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  float x = obj->transform.position.x - camera->position.x;
+  float y = obj->transform.position.z - camera->position.z;
+  float angle = atan2(y,x)*180/M_PI;
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glUniform1f(glGetUniformLocation(program, "angle"), angle);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void init(void) {
-  glEnable(GL_DEPTH_TEST);
-  //glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  camera = createCamera();
-  camera->center.x = camera->position.x + camera->camFront.x;
-  camera->center.y = camera->position.y + camera->camFront.y;
-  camera->center.z = camera->position.z + camera->camFront.z;
-  lookAt(camera->view, camera->position, camera->center, camera->camUp);
-  perspective(camera->projection, 45.0f, 800/800, 0.1, 100);
+void drawWithTexture(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
 
-  boundingBoxProgram = createShader("shaders/boundingbox.vert", "shaders/boundingbox.frag")->program;
+  drawTextures(obj);
 
-  glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
-  glViewport(0, 0, 800, 800);
+  glBindVertexArray(obj->vao);
+
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
+
 
 void sunAnimation(Object* obj) {
   //setObjectPosition(obj, 0, 0, 0);
@@ -203,7 +197,73 @@ void moonAnimation(Object* obj) {
 void bjarneLightAnimation(Object* obj) {
   setObjectPosition(obj, sin(glfwGetTime())*3,0,cos(glfwGetTime())*3);
   obj->light->position = obj->transform.position;
-  //printVec3(obj->light->position);
+} 
+
+void boatAnimation(Object* obj) {
+  setObjectRotation(obj, -cos(timeAtDraw)*10, 0, cos(timeAtDraw)*10);
+}
+
+void rmDisplayAnimation(Object* obj) {
+  float x = obj->transform.position.x - camera->position.x;
+  float y = obj->transform.position.z - camera->position.z;
+  setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI, 0);
+}
+
+void drawFloor(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawFundament(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawPodest(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawRopes(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawPodestPanels(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+  drawTextures(obj);
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
 void drawFloor(Object* obj) {
@@ -276,6 +336,8 @@ void createScene(void) {
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
 
+  sgAddChild(root, rmRenderer);
+  sgAddChild(root, rmDisplay);
   Object* house = createObject("objects/cube.obj");
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
   Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
@@ -366,11 +428,11 @@ void createScene(void) {
   
   // particleObject->shouldRender = 1;
 
-  sun->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  earth->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  moon->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  window->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
-  window2->shader = createShader("shaders/tex.vert", "shaders/tex.frag");
+  sun->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  earth->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  moon->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  window->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  window2->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
@@ -393,6 +455,8 @@ void createScene(void) {
   
   // particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
 
+  rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
+  rmDisplay->shader = createShader("shaders/texture.vert", "shaders/rmDisplay.frag");
 
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
@@ -409,12 +473,14 @@ void createScene(void) {
   loadTexture(vitrineBack,"textures/podest_glass.png",0);
   loadTexture(vitrineRigth,"textures/podest_glass.png",0);
   loadTexture(vitrineLeft,"textures/podest_glass.png",0);
+  Texture rmTexture = loadTexture(rmDisplay, NULL, 0);
+  attachRenderTexture(rmRenderer->renderTarget, rmTexture);
 
-  sun->draw = &drawSphere;
-  earth->draw = &drawSphere;
-  moon->draw = &drawSphere;
-  window->draw = &drawSphere;
-  window2->draw = &drawSphere;
+  sun->draw = &drawWithTexture;
+  earth->draw = &drawWithTexture;
+  moon->draw = &drawWithTexture;
+  window->draw = &drawWithTexture;
+  window2->draw = &drawWithTexture;
   water->draw = &drawWater;
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
@@ -434,11 +500,15 @@ void createScene(void) {
   
   // particleObject->draw = &drawParticles;
   
+  rmDisplay->draw = &drawWithTexture;
+  rmRenderer->draw = &drawRMRenderer;
 
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
   bjarneLight->animate = &bjarneLightAnimation;
+  boat->animate = &boatAnimation;
+  rmDisplay->animate = &rmDisplayAnimation;
 
 
   bjarne->material = rubin;
@@ -455,6 +525,8 @@ void createScene(void) {
   setObjectPosition(vitrine3,-11.25,-15,16);
   setObjectPosition(vitrine4,-11.25,-15,-16);
   setObjectScale(sun, 0.5,0.5,0.5);
+  setObjectPosition(rmRenderer, -15, 0, 0);
+  setObjectPosition(rmDisplay, -10, 0, 0);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
   //setObjectScale(boat, 0.5, 0.5, 0.5);
@@ -495,8 +567,29 @@ void createScene(void) {
   //   // partList[i]->material = wood;
 
   // }
-  
+    rmDisplay->isTransparent = 0;
+
   scene = root;
+} 
+
+void init(void) {
+  glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  camera = createCamera();
+  camera->center.x = camera->position.x + camera->camFront.x;
+  camera->center.y = camera->position.y + camera->camFront.y;
+  camera->center.z = camera->position.z + camera->camFront.z;
+  lookAt(camera->view, camera->position, camera->center, camera->camUp);
+  perspective(camera->projection, 45.0f, 800/800, 0.1, 100);
+
+  boundingBoxProgram = createShader("shaders/boundingbox.vert", "shaders/boundingbox.frag")->program;
+
+  glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
+  glViewport(0, 0, 800, 800);
+}
 }
 
 void draw() {

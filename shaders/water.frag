@@ -3,6 +3,8 @@
 in vec2 texCoord;
 in float y;
 
+out vec4 FragColor;
+
 uniform sampler2D tex;
 out vec4 FragColor;
 void main() {
