@@ -49,7 +49,7 @@ void sortObjectsByDist(ObjectList* objects) {
         swapped = 0;
         for (int j = 0; j < objects->length - i - 1; j++) {
             if (distToCamera(objects->objects[i]->globalPosition, camera->position) < distToCamera(objects->objects[j+1]->globalPosition, camera->position)) {
-                swap(objects->objects[j], objects->objects[j+1]);
+                //swap(objects->objects[j], objects->objects[j+1]);
                 swapped = 1;
             }
         }
@@ -64,7 +64,6 @@ void drawObjectsFromList(ObjectList* list) {
 }
 
 void drawIlluminatedObjects(ObjectList* objects) {
-    //printf("draw\n");
     drawObjectsFromList(objects);
 }
 

@@ -20,7 +20,7 @@
 
 void writeArrayToFile(float* array, int size, const char* filename) {
     assert(array != NULL);
-    assert(filename != NULL);
+
 
     FILE* file = fopen( filename, "w");
     if (file == NULL) {
@@ -39,10 +39,14 @@ void writeArrayToFile(float* array, int size, const char* filename) {
 }
 
 Object* createVAOwithObj(const char* objFilePath) {
-    assert(objFilePath != NULL);
 
     Object* obj = (Object*)malloc(sizeof(Object));
     initObject(obj);
+
+    if (objFilePath == NULL) {
+        obj->shouldRender = 0;
+        return obj;
+    }
 
     //clock_t begin = clock();
 
