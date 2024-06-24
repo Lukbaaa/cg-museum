@@ -12,7 +12,14 @@
 #include "light.h"
 #include "materials.h"
 
-#define NUM_PARTICLES 3
+#define NUM_PARTICLES 100
+#define PARTICLES_X 10
+#define PARTICLES_Y 10
+#define PARTICLES_Z 10
+
+#define PARTICLE_SIZE 0.01
+
+#define PARTICLE_LIFE 10.0f
 
 
 typedef struct {
@@ -62,15 +69,33 @@ const GLuint cube_indices[] = {
     5, 6, 2, 2, 1, 5, // right face
 };
 
+GLuint vertexbufferparticles, elementbufferparticles;
+
+void initBuffers() {
+
+    // glGenVertexArrays(1, &particleObject->vao);
+    glBindVertexArray(particleObject->vao);
+
+    glGenBuffers(1, &vertexbufferparticles);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbufferparticles);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &elementbufferparticles);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbufferparticles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+}
 void initParticles() {
 
     particleObject->light = createLight();  
     particleObject->light->ambient = ambient;
     particleObject->light->diffuse = diffuse;
     particleObject->light->specular = specular;
-    ps.position[0] = 0.0;
-    ps.position[1] = 0.0;
-    ps.position[2] = 0.0;
+    ps.position[0] = PARTICLES_X;
+    ps.position[1] = PARTICLES_Y;
+    ps.position[2] = PARTICLES_Z;
     particleObject->light->position= arrayToVec3(ps.position);
 
     for (int i = 0; i < NUM_PARTICLES; i++) {
@@ -86,8 +111,9 @@ void initParticles() {
         // ps.particles[i].velocity[0] = ps.position[0];
         // ps.particles[i].velocity[1] = ps.position[1];
         // ps.particles[i].velocity[2] = ps.position[2];
-        ps.particles[i].life = 10.0f;
+        ps.particles[i].life = PARTICLE_LIFE;
     }
+    initBuffers();
 }
 
 void updateParticles(float deltaTime) {
@@ -107,27 +133,9 @@ void updateParticles(float deltaTime) {
             ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
             ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
             ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
-            ps.particles[i].life = 10.0f;
+            ps.particles[i].life = PARTICLE_LIFE;
         }
     }
-}
-
-GLuint vertexbufferparticles, elementbufferparticles;
-
-void initBuffers() {
-
-    // glGenVertexArrays(1, &particleObject->vao);
-    glBindVertexArray(particleObject->vao);
-
-    glGenBuffers(1, &vertexbufferparticles);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbufferparticles);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &elementbufferparticles);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbufferparticles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
 }
 
 

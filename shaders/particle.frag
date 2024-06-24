@@ -31,6 +31,7 @@ in vec3 normal;
 uniform vec3 viewPos;
 uniform Material material;
 uniform LightSource light;
+uniform float time;
 
 out vec4 FragColor;
 void main() {
@@ -45,7 +46,7 @@ void main() {
     // diffuse
     float diffuseStrength = 1;
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(vec3(0, 0, 0) - fragPos); //vec3 ist light.position
+    vec3 lightDir = normalize(light.position + time - fragPos);
     float diff = max(dot(lightDir, norm), 0.0);
     vec4 diffuse = diffuseStrength * diff * material.diffuse * light.diffuse;
 

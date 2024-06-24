@@ -46,6 +46,70 @@ void drawTextures(Object* obj) {
   }
 }
 
+void drawParticles(Object* obj) {
+    updateParticles(deltaTime*1.5);  
+    int program = obj->shader->program;
+    glUseProgram(program);
+    
+    // ist das notw?
+    glBindVertexArray(obj->vao);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2); 
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbufferparticles);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbufferparticles);
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        if (ps.particles[i].life > 0.0f) {
+
+            GLfloat model[16];
+            identity(model);
+            translateParticleVector(model, model, ps.particles[i].position);
+            // printf("particle%d position: %f, %f, %f\n", i, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);            
+            // printf("global position: %f, %f, %f\n", obj->globalPosition.x, obj->globalPosition.y, obj->globalPosition.z);
+            // setObjectPosition(obj, ps.particles[i].position[0], ps.particles[i].position[1], ps.particles[i].position[2]);
+            GLfloat normalMatrix[16];
+            inverse4(normalMatrix, model);
+            transpose4(normalMatrix, normalMatrix);
+            glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+            glUniform1f(glGetUniformLocation(program,"dt"),ps.particles[i].life);
+            glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, model);
+            glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+            glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+
+            glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
+            glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
+            glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
+            glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
+            glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
+            
+            glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&obj->light->position); 
+            glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->light->ambient.r));
+            glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->light->diffuse.r));
+            glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->light->specular.r));
+            
+            //glfw get time in time
+            glUniform1f(glGetUniformLocation(program, "time"), glfwGetTime());
+
+            
+
+            glDrawElements(GL_TRIANGLES, obj->vertCount, GL_UNSIGNED_INT, (void*)0);
+            
+        }
+    }
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+}
+
 void drawSkybox() {
   glDepthMask(GL_FALSE);
   glDepthFunc(GL_LEQUAL);
@@ -152,7 +216,7 @@ void drawRMRenderer(Object* obj) {
   glBindVertexArray(obj->vao);
 
   glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
-  printf("%d\n", obj->renderTarget);
+  // printf("%d\n", obj->renderTarget);
   glClearColor(0,0,0,0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -276,8 +340,11 @@ void createScene(void) {
 
   rmRenderer->renderTarget = createRenderTarget();
 
-  // particleObject = createObject("objects/cube.obj");
+  particleObject = createObject("objects/cube.obj");
+  initParticles();
 
+  // child objects
+  sgAddChild(root, particleObject);
   sgAddChild(root, window);
   sgAddChild(root, window2);
   sgAddChild(root, bjarne);
@@ -335,7 +402,7 @@ void createScene(void) {
 
   sgAddChild(root, particleLight);
 
-
+  // render visibility of objects
   root->shouldRender = 0;
   house->shouldRender = 0;
   vitrine1->shouldRender =0;
@@ -346,6 +413,7 @@ void createScene(void) {
   
   // particleObject->shouldRender = 1;
 
+  // shaders
   sun->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   earth->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   moon->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
@@ -373,11 +441,12 @@ void createScene(void) {
 
   particleLight->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
   
-  // particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
+  particleObject->shader = createShader("shaders/particle.vert", "shaders/particle.frag");
 
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
   rmDisplay->shader = createShader("shaders/texture.vert", "shaders/rmDisplay.frag");
 
+  // textures
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
@@ -396,6 +465,7 @@ void createScene(void) {
   Texture rmTexture = loadTexture(rmDisplay, NULL, 0);
   attachRenderTexture(rmRenderer->renderTarget, rmTexture);
 
+  // draw functions
   sun->draw = &drawWithTexture;
   earth->draw = &drawWithTexture;
   moon->draw = &drawWithTexture;
@@ -420,11 +490,12 @@ void createScene(void) {
   vitrineLeft->draw = &drawPodestPanels;
   vitrineTop->draw = &drawTextures;
   
-  // particleObject->draw = &drawParticles;
+  particleObject->draw = &drawParticles;
   
   rmDisplay->draw = &drawWithTexture;
   rmRenderer->draw = &drawRMRenderer;
 
+  // animations
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
@@ -432,9 +503,9 @@ void createScene(void) {
   boat->animate = &boatAnimation;
   rmDisplay->animate = &rmDisplayAnimation;
 
-
+  // materials
   bjarne->material = rubin;
-  // particleObject->material = wood;
+  particleObject->material = rubin;
 
 
   setObjectPosition(window, 3,0,0);
@@ -446,9 +517,11 @@ void createScene(void) {
   setObjectPosition(vitrine2,11.25,-15,-16);
   setObjectPosition(vitrine3,-11.25,-15,16);
   setObjectPosition(vitrine4,-11.25,-15,-16);
-  setObjectScale(sun, 0.5,0.5,0.5);
   setObjectPosition(rmRenderer, -15, 0, 0);
   setObjectPosition(rmDisplay, -10, 0, 0);
+  setObjectPosition(particleObject, PARTICLES_X, PARTICLES_Y, PARTICLES_Z);
+
+  setObjectScale(sun, 0.5,0.5,0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
   //setObjectScale(boat, 0.5, 0.5, 0.5);
