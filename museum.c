@@ -318,8 +318,6 @@ void createScene(void) {
   Object* sun = createObject("objects/sphere.obj");
   Object* earth = createObject("objects/sphere.obj");
   Object* moon = createObject("objects/sphere.obj");
-  Object* window = createObject("objects/window.obj");
-  Object* window2 = createObject("objects/window.obj");
   Object* water = createObject("objects/plane.obj");
   Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
@@ -341,8 +339,8 @@ void createScene(void) {
   Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
   Object* baloon2 = createObject("objects/house_objects/house_baloon2.obj");
   //Object* mountRushmore = createObject("objects/mt_rushmore.obj");
+  Object* particleLight = createObject("objects/cube.obj");
   
-  Object* particleLight = createObject("objects/sphere.obj");
 
   Object* vitrineFront= createObject("objects/house_objects/vitrine/glas_front.obj"); //vitrineFront
   Object* vitrineRigth= createObject("objects/house_objects/vitrine/glas_right.obj"); //vitrineRigth
@@ -356,6 +354,15 @@ void createScene(void) {
   Object* vitrine3=createObject("objects/cube.obj");
   Object* vitrine4=createObject("objects/cube.obj");
 
+  Object* houseWindow1=createObject("objects/house_objects/house_window1.obj");
+  Object* houseWindow2=createObject("objects/house_objects/house_window2.obj");
+  Object* houseWindow3=createObject("objects/house_objects/house_window3.obj");
+  Object* houseWindow4=createObject("objects/house_objects/house_window4.obj");
+  Object* houseWindow5=createObject("objects/house_objects/house_window5.obj");
+  Object* houseWindow6=createObject("objects/house_objects/house_window6.obj");
+  Object* houseWindow7=createObject("objects/house_objects/house_window7.obj");
+  Object* houseWindow8=createObject("objects/house_objects/house_window8.obj");
+
   rmRenderer->renderTarget = createRenderTarget();
 
   particleObject = createObject("objects/cube.obj");
@@ -363,8 +370,6 @@ void createScene(void) {
 
   // child objects
   sgAddChild(root, particleObject);
-  sgAddChild(root, window);
-  sgAddChild(root, window2);
   //sgAddChild(root, mountRushmore);
   sgAddChild(root,house);
   sgAddChild(root, rmRenderer);
@@ -374,6 +379,15 @@ void createScene(void) {
   sgAddChild(house,houseFundamentBack);
   sgAddChild(house,houseFundamentLeft);
   sgAddChild(house,houseFundamentRight);
+
+  sgAddChild(house,houseWindow1);
+  sgAddChild(house,houseWindow2);
+  sgAddChild(house,houseWindow3);
+  sgAddChild(house,houseWindow4);
+  sgAddChild(house,houseWindow5);
+  sgAddChild(house,houseWindow6);
+  sgAddChild(house,houseWindow7);
+  sgAddChild(house,houseWindow8);
   
   sgAddChild(house,houseFloor);
   sgAddChild(house,houseRoof);
@@ -448,8 +462,14 @@ void createScene(void) {
   sun->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   earth->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   moon->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
-  window->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
-  window2->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow1->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow2->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow3->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow4->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow5->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow6->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow7->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
+  houseWindow8->shader = createShader("shaders/texture.vert", "shaders/texture.frag");
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   mountRushmore->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
@@ -487,8 +507,14 @@ void createScene(void) {
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
-  loadTexture(window, "textures/window_red.png", 0);
-  loadTexture(window2, "textures/window_blue.png", 0);
+  loadTexture(houseWindow1, "textures/window_blue.png", 0);
+  loadTexture(houseWindow2, "textures/window_blue.png", 0);
+  loadTexture(houseWindow3, "textures/window_blue.png", 0);
+  loadTexture(houseWindow4, "textures/window_blue.png", 0);
+  loadTexture(houseWindow5, "textures/window_blue.png", 0);
+  loadTexture(houseWindow6, "textures/window_blue.png", 0);
+  loadTexture(houseWindow7, "textures/window_blue.png", 0);
+  loadTexture(houseWindow8, "textures/window_blue.png", 0);
   loadTexture(boat, "textures/boat.png", 0);
   loadTexture(water, "textures/water.png", 0);
   loadTexture(houseFloor, "textures/wood_floor.png",0);
@@ -513,8 +539,14 @@ void createScene(void) {
   sun->draw = &drawWithTexture;
   earth->draw = &drawWithTexture;
   moon->draw = &drawWithTexture;
-  window->draw = &drawWithTexture;
-  window2->draw = &drawWithTexture;
+  houseWindow1->draw = &drawWithTexture;
+  houseWindow2->draw = &drawWithTexture;
+  houseWindow3->draw = &drawWithTexture;
+  houseWindow4->draw = &drawWithTexture;
+  houseWindow5->draw = &drawWithTexture;
+  houseWindow6->draw = &drawWithTexture;
+  houseWindow7->draw = &drawWithTexture;
+  houseWindow8->draw = &drawWithTexture;
   water->draw = &drawWater;
   mountRushmore->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
@@ -558,9 +590,6 @@ void createScene(void) {
   baloon2->material = rubin;
   particleObject->material = rubin;
 
-
-  setObjectPosition(window, 3,0,0);
-  setObjectPosition(window2, 5,0,0);
   // setObjectPosition(water, 0, 0, 20);
   setObjectPosition(mountRushmore, 0, 0.9, 0);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
@@ -576,7 +605,7 @@ void createScene(void) {
   setObjectPosition(particleObject, -1, -1, 1);
 
   setObjectPosition(skyboxSun,10.0,40.0,50.0);
-  setObjectScale(particleObject, 0.2, 0.2, 0.2);
+  setObjectScale(particleObject, 0.15, 0.15, 0.15);
   setObjectScale(sun, 0.5,0.5,0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
@@ -611,12 +640,18 @@ void createScene(void) {
   addLightAffectedBy(baloon2,sunLight);
 
 
-  window->isTransparent = 1;
-  window2->isTransparent = 1;
-  // vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
-  // vitrineFront->isTransparent = 1;
-  // vitrineLeft->isTransparent = 1;
-  // vitrineRigth->isTransparent = 1;
+  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  vitrineFront->isTransparent = 1;
+  vitrineLeft->isTransparent = 1;
+  vitrineRigth->isTransparent = 1;
+  houseWindow1->isTransparent = 1;
+  houseWindow2->isTransparent = 1;
+  houseWindow3->isTransparent = 1;
+  houseWindow4->isTransparent = 1;
+  houseWindow5->isTransparent = 1;
+  houseWindow6->isTransparent = 1;
+  houseWindow7->isTransparent = 1;
+  houseWindow8->isTransparent = 1;
   
   rmDisplay->isTransparent = 0;
 

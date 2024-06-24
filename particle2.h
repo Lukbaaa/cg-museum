@@ -12,14 +12,14 @@
 #include "light.h"
 #include "materials.h"
 
-#define NUM_PARTICLES 100
-#define PARTICLES_X 0
-#define PARTICLES_Y 0
-#define PARTICLES_Z 0
+#define NUM_PARTICLES 50
+#define PARTICLES_X -1.1
+#define PARTICLES_Y -1.1
+#define PARTICLES_Z -1.6
 
-#define PARTICLE_SIZE 0.01
+#define PARTICLE_SIZE 0.001
 
-#define PARTICLE_LIFE 10.0f
+#define PARTICLE_LIFE 1.4f
 
 
 typedef struct {
@@ -118,7 +118,7 @@ void initParticles() {
 
 void updateParticles(float deltaTime) {
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        ps.particles[i].life -= deltaTime;
+        ps.particles[i].life -= deltaTime/1.6;
         if (ps.particles[i].life > 0.0f) {
             ps.particles[i].position[0] += ps.particles[i].velocity[0] * deltaTime;
             ps.particles[i].position[1] += ps.particles[i].velocity[1] * deltaTime;
