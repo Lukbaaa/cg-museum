@@ -12,6 +12,8 @@
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
+#else
+#define M_PI 3.14159265359
 #endif
 
 #include <GL/glew.h>
@@ -150,6 +152,8 @@ void drawRMRenderer(Object* obj) {
   glBindVertexArray(obj->vao);
 
   glBindFramebuffer(GL_FRAMEBUFFER, obj->renderTarget);
+  printf("%d\n", obj->renderTarget);
+  glClearColor(0,0,0,0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   float x = obj->transform.position.x - camera->position.x;
@@ -209,96 +213,6 @@ void rmDisplayAnimation(Object* obj) {
   setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI, 0);
 }
 
-void drawFloor(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawFundament(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawPodest(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawRopes(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawPodestPanels(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawFloor(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawFundament(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
-void drawPodest(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-  drawTextures(obj);
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
-}
-
 void drawRopes(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
@@ -335,9 +249,10 @@ void createScene(void) {
   Object* bjarne = createObject("objects/bjarne.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
+  Object* rmRenderer = createObject("objects/cube.obj");
+  Object* rmDisplay = createObject("objects/window.obj");
 
-  sgAddChild(root, rmRenderer);
-  sgAddChild(root, rmDisplay);
+
   Object* house = createObject("objects/cube.obj");
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
   Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
@@ -359,13 +274,16 @@ void createScene(void) {
   Object* vitrine3=createObject("objects/cube.obj");
   Object* vitrine4=createObject("objects/cube.obj");
 
+  rmRenderer->renderTarget = createRenderTarget();
+
   // particleObject = createObject("objects/cube.obj");
 
   sgAddChild(root, window);
   sgAddChild(root, window2);
   sgAddChild(root, bjarne);
   sgAddChild(root,house);
-
+  sgAddChild(root, rmRenderer);
+  sgAddChild(root, rmDisplay);
   sgAddChild(house,houseFundament);
   sgAddChild(house,houseFloor);
   sgAddChild(house,houseRoof);
@@ -437,6 +355,8 @@ void createScene(void) {
   bjarne->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
   bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
+  rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
+  rmDisplay->shader = createShader("shaders/rmDisplay.vert", "shaders/rmDisplay.frag");
   houseFloor->shader = createShader("shaders/house_shader/floor.vert","shaders/house_shader/floor.frag");
   houseFundament->shader = createShader("shaders/house_shader/fundament.vert","shaders/house_shader/fundament.frag");
   houseRoof->shader = houseFloor->shader;
@@ -485,18 +405,20 @@ void createScene(void) {
   bjarne->draw = &drawBjarne;
   bjarneLight->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
-  houseFloor->draw = &drawFloor;
-  houseFundament->draw = &drawFundament;
-  houseRoof->draw = &drawFloor;
+  rmRenderer->draw = &drawRMRenderer;
+  rmDisplay->draw = &drawTextures;
+  houseFloor->draw = &drawTextures;
+  houseFundament->draw = &drawTextures;
+  houseRoof->draw = &drawTextures;
   ropes->draw = &drawRopes;
-  baloon1->draw = &drawFloor;
-  vitrinePodest->draw = &drawPodest;
-  particleLight->draw = &drawFloor;
+  baloon1->draw = &drawTextures;
+  vitrinePodest->draw = &drawTextures;
+  particleLight->draw = &drawTextures;
   vitrineFront->draw = &drawPodestPanels;
   vitrineBack->draw = &drawPodestPanels;
   vitrineRigth->draw = &drawPodestPanels;
   vitrineLeft->draw = &drawPodestPanels;
-  vitrineTop->draw = drawPodest;
+  vitrineTop->draw = &drawTextures;
   
   // particleObject->draw = &drawParticles;
   
@@ -534,8 +456,6 @@ void createScene(void) {
   //setObjectScale(houseFloor, 0.2,0.2,0.2);
   // setObjectScale(vitrinePodest,1.2,1.2,1.2);
   setObjectScale(particleLight,0.1,0.1,0.1);
-  
-
 
   LightSource* light = createLight();
   Vec4 ambient = {1,1,1,1};
@@ -590,7 +510,7 @@ void init(void) {
   glClearColor((1/255.0f)*191, (1/255.0f)*217, (1/255.0f)*204, 1.0f);
   glViewport(0, 0, 800, 800);
 }
-}
+
 
 void draw() {
 

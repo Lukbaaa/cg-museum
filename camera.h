@@ -6,6 +6,8 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glext.h>
 #include <GLFW/glfw3.h>
+#else
+#define M_PI 3.14159265359
 #endif
 
 #include <assert.h>

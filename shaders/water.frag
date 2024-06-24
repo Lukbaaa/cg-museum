@@ -6,7 +6,7 @@ in float y;
 out vec4 FragColor;
 
 uniform sampler2D tex;
-out vec4 FragColor;
+
 void main() {
     float color = y*0.5;
     if (color < 0) {
