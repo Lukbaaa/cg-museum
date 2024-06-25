@@ -14,7 +14,7 @@
 
 #define NUM_PARTICLES 50
 #define PARTICLES_X -1.1
-#define PARTICLES_Y -1.1
+#define PARTICLES_Y 1.2
 #define PARTICLES_Z -1.6
 
 #define PARTICLE_SIZE 0.001
@@ -99,18 +99,12 @@ void initParticles() {
     particleObject->light->position= arrayToVec3(ps.position);
 
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        // particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
-        // particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
-        // particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
         ps.particles[i].position[0] = ps.position[0];
         ps.particles[i].position[1] = ps.position[1];
         ps.particles[i].position[2] = ps.position[2];
         ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
         ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
         ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
-        // ps.particles[i].velocity[0] = ps.position[0];
-        // ps.particles[i].velocity[1] = ps.position[1];
-        // ps.particles[i].velocity[2] = ps.position[2];
         ps.particles[i].life = PARTICLE_LIFE;
     }
     initBuffers();
@@ -124,9 +118,6 @@ void updateParticles(float deltaTime) {
             ps.particles[i].position[1] += ps.particles[i].velocity[1] * deltaTime;
             ps.particles[i].position[2] += ps.particles[i].velocity[2] * deltaTime;
         } else {
-            // particles[i].position[0] = (rand() % 100) / 100.0f - 0.5f;
-            // particles[i].position[1] = (rand() % 100) / 100.0f - 0.5f;
-            // particles[i].position[2] = (rand() % 100) / 100.0f - 0.5f;
             ps.particles[i].position[0] = ps.position[0];
             ps.particles[i].position[1] = ps.position[1];
             ps.particles[i].position[2] = ps.position[2];
@@ -137,50 +128,5 @@ void updateParticles(float deltaTime) {
         }
     }
 }
-
-
-
-// void renderParticles(GLuint MatrixID, Camera* camera) {
-//     glUseProgram(MatrixID);
-//     glEnableVertexAttribArray(0);
-//     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-//     for (int i = 0; i < NUM_PARTICLES; i++) {
-//         if (ps.particles[i].life > 0.0f) {
-//             GLfloat model[16];
-//             identity(model);
-//             translateVector(model, model, ps.particles[i].position);
-
-//             GLfloat normalMatrix[16];
-//             inverse4(normalMatrix, model);
-//             transpose4(normalMatrix, normalMatrix);
-//             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "normalMatrix"), 1, GL_FALSE, normalMatrix);
-
-//             glUniform1f(glGetUniformLocation(MatrixID,"dt"),ps.particles[i].life);
-//             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "model"), 1, GL_FALSE, model);
-//             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "view"), 1, GL_FALSE, camera->view);
-//             glUniformMatrix4fv(glGetUniformLocation(MatrixID, "projection"), 1, GL_TRUE, camera->projection);
-
-//             glUniform4fv(glGetUniformLocation(MatrixID, "material.emissive"), 1, material.emissive);
-//             glUniform4fv(glGetUniformLocation(MatrixID, "material.ambient"), 1, material.ambient);
-//             glUniform4fv(glGetUniformLocation(MatrixID, "material.diffuse"), 1, material.diffuse);
-//             glUniform4fv(glGetUniformLocation(MatrixID, "material.specular"), 1, material.specular);
-//             glUniform1f(glGetUniformLocation(MatrixID, "material.shininess"), material.shininess);
-            
-//             glUniform3fv(glGetUniformLocation(MatrixID, "light.position"), 1, (float*)&lightPosition); 
-//             glUniform4fv(glGetUniformLocation(MatrixID, "light.ambient"), 1, (float*)&(light->ambient.r));
-//             glUniform4fv(glGetUniformLocation(MatrixID, "light.diffuse"), 1, (float*)&(light->diffuse.r));
-//             glUniform4fv(glGetUniformLocation(MatrixID, "light.specular"), 1, (float*)&(light->specular.r));
-
-            
-
-//             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)0);
-//         }
-//     }
-
-//     glDisableVertexAttribArray(0);
-// }
 
 #endif // !PARTICLE2_H
