@@ -674,7 +674,7 @@ void createScene(void) {
   setObjectPosition(earth, 4,0,0);
   setObjectPosition(moon, 2,0,0);
 
-  setObjectPosition(particleObject, 0, 50, 0);
+  setObjectPosition(particleObject, -1.1, 1.2, -1.6);
   setObjectPosition(water, 0, 10, 0);
 
   setObjectPosition(rmRenderer, -15, 0, 0);
@@ -684,7 +684,8 @@ void createScene(void) {
   //setObjectPosition(particleObject, -1, -1, 1);
 
   setObjectPosition(skyboxSun,10.0,40.0,50.0);
-  setObjectScale(particleObject, 0.15, 0.15, 0.15);
+  
+  setObjectScale(particleObject, 0.3, 0.3, 0.3);
   setObjectScale(sun, 0.8,0.8,0.8);
   setObjectScale(earth, 0.7, 0.7, 0.7);
   setObjectScale(moon, 0.5, 0.5, 0.5);
