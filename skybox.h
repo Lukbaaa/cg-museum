@@ -109,7 +109,6 @@ void loadCubemapTexture() {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	// This might help with seams on some systems
 	// glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    printf("Loading cubemap texture1\n");
     // Cycles through all the textures and attaches them to the cubemap object
 	stbi_set_flip_vertically_on_load(0);
 	for (unsigned int i = 0; i < 6; i++)
@@ -118,7 +117,6 @@ void loadCubemapTexture() {
 		unsigned char* data = stbi_load(facesCubemap[i], &width, &height, &nrChannels, 0);
 		if (data)
 		{
-            printf("Loading cubemap texture2\n");
 			glTexImage2D
 			(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,

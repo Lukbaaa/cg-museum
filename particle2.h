@@ -22,11 +22,15 @@
 #define PARTICLE_LIFE 1.4f
 
 
+
+
 typedef struct {
     float position[3];
     float velocity[3];
     float life;
 } Particle;
+
+int boolean;
 
 typedef struct {
     Particle particles[NUM_PARTICLES];
@@ -40,6 +44,7 @@ Vec4 diffuse = {1,1,1,1};
 Vec4 specular = {1,1,1,1};
 // Vec3 lightPosition = {0.0,0.0,-0.4};
 // Material material;
+float startVel[3];
 
 Object* particleObject;
 Object* partList[NUM_PARTICLES];
@@ -112,8 +117,12 @@ void initParticles() {
         ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
         ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
         ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
+        startVel[0] = ps.particles[i].velocity[0];
+        startVel[1] = ps.particles[i].velocity[1];
+        startVel[2] = ps.particles[i].velocity[2];
         ps.particles[i].life = PARTICLE_LIFE;
     }
+
     initBuffers();
 }
 
@@ -125,18 +134,18 @@ void updateParticles(float deltaTime) {
     for (int i = 0; i < NUM_PARTICLES; i++) {
         ps.particles[i].life -= deltaTime/1.6;
         if (ps.particles[i].life > 0.0f) {
-            ps.particles[i].position[0] += ps.particles[i].velocity[0] * deltaTime;
-            ps.particles[i].position[1] += ps.particles[i].velocity[1] * deltaTime;
-            ps.particles[i].position[2] += ps.particles[i].velocity[2] * deltaTime;
-        } else {
-            ps.particles[i].position[0] = ps.position[0];
-            ps.particles[i].position[1] = ps.position[1];
-            ps.particles[i].position[2] = ps.position[2];
-            ps.particles[i].velocity[0] = (rand() % 100) / 500.0f - 0.1f;
-            ps.particles[i].velocity[1] = (rand() % 100) / 500.0f - 0.1f;
-            ps.particles[i].velocity[2] = (rand() % 100) / 500.0f - 0.1f;
+            ps.particles[i].position[0] -= ps.particles[i].velocity[0] * deltaTime;
+            ps.particles[i].position[1] -= ps.particles[i].velocity[1] * deltaTime;
+            ps.particles[i].position[2] -= ps.particles[i].velocity[2] * deltaTime;
+
+        }
+        else {
+            ps.particles[i].velocity[0] = -ps.particles[i].velocity[0];
+            ps.particles[i].velocity[1] = -ps.particles[i].velocity[1];
+            ps.particles[i].velocity[2] = -ps.particles[i].velocity[2];
             ps.particles[i].life = PARTICLE_LIFE;
         }
+
     }
 }
 
