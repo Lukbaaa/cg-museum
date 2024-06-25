@@ -29,6 +29,8 @@ uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
 
+out vec4 FragColor;
+
 void main() {
     LightSource light = light0;
     // emissive
@@ -59,5 +61,5 @@ void main() {
     vec4 clouds = texture(tex3, texCoord);//vec2(texCoord.x+time/5, texCoord.y)); 
 
     vec4 day_night_ocean = mix(night, day, diff*diffuseStrength) + ocean*spec*specularStrength;
-    gl_FragColor = gl_FragColor = mix(day_night_ocean, clouds, clouds.a);
+    FragColor = mix(day_night_ocean, clouds, clouds.a);
 }

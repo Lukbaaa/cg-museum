@@ -660,10 +660,10 @@ void createScene(void) {
 
   setObjectPosition(vitrinePodest, 0, 0, 0);
   setObjectPosition(vitrineTop, 0, 17.6, 0);
-  setObjectPosition(vitrineFront, 0, 0, 3.7);
-  setObjectPosition(vitrineBack, 0, 0, -3.7);
-  setObjectPosition(vitrineLeft, -3.7, 0, 0);
-  setObjectPosition(vitrineRight, 3.7, 0, 0);
+  setObjectPosition(vitrineFront, 0, 0, 3.71);
+  setObjectPosition(vitrineBack, 0, 0, -3.71);
+  setObjectPosition(vitrineLeft, -3.71, 0, 0);
+  setObjectPosition(vitrineRight, 3.71, 0, 0);
 
   setObjectPosition(vitrine1,11.25, 0.1, 16);
   setObjectPosition(vitrine2,11.25, 0.1, -16);
