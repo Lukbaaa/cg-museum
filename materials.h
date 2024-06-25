@@ -69,4 +69,13 @@ Material wood =
         {0.5f, 0.5f, 0.5f, 1.0f},
         10.0f
     };
+
+Material black_rubber = 
+    {
+        {0,0,0,1},
+        {0.2f, 0.2f, 0.2f, 1.0f},
+        {0.1f, 0.1f, 0.1f, 1.0f},
+        {0.4f, 0.4f, 0.4f, 1.0f},
+        10.0f
+    };
 #endif

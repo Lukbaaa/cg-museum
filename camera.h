@@ -35,7 +35,7 @@ typedef struct Camera {
 Camera* camera;
 
 void initCamera(Camera* cam) {
-  Vec3 camPos = {0,0,0};
+  Vec3 camPos = {0,1,3};
   cam->position = camPos;
   Vec3 camFront = {0.0f, 0.0f, -1.0};
   cam->camFront = camFront;
@@ -104,6 +104,7 @@ void changeView(Camera* cam) {
   cam->center.x = cam->position.x + cam->camFront.x;
   cam->center.y = cam->position.y + cam->camFront.y;
   cam->center.z = cam->position.z + cam->camFront.z;
+
   lookAt(cam->view, cam->position, cam->center, cam->camUp);
 }
 

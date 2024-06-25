@@ -288,12 +288,12 @@ void drawRopes(Object* obj) {
 
 void createScene(void) {
   
+  printf("creating objects...\n");
   Object* root = createObject(NULL);
   Object* sun = createObject("objects/sphere.obj");
   Object* earth = createObject("objects/sphere.obj");
   Object* moon = createObject("objects/sphere.obj");
   Object* water = createObject("objects/plane.obj");
-  //Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* bjarneLight = createObject("objects/sphere.obj");
   Object* skyboxSun = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
@@ -303,53 +303,56 @@ void createScene(void) {
 
   Object* house = createObject(NULL);
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
-  // Object* houseFundament = createObject("objects/house_objects/house_fundament.obj");
   Object* houseFundamentFront_L = createObject("objects/house_objects/house_fundament_front_L.obj");
   Object* houseFundamentFront_R = createObject("objects/house_objects/house_fundament_front_R.obj");
   Object* houseFundamentFront_M = createObject("objects/house_objects/house_fundament_front_M.obj");
   Object* houseFundamentBack = createObject("objects/house_objects/house_fundament_back.obj");
-  Object* houseFundamentLeft = createObject("objects/house_objects/house_fundament_left.obj");
-  Object* houseFundamentRight = createObject("objects/house_objects/house_fundament_right.obj");
+  Object* houseFundamentLeft = createObject("objects/house_objects/house_fundament_lr.obj");
+  Object* houseFundamentRight = createObject("objects/house_objects/house_fundament_lr.obj");
   Object* houseRoof = createObject("objects/house_objects/house_roof.obj");
-  Object* ropes = createObject("objects/house_objects/house_ropes.obj");
-  Object* baloon1 = createObject("objects/house_objects/house_baloon1.obj");
-  Object* baloon2 = createObject("objects/house_objects/house_baloon2.obj");
+  Object* rope1 = createObject("objects/house_objects/house_rope1.obj");
+  Object* rope2 = createObject("objects/house_objects/house_rope2.obj");
+  Object* baloon1 = createObject("objects/house_objects/house_baloon.obj");
+  Object* baloon2 = createObject("objects/house_objects/house_baloon.obj");
   //Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* particleLight = createObject("objects/cube.obj");
   
 
-  Object* vitrineFront= createObject("objects/house_objects/vitrine/glas_front.obj"); //vitrineFront
-  Object* vitrineRigth= createObject("objects/house_objects/vitrine/glas_right.obj"); //vitrineRigth
-  Object* vitrineLeft= createObject("objects/house_objects/vitrine/glas_left.obj"); //vitrineLeft
-  Object* vitrineBack= createObject("objects/house_objects/vitrine/glas_back.obj"); //vitrineBack
-  Object* vitrineTop= createObject("objects/house_objects/vitrine/top.obj"); //vitrineTop
-  Object* vitrinePodest= createObject("objects/house_objects/vitrine/podest.obj"); //vitrinePodest
+  Object* vitrineFront = createObject("objects/house_objects/vitrine/glas_front.obj"); 
+  Object* vitrineRight = createObject("objects/house_objects/vitrine/glas_right.obj");
+  Object* vitrineLeft = createObject("objects/house_objects/vitrine/glas_left.obj"); 
+  Object* vitrineBack = createObject("objects/house_objects/vitrine/glas_back.obj"); 
+  Object* vitrineTop = createObject("objects/house_objects/vitrine/top.obj"); 
+  Object* vitrinePodest = createObject("objects/house_objects/vitrine/podest.obj");
 
-  Object* vitrine1=createObject(NULL);
-  Object* vitrine2=createObject(NULL);
-  Object* vitrine3=createObject(NULL);
-  Object* vitrine4=createObject(NULL);
+  Object* vitrine1 = createObject(NULL);
+  Object* vitrine2 = createObject(NULL);
+  Object* vitrine3 = createObject(NULL);
+  Object* vitrine4 = createObject(NULL);
 
-  Object* houseWindow1=createObject("objects/house_objects/house_window1.obj");
-  Object* houseWindow2=createObject("objects/house_objects/house_window2.obj");
-  Object* houseWindow3=createObject("objects/house_objects/house_window3.obj");
-  Object* houseWindow4=createObject("objects/house_objects/house_window4.obj");
-  Object* houseWindow5=createObject("objects/house_objects/house_window5.obj");
-  Object* houseWindow6=createObject("objects/house_objects/house_window6.obj");
-  Object* houseWindow7=createObject("objects/house_objects/house_window7.obj");
-  Object* houseWindow8=createObject("objects/house_objects/house_window8.obj");
+  Object* houseWindow1 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow2 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow3 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow4 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow5 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow6 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow7 = createObject("objects/house_objects/house_window.obj");
+  Object* houseWindow8 = createObject("objects/house_objects/house_window.obj");
+  printf("finished creating objects!\n");
 
   rmRenderer->renderTarget = createRenderTarget();
 
   particleObject = createObject("objects/cube.obj");
   initParticles();
 
+  printf("creating scene graph...\n");
   // child objects
   sgAddChild(root, particleObject);
   //sgAddChild(root, mountRushmore);
   sgAddChild(root,house);
   sgAddChild(root, rmRenderer);
   sgAddChild(root, rmDisplay);
+  sgAddChild(root,skyboxSun);
 
   sgAddChild(house,houseFundamentFront_L);
   sgAddChild(house,houseFundamentFront_M);
@@ -369,45 +372,46 @@ void createScene(void) {
   
   sgAddChild(house,houseFloor);
   sgAddChild(house,houseRoof);
-  sgAddChild(house,ropes);
+  sgAddChild(house,rope1);
+  sgAddChild(house,rope2);
   sgAddChild(house,baloon1);
   sgAddChild(house,baloon2);
-  sgAddChild(root,skyboxSun);
+
   sgAddChild(house,vitrine1);
 
   
   // Solar System
-  sgAddChild(vitrine1, sun);
   sgAddChild(vitrine1,vitrinePodest);
+  sgAddChild(vitrine1,vitrineFront);
+  sgAddChild(vitrine1,vitrineBack);
+  sgAddChild(vitrine1,vitrineLeft);
+  sgAddChild(vitrine1,vitrineRight);
+  sgAddChild(vitrine1,vitrineTop);
+  sgAddChild(vitrine1, sun);
   sgAddChild(sun, earth);
   sgAddChild(earth, moon);
-  sgAddChild(vitrinePodest,vitrineFront);
-  sgAddChild(vitrineFront,vitrineBack);
-  sgAddChild(vitrineBack,vitrineLeft);
-  sgAddChild(vitrineLeft,vitrineRigth);
-  sgAddChild(vitrineRigth,vitrineTop);
 
   // Boat
   sgAddChild(house,vitrine2);
   sgAddChild(vitrine2, water);
   sgAddChild(vitrine2,vitrinePodest);
   sgAddChild(water, boat);
-  sgAddChild(vitrinePodest,vitrineFront);
-  sgAddChild(vitrineFront,vitrineBack);
-  sgAddChild(vitrineBack,vitrineLeft);
-  sgAddChild(vitrineLeft,vitrineRigth);
-  sgAddChild(vitrineRigth,vitrineTop);
+  sgAddChild(vitrine2,vitrineFront);
+  sgAddChild(vitrine2,vitrineBack);
+  sgAddChild(vitrine2,vitrineLeft);
+  sgAddChild(vitrine2,vitrineRight);
+  sgAddChild(vitrine2,vitrineTop);
 
   // mount Rushmore
   sgAddChild(house,vitrine3);
   //sgAddChild(vitrine3, mountRushmore);
   //sgAddChild(mountRushmore, bjarneLight);
   sgAddChild(vitrine3,vitrinePodest);
-  sgAddChild(vitrinePodest,vitrineFront);
-  sgAddChild(vitrineFront,vitrineBack);
-  sgAddChild(vitrineBack,vitrineLeft);
-  sgAddChild(vitrineLeft,vitrineRigth);
-  sgAddChild(vitrineRigth,vitrineTop);
+  sgAddChild(vitrine3,vitrineFront);
+  sgAddChild(vitrine3,vitrineBack);
+  sgAddChild(vitrine3,vitrineLeft);
+  sgAddChild(vitrine3,vitrineRight);
+  sgAddChild(vitrine3,vitrineTop);
 
   // 
   sgAddChild(house,vitrine4);
@@ -416,27 +420,20 @@ void createScene(void) {
 
   sgAddChild(vitrine4, particleObject);
   sgAddChild(vitrine4,vitrinePodest);
-  sgAddChild(vitrinePodest,vitrineFront);
-  sgAddChild(vitrineFront,vitrineBack);
-  sgAddChild(vitrineBack,vitrineLeft);
-  sgAddChild(vitrineLeft,vitrineRigth);
-  sgAddChild(vitrineRigth,vitrineTop);
-
+  sgAddChild(vitrine4,vitrineFront);
+  sgAddChild(vitrine4,vitrineBack);
+  sgAddChild(vitrine4,vitrineLeft);
+  sgAddChild(vitrine4,vitrineRight);
+  sgAddChild(vitrine4,vitrineTop);
 
   sgAddChild(root, particleLight);
 
-  // render visibility of objects
-  root->shouldRender = 0;
-  house->shouldRender = 0;
-  vitrine1->shouldRender =0;
-  vitrine2->shouldRender =0;
-  vitrine3->shouldRender =0;
-  vitrine4->shouldRender =0;
-  sun->shouldRender = 1;
+  printf("finished creating scene graph!\n");
   
   // particleObject->shouldRender = 1;
 
   // shaders
+  printf("creating shaders...\n");
   Shader* textureShader = createShader("shaders/texture.vert", "shaders/texture.frag");
   sun->shader = textureShader;
   earth->shader = textureShader;
@@ -465,17 +462,17 @@ void createScene(void) {
   houseFundamentLeft->shader = houseShader;
   houseFundamentRight->shader = houseShader;
   houseRoof->shader = textureShader;
-  ropes->shader = createShader("shaders/ropes.vert","shaders/texture.frag");
+  rope1->shader = createShader("shaders/ropes.vert","shaders/texture.frag");
+  rope2->shader = createShader("shaders/ropes.vert","shaders/texture.frag");
   Shader* baloonShader = createShader("shaders/baloon.vert","shaders/baloon.frag");
   baloon1->shader = baloonShader;
   baloon2->shader = baloonShader;
   //mountRushmore->shader = createShader("shaders/mountRushmore.vert","shaders/mountRushmore.frag");
 
-  //Vitrine 1, gibt es eine Möglichkeit, diese wiederzuverwenden?
   vitrinePodest->shader = textureShader;
   vitrineFront->shader = textureShader;
   vitrineBack->shader = textureShader;
-  vitrineRigth->shader = textureShader;
+  vitrineRight->shader = textureShader;
   vitrineLeft->shader = textureShader;
   vitrineTop->shader = textureShader;
 
@@ -485,8 +482,10 @@ void createScene(void) {
 
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
   rmDisplay->shader = createShader("shaders/texture.vert", "shaders/rmDisplay.frag");
+  printf("finished creating shaders!\n");
 
   // textures
+  printf("loading textures...\n");
   loadTexture(sun, "textures/sun.png", 0);
   loadTexture(earth, "textures/earth_day.png", 0);
   loadTexture(moon, "textures/moon.png", 0);
@@ -508,17 +507,19 @@ void createScene(void) {
   loadTexture(houseFundamentLeft, "textures/brick_texture.png",0);
   loadTexture(houseFundamentRight, "textures/brick_texture.png",0);
   loadTexture(houseRoof, "textures/roof.jpg",0);
-  loadTexture(ropes, "textures/rope1.jpg",0);
+  loadTexture(rope1, "textures/rope1.jpg",0);
+  loadTexture(rope2, "textures/rope1.jpg",0);
   
   
   loadTexture(vitrinePodest, "textures/black_marble_texture.jpg",0);
   loadTexture(vitrineTop,"textures/black_marble_texture.jpg",0);
   loadTexture(vitrineFront,"textures/podest_glass.png",0);
   loadTexture(vitrineBack,"textures/podest_glass.png",0);
-  loadTexture(vitrineRigth,"textures/podest_glass.png",0);
+  loadTexture(vitrineRight,"textures/podest_glass.png",0);
   loadTexture(vitrineLeft,"textures/podest_glass.png",0);
   Texture rmTexture = loadTexture(rmDisplay, NULL, 0);
   attachRenderTexture(rmRenderer->renderTarget, rmTexture);
+  // printf("finished loading textures!\n");
 
   // draw functions
   sun->draw = &drawWithTexture;
@@ -547,14 +548,15 @@ void createScene(void) {
   houseFundamentLeft->draw = &drawWithTexture;
   houseFundamentRight->draw = &drawWithTexture;
   houseRoof->draw = &drawWithTexture;
-  ropes->draw = &drawWithTexture;
+  rope1->draw = &drawRopes;
+  rope2->draw = &drawRopes;
   baloon1->draw = &drawBjarne;
   baloon2->draw = &drawBjarne;
   vitrinePodest->draw = &drawWithTexture;
   particleLight->draw = &drawWithTexture;
   vitrineFront->draw = &drawWithTexture;
   vitrineBack->draw = &drawWithTexture;
-  vitrineRigth->draw = &drawWithTexture;
+  vitrineRight->draw = &drawWithTexture;
   vitrineLeft->draw = &drawWithTexture;
   vitrineTop->draw = &drawWithTexture;
   //mountRushmore->draw = &drawBjarne;
@@ -579,7 +581,36 @@ void createScene(void) {
 
   // setObjectPosition(water, 0, 0, 20);
   //setObjectPosition(mountRushmore, 0, 0.9, 0);
+  setObjectPosition(baloon1, -34.47, 159.17, -31.36);
+  setObjectPosition(baloon2, 41.61, 145.2, 15.83);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
+
+  setObjectRotation(houseWindow5, 0, 90, 0);
+  setObjectRotation(houseWindow6, 0, 90, 0);
+  setObjectRotation(houseWindow7, 0, 90, 0);
+  setObjectRotation(houseWindow8, 0, 90, 0);
+
+  setObjectScale(houseWindow7, 1, 1.3, 0.63);
+  setObjectScale(houseWindow8, 1, 1.3, 0.63);
+
+  setObjectPosition(houseRoof, 0,50,0);
+  setObjectPosition(houseFundamentBack, 0,0,-26.38);
+  setObjectPosition(houseFundamentLeft, -27.88,0,0);
+  setObjectPosition(houseFundamentRight, 27.88,0,0);
+  setObjectPosition(houseFundamentFront_L, -16.767, 0, 27.655);
+  setObjectPosition(houseFundamentFront_M, 0, 29.48, 27.68);
+  setObjectPosition(houseFundamentFront_R, 16.505, 0, 27.629);
+  setObjectPosition(houseWindow1, -27.88, 17.65, -11.4);
+  setObjectPosition(houseWindow2, -27.88, 17.65, 12.99);
+  setObjectPosition(houseWindow3, 27.88, 17.65, 12.99);
+  setObjectPosition(houseWindow4, 27.88, 17.65, -11.4);
+  setObjectPosition(houseWindow5, 11.45, 17.65, -26.37);
+  setObjectPosition(houseWindow6, -12.92, 17.65, -26.37);
+  setObjectPosition(houseWindow7, -15.79, 17.67, 27.74);
+  setObjectPosition(houseWindow8, 14.18, 17.67, 27.74);
+  setObjectPosition(rope1, 29.95, 41.81, 23.10);
+  setObjectPosition(rope2, -36.15, 40.73, -34.64);
+
   setObjectPosition(vitrine1,11.25,-15,16);
   setObjectPosition(vitrine2,11.25,-15,-16);
   setObjectPosition(vitrine3,-11.25,-15,16);
@@ -597,16 +628,13 @@ void createScene(void) {
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
   //setObjectScale(mountRushmore,0.1,0.1,0.1);
-  //setObjectScale(boat, 0.5, 0.5, 0.5);
+  setObjectScale(boat, 0.5, 0.5, 0.5);
   setObjectScale(water, 0.5, 0.5, 0.5);
-  //setObjectScale(houseFloor, 0.2,0.2,0.2);
-  // setObjectScale(vitrinePodest,1.2,1.2,1.2);
   setObjectScale(particleLight,0.1,0.1,0.1);
-  //setObjectRotation(mountRushmore,0.0,180.0,0.0);
 
 
   LightSource* light = createLight();
-  Vec4 ambient = {1,1,1,1};
+  //Vec4 ambient = {1,1,1,1};
   Vec4 diffuse = {1,1,1,1};
   Vec4 specular = {1,1,1,1};  
   light->diffuse = diffuse;
@@ -616,7 +644,7 @@ void createScene(void) {
   //addLightAffectedBy(mountRushmore, light);
 
   LightSource* sunLight = createLight();
-  Vec4 sun_ambient = {1,1,1,1};
+  //Vec4 sun_ambient = {1,1,1,1};
   Vec4 sun_diffuse = {1,1,1,1};
   Vec4 sun_specular = {1,1,1,1};  
   sunLight->diffuse = sun_diffuse;
@@ -627,10 +655,10 @@ void createScene(void) {
   addLightAffectedBy(baloon2,sunLight);
 
 
-  vitrineBack->isTransparent = 1; //Irgenwie spackt das rum
+  vitrineBack->isTransparent = 1; 
   vitrineFront->isTransparent = 1;
   vitrineLeft->isTransparent = 1;
-  vitrineRigth->isTransparent = 1;
+  vitrineRight->isTransparent = 1;
   houseWindow1->isTransparent = 1;
   houseWindow2->isTransparent = 1;
   houseWindow3->isTransparent = 1;
@@ -640,7 +668,7 @@ void createScene(void) {
   houseWindow7->isTransparent = 1;
   houseWindow8->isTransparent = 1;
   
-  rmDisplay->isTransparent = 0;
+  rmDisplay->isTransparent = 1;
 
   scene = root;
 } 
@@ -672,15 +700,18 @@ void draw() {
     GLfloat modelStack[16];
     identity(modelStack);
 
-    ObjectList transparentObjects;
-    initObjectList(&transparentObjects);
-    ObjectList illuminatedObjects;
-    initObjectList(&illuminatedObjects);
+    ObjectHardList transparentObjects;
+    initObjectHardList(&transparentObjects);
+    ObjectHardList illuminatedObjects;
+    initObjectHardList(&illuminatedObjects);
 
     traverseDraw(scene, modelStack, &transparentObjects, &illuminatedObjects);
+    for (int i = 0; i < transparentObjects.length; i++) {
+      //printf("%f ", distToCamera(objects->objects[i].globalPosition, camera->position));
+      //printVec3(transparentObjects.objects[i].transform.position);
+    }
     drawIlluminatedObjects(&illuminatedObjects);
     drawTransparentObjects(&transparentObjects);
-    
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -712,15 +743,16 @@ int main(void) {
   glfwMakeContextCurrent(window);
   glewInit();
   init();
+  printf("creating scene...\n");
   createScene();
-
+  printf("finished creating scene!\n");
   initializeSkybox();
   loadCubemapTexture();
   scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
     
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
-    float deltaTime = timeAtDraw - timeAtStart;
+    //float deltaTime = timeAtDraw - timeAtStart;
 
     processInput(window, camera);
     draw();

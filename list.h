@@ -15,7 +15,6 @@
 typedef struct Object Object;
 typedef struct LightSource LightSource;
 
-
 typedef struct ObjectList {
     Object** objects;
     int length;

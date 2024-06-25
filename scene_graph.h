@@ -35,21 +35,21 @@ void traverse(Object* root) {
     }
 }
 
-void swap(Object* x, Object* y)
+void swap(Object* elem1, Object* elem2)
 {
-    Object temp = *x;
-    *x = *y;
-    *y = temp;
+    Object temp = *elem1;
+    *elem1 = *elem2;
+    *elem2 = temp;
 }
 
 // bubble sort
-void sortObjectsByDist(ObjectList* objects) {
+void sortObjectsByDist(ObjectHardList* objects) {
     int swapped;
     for (int i = 0; i < objects->length - 1; i++) {
         swapped = 0;
         for (int j = 0; j < objects->length - i - 1; j++) {
-            if (distToCamera(objects->objects[i]->globalPosition, camera->position) < distToCamera(objects->objects[j+1]->globalPosition, camera->position)) {
-                //swap(objects->objects[j], objects->objects[j+1]);
+            if (distToCamera(objects->objects[j].globalPosition, camera->position) < distToCamera(objects->objects[j+1].globalPosition, camera->position)) {
+                swap(&objects->objects[j], &objects->objects[j+1]);
                 swapped = 1;
             }
         }
@@ -57,18 +57,30 @@ void sortObjectsByDist(ObjectList* objects) {
     }
 }
 
-void drawObjectsFromList(ObjectList* list) {
+void drawObjectsFromList(ObjectHardList* list) {
     for(int i = 0; i < list->length; i++) {
-        list->objects[i]->draw(list->objects[i]);
+        list->objects[i].draw(&list->objects[i]);
     }
 }
 
-void drawIlluminatedObjects(ObjectList* objects) {
+void drawIlluminatedObjects(ObjectHardList* objects) {
     drawObjectsFromList(objects);
 }
 
-void drawTransparentObjects(ObjectList* objects) {
+void drawTransparentObjects(ObjectHardList* objects) {
+    // for (int i = 0; i < objects->length; i++) {
+    //     //printf("%f ", distToCamera(objects->objects[i].globalPosition, camera->position));
+    //     printVec3(objects->objects[i].transform.position);
+    // }
+    printf("\n");
+
     sortObjectsByDist(objects);
+
+    // for (int i = 0; i < objects->length; i++) {
+    //     //printf("%f ", distToCamera(objects->objects[i].globalPosition, camera->position));
+    //     printVec3(objects->objects[i].transform.position);
+    // }
+    //printf("\n");
     drawObjectsFromList(objects);
 }
 
@@ -89,7 +101,7 @@ void drawBoundingBox(Object* obj) {
   }
 }
 
-void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentObjects, ObjectList* illuminatedObjects) {
+void traverseDraw(Object* root, GLfloat modelStack[16], ObjectHardList* transparentObjects, ObjectHardList* illuminatedObjects) {
     assert(root != NULL);
     assert(transparentObjects != NULL);
     assert(illuminatedObjects != NULL);
@@ -116,9 +128,10 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectList* transparentO
             drawBoundingBox(root);
         }
         if(root->isTransparent) {
-            objectListAdd(transparentObjects, root);
+            printVec3(root->globalPosition);
+            objectHardListAdd(transparentObjects, *root);
         } else if(root->lightsAffectedBy.length > 0) {
-            objectListAdd(illuminatedObjects, root);
+            objectHardListAdd(illuminatedObjects, *root);
         } else {
             root->draw(root);
         }

@@ -29,8 +29,6 @@ typedef struct BoundingBox {
     Vec3 bottomrightback;
 } BoundingBox;
 
-
-
 typedef struct Object {
     GLuint vao;
     int vertCount;
@@ -54,6 +52,22 @@ typedef struct Object {
     void (*draw)(Object*);
     void (*animate)(Object*);
 } Object;
+
+typedef struct ObjectHardList {
+    Object* objects;
+    int length;
+} ObjectHardList;
+
+void initObjectHardList(ObjectHardList* list) {
+    list->objects = NULL;
+    list->length=0;
+}
+
+void objectHardListAdd(ObjectHardList* list, Object object) {
+    list->objects = (Object*)realloc(list->objects, sizeof(Object)*((list->length)+1));
+    (list->objects)[list->length] = object;
+    (list->length)++;
+}
 
 void initObject(Object* obj) {
     assert(obj != NULL);
