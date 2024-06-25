@@ -175,7 +175,7 @@ void drawBoat(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawBaloon(Object* obj) {
+void drawLightAffectedObject(Object* obj) {
 
   int program = obj->shader->program;
   glUseProgram(program);
@@ -190,6 +190,7 @@ void drawBaloon(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
 
+  //activateTextures(obj);
   sendLightParams(obj);
 
   GLfloat normalMatrix[16];
@@ -201,7 +202,7 @@ void drawBaloon(Object* obj) {
 
 }
 
-void drawBjarneLight(Object* obj) {
+void drawLightSource(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
 
@@ -335,7 +336,7 @@ void createScene(void) {
   Object* earth = createObject("objects/sphere.obj");
   Object* moon = createObject("objects/sphere.obj");
   Object* water = createObject("objects/plane.obj");
-  Object* bjarneLight = createObject("objects/sphere.obj");
+  Object* rushmoreLight = createObject("objects/sphere.obj");
   Object* skyboxSun = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* rmRenderer = createObject("objects/cube.obj");
@@ -357,8 +358,8 @@ void createScene(void) {
   Object* rope2 = createObject("objects/house_objects/house_rope2.obj");
   Object* baloon1 = createObject("objects/house_objects/house_baloon.obj");
   Object* baloon2 = createObject("objects/house_objects/house_baloon.obj");
-  //Object* mountRushmore = createObject("objects/mt_rushmore.obj");
-  Object* particleLight = createObject("objects/cube.obj");
+  Object* mountRushmore = createObject("objects/mt_rushmore.obj");
+  Object* particleLight = createObject(NULL);
   
 
   Object* vitrineFront = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
@@ -392,7 +393,6 @@ void createScene(void) {
   printf("creating scene graph...\n");
   // child objects
   sgAddChild(root, particleObject);
-  //sgAddChild(root, mountRushmore);
   sgAddChild(root,house);
   sgAddChild(root, rmRenderer);
   sgAddChild(root, rmDisplay);
@@ -446,8 +446,8 @@ void createScene(void) {
 
   // mount Rushmore
   sgAddChild(house,vitrine3);
-  //sgAddChild(vitrine3, mountRushmore);
-  //sgAddChild(mountRushmore, bjarneLight);
+  sgAddChild(vitrine3, mountRushmore);
+  sgAddChild(mountRushmore, rushmoreLight);
   sgAddChild(vitrine3,vitrinePodest);
   sgAddChild(vitrine3,vitrineFront);
   sgAddChild(vitrine3,vitrineBack);
@@ -483,9 +483,8 @@ void createScene(void) {
   houseWindow7->shader = textureShader;
   houseWindow8->shader = textureShader;
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
-  //mountRushmore->shader = createShader("shaders/bjarne.vert", "shaders/bjarne.frag");
-  bjarneLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
-  skyboxSun->shader = bjarneLight->shader;
+  rushmoreLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
+  skyboxSun->shader = rushmoreLight->shader;
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
   rmDisplay->shader = createShader("shaders/rmDisplay.vert", "shaders/rmDisplay.frag");
@@ -505,7 +504,7 @@ void createScene(void) {
   Shader* baloonShader = createShader("shaders/baloon.vert","shaders/baloon.frag");
   baloon1->shader = baloonShader;
   baloon2->shader = baloonShader;
-  //mountRushmore->shader = createShader("shaders/mountRushmore.vert","shaders/mountRushmore.frag");
+  mountRushmore->shader = createShader("shaders/mountRushmore.vert","shaders/mountRushmore.frag");
 
   vitrinePodest->shader = textureShader;
   vitrineFront->shader = textureShader;
@@ -582,9 +581,9 @@ void createScene(void) {
   houseWindow7->draw = &drawWithTexture;
   houseWindow8->draw = &drawWithTexture;
   water->draw = &drawWater;
-  //mountRushmore->draw = &drawBjarne;
-  bjarneLight->draw = &drawBjarneLight;
-  skyboxSun->draw = &drawBjarneLight;
+  mountRushmore->draw = &drawLightAffectedObject;
+  rushmoreLight->draw = &drawLightSource;
+  skyboxSun->draw = &drawLightSource;
   boat->draw = &drawBoat;
   rmRenderer->draw = &drawRMRenderer;
   rmDisplay->draw = &drawWithTexture;
@@ -600,8 +599,8 @@ void createScene(void) {
   houseRoof->draw = &drawWithTexture;
   rope1->draw = &drawRopes;
   rope2->draw = &drawRopes;
-  baloon1->draw = &drawBaloon;
-  baloon2->draw = &drawBaloon;
+  baloon1->draw = &drawLightAffectedObject;
+  baloon2->draw = &drawLightAffectedObject;
   vitrinePodest->draw = &drawWithTexture;
   particleLight->draw = &drawWithTexture;
   vitrineFront->draw = &drawWithTexture;
@@ -609,9 +608,7 @@ void createScene(void) {
   vitrineRight->draw = &drawWithTexture;
   vitrineLeft->draw = &drawWithTexture;
   vitrineTop->draw = &drawWithTexture;
-  //mountRushmore->draw = &drawBjarne;
   particleObject->draw = &drawParticles;
-  
   rmDisplay->draw = &drawWithTexture;
   rmRenderer->draw = &drawRMRenderer;
 
@@ -619,18 +616,18 @@ void createScene(void) {
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
-  bjarneLight->animate = &bjarneLightAnimation;
+  rushmoreLight->animate = &bjarneLightAnimation;
   boat->animate = &boatAnimation;
   rmDisplay->animate = &rmDisplayAnimation;
 
   // materials
-  //mountRushmore->material = rubin;
+  mountRushmore->material = gold;
   baloon1->material = rubin;
   baloon2->material = rubin;
   particleObject->material = rubin;
 
-  // setObjectPosition(water, 0, 0, 20);
-  //setObjectPosition(mountRushmore, 0, 0.9, 0);
+  setObjectPosition(mountRushmore, 0, 10.5, -0.5);
+  setObjectRotation(mountRushmore, 0, 180, 0);
   setObjectPosition(baloon1, -34.47, 159.17, -31.36);
   setObjectPosition(baloon2, 41.61, 145.2, 15.83);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
@@ -694,10 +691,9 @@ void createScene(void) {
   setObjectScale(sun, 4,4,4);
   setObjectScale(earth, 0.7, 0.7, 0.7);
   setObjectScale(moon, 0.5, 0.5, 0.5);
-  setObjectScale(bjarneLight, 0.3,0.3,0.3);
+  setObjectScale(rushmoreLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
-  //setObjectScale(rmDisplay, 5, 5, 5);
-  //setObjectScale(mountRushmore,0.1,0.1,0.1);
+  setObjectScale(mountRushmore,0.1,0.1,0.1);
   setObjectScale(boat, 0.5, 0.5, 0.5);
   setObjectScale(water, 0.5, 0.5, 0.5);
   setObjectScale(particleLight,0.1,0.1,0.1);
@@ -710,8 +706,8 @@ void createScene(void) {
   light->diffuse = diffuse;
   light->specular = specular;
 
-  bjarneLight->light=light;
-  //addLightAffectedBy(mountRushmore, light);
+  rushmoreLight->light=light;
+  addLightAffectedBy(mountRushmore, light);
 
   LightSource* sunLight = createLight();
   //Vec4 sun_ambient = {1,1,1,1};
@@ -742,7 +738,6 @@ void createScene(void) {
   houseWindow6->isTransparent = 1;
   houseWindow7->isTransparent = 1;
   houseWindow8->isTransparent = 1;
-  
   rmDisplay->isTransparent = 1;
 
   scene = root;

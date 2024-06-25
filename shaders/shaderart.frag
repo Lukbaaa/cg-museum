@@ -1,3 +1,4 @@
+// CODE VON https://www.shadertoy.com/view/mtyGWy DIENT NUR ZUR DEMONSTRATION
 #version 330 core
 
 out vec4 FragColor;
