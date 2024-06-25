@@ -21,12 +21,12 @@ in vec3 normal;
 
 uniform vec3 viewPos;
 uniform Material material;
-uniform LightSource light0;
+uniform LightSource light[1];
 
 out vec4 FragColor;
 void main() {
 
-    LightSource light = light0;
+    LightSource light = light[0];
 
     // emissive
     vec4 emissive = material.emissive;

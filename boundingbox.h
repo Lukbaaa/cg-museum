@@ -24,7 +24,7 @@ GLuint boundingBoxProgram;
 * @param length - Länge der Bounding Box
 * @param depth - Tiefe der Bounding Box
 */
-BoundingBox createBoundingBox(int width, int length, int depth) {
+BoundingBox createBoundingBox(float width, float length, float depth) {
     BoundingBox box;
 
     GLfloat halfWidth = width / 2.0f;

@@ -141,11 +141,10 @@ float lastFrame = 0.0f;
 /**
  * Listener für Mauseingabe
  * @param window - Fenster
- * @param cam - Kamera
  * @param xposIn - x-Position
  * @param yposIn - y-Position
  */
-void mouse_callback(GLFWwindow* window, Camera* cam, double xposIn, double yposIn)
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
   assert(window != NULL);
 
@@ -154,32 +153,32 @@ void mouse_callback(GLFWwindow* window, Camera* cam, double xposIn, double yposI
 
   if (firstMouse)
   {
-      cam->lastX = xpos;
-      cam->lastY = ypos;
+      camera->lastX = xpos;
+      camera->lastY = ypos;
       firstMouse = 0;
   }
 
-  float xoffset = xpos - cam->lastX;
-  float yoffset = cam->lastY - ypos; 
-  cam->lastX = xpos;
-  cam->lastY = ypos;
+  float xoffset = xpos - camera->lastX;
+  float yoffset = camera->lastY - ypos; 
+  camera->lastX = xpos;
+  camera->lastY = ypos;
 
   float sensitivity = 0.5f; 
   xoffset *= sensitivity;
   yoffset *= sensitivity;
 
-  cam->yaw += xoffset;
-  cam->pitch += yoffset;
+  camera->yaw += xoffset;
+  camera->pitch += yoffset;
 
-  if (cam->pitch > 89.0f)
-      cam->pitch = 89.0f;
-  if (cam->pitch < -89.0f)
-      cam->pitch = -89.0f;
+  if (camera->pitch > 89.0f)
+      camera->pitch = 89.0f;
+  if (camera->pitch < -89.0f)
+      camera->pitch = -89.0f;
 
-  cam->camFront.x = cos(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
-  cam->camFront.y = sin(cam->pitch*M_PI/180);
-  cam->camFront.z = sin(cam->yaw*M_PI/180) * cos(cam->pitch*M_PI/180);
-  normalize(&(cam->camFront));
+  camera->camFront.x = cos(camera->yaw*M_PI/180) * cos(camera->pitch*M_PI/180);
+  camera->camFront.y = sin(camera->pitch*M_PI/180);
+  camera->camFront.z = sin(camera->yaw*M_PI/180) * cos(camera->pitch*M_PI/180);
+  normalize(&(camera->camFront));
 }
 
 /**

@@ -1,4 +1,4 @@
-ifndef OBJECTLOADER_H
+#ifndef OBJECTLOADER_H
 #define OBJECTLOADER_H
 
 #ifdef __APPLE__

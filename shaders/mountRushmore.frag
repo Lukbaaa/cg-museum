@@ -20,11 +20,11 @@ in vec3 normal;
 
 uniform vec3 viewPos;
 uniform Material material;
-uniform LightSource light;
+uniform LightSource light[2];
 
 out vec4 FragColor;
-void main() {
 
+vec4 calculateLight(Material material, LightSource light, vec3 fragPos, vec3 normal, vec3 viewPos) {
     // emissive
     vec4 emissive = material.emissive;
 
@@ -47,7 +47,16 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec4 specular = specularStrength * spec * material.specular * light.specular;
 
-    vec4 result = emissive + ambient + diffuse + specular;
+    return emissive + ambient + diffuse + specular;
+}
+
+void main() {
+
+    vec4 result = vec4(0.0);
+    
+    for (int i = 0; i < 2; i++) {
+        result += calculateLight(material, light[i], fragPos, normal, viewPos);
+    }
 
     FragColor = result;
 }

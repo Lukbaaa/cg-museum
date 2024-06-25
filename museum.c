@@ -51,13 +51,13 @@ void activateTextures(Object* obj) {
 void sendLightParams(Object* obj) {
   for(int i = 0; i < obj->lightsAffectedBy.length; i++) {
     char uniformName[30]; 
-    sprintf(uniformName, "light%d.position", i);
+    sprintf(uniformName, "light[%d].position", i);
     glUniform3fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->position));
-    sprintf(uniformName, "light%d.ambient", i);
+    sprintf(uniformName, "light[%d].ambient", i);
     glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->ambient));
-    sprintf(uniformName, "light%d.diffuse", i);
+    sprintf(uniformName, "light[%d].diffuse", i);
     glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->diffuse));
-    sprintf(uniformName, "light%d.specular", i);
+    sprintf(uniformName, "light[%d].specular", i);
     glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->specular));
   }
 }
@@ -285,8 +285,7 @@ void drawEarth(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
-  printVec3(obj->lightsAffectedBy.objects[0]->position);
-  printVec3(getGlobalPosition(obj->model, obj->transform.position));
+
   sendLightParams(obj);
   activateTextures(obj);
 
@@ -314,9 +313,16 @@ void moonAnimation(Object* obj) {
   setObjectRotation(obj, 0, -glfwGetTime()*50,0);
 }
 
-void bjarneLightAnimation(Object* obj) {
+void rushmoreLightAnimation(Object* obj) {
   setObjectPosition(obj, sin(glfwGetTime())*3,0,cos(glfwGetTime())*3);
-  obj->light->position = obj->transform.position;
+  obj->light->diffuse = (Vec4){fabs(cos(glfwGetTime()*0.2)),fabs(cos(glfwGetTime()*0.3)),fabs(cos(glfwGetTime()*0.4)),1};
+  obj->light->specular = (Vec4){fabs(cos(glfwGetTime()*0.)),fabs(cos(glfwGetTime()*0.3)),fabs(cos(glfwGetTime()*0.4)),1};
+} 
+
+void rushmoreLight2Animation(Object* obj) {
+  setObjectPosition(obj, sin(glfwGetTime())*3-25,0,cos(glfwGetTime())*3-20);
+  obj->light->diffuse = (Vec4){fabs(sin(glfwGetTime()*0.2)),fabs(sin(glfwGetTime()*0.3)),fabs(sin(glfwGetTime()*0.4)),1};
+  obj->light->specular = (Vec4){fabs(sin(glfwGetTime()*0.2)),fabs(sin(glfwGetTime()*0.3)),fabs(sin(glfwGetTime()*0.4)),1};
 } 
 
 void boatAnimation(Object* obj) {
@@ -339,13 +345,13 @@ void createScene(void) {
   Object* moon = createObject("objects/sphere.obj");
   Object* water = createObject("objects/plane.obj");
   Object* rushmoreLight = createObject("objects/sphere.obj");
+  Object* rushmoreLight2 = createObject("objects/sphere.obj");
   Object* skyboxSun = createObject("objects/sphere.obj");
   Object* boat = createObject("objects/boat.obj");
   Object* rmRenderer = createObject("objects/cube.obj");
   Object* rmDisplay = createObject("objects/window.obj");
   Object* artRenderer = createObject("objects/cube.obj");
   Object* artDisplay = createObject("objects/cube.obj");
-
 
   Object* house = createObject(NULL);
   Object* houseFloor = createObject("objects/house_objects/house_floor.obj");
@@ -363,7 +369,6 @@ void createScene(void) {
   Object* mountRushmore = createObject("objects/mt_rushmore.obj");
   Object* particleLight = createObject(NULL);
   
-
   Object* vitrineFront = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
   Object* vitrineRight = createObject("objects/house_objects/vitrine/glas_vitrine.obj");
   Object* vitrineLeft = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
@@ -450,6 +455,7 @@ void createScene(void) {
   sgAddChild(house,vitrine3);
   sgAddChild(vitrine3, mountRushmore);
   sgAddChild(mountRushmore, rushmoreLight);
+  sgAddChild(mountRushmore, rushmoreLight2);
   sgAddChild(vitrine3,vitrinePodest);
   sgAddChild(vitrine3,vitrineFront);
   sgAddChild(vitrine3,vitrineBack);
@@ -486,6 +492,7 @@ void createScene(void) {
   houseWindow8->shader = textureShader;
   water->shader = createShader("shaders/water.vert", "shaders/water.frag");
   rushmoreLight->shader = createShader("shaders/lightsource.vert", "shaders/lightsource.frag");
+  rushmoreLight2->shader = rushmoreLight->shader;
   skyboxSun->shader = rushmoreLight->shader;
   boat->shader = createShader("shaders/boat.vert", "shaders/boat.frag");
   rmRenderer->shader = createShader("shaders/raymarching.vert", "shaders/raymarching.frag");
@@ -585,6 +592,7 @@ void createScene(void) {
   water->draw = &drawWater;
   mountRushmore->draw = &drawLightAffectedObject;
   rushmoreLight->draw = &drawLightSource;
+  rushmoreLight2->draw = &drawLightSource;
   skyboxSun->draw = &drawLightSource;
   boat->draw = &drawBoat;
   rmRenderer->draw = &drawRMRenderer;
@@ -618,7 +626,8 @@ void createScene(void) {
   sun->animate = &sunAnimation;
   earth->animate = &earthAnimation;
   moon->animate = &moonAnimation;
-  rushmoreLight->animate = &bjarneLightAnimation;
+  rushmoreLight->animate = &rushmoreLightAnimation;
+  rushmoreLight2->animate = &rushmoreLight2Animation;
   boat->animate = &boatAnimation;
   rmDisplay->animate = &rmDisplayAnimation;
 
@@ -630,6 +639,7 @@ void createScene(void) {
 
   setObjectPosition(mountRushmore, 0, 10.5, -0.5);
   setObjectRotation(mountRushmore, 0, 180, 0);
+  setObjectPosition(rushmoreLight2, 0, 0, -1);
   setObjectPosition(baloon1, -34.47, 159.17, -31.36);
   setObjectPosition(baloon2, 41.61, 145.2, 15.83);
   setObjectPosition(particleLight, 1.0,2.0,0.4);
@@ -694,6 +704,7 @@ void createScene(void) {
   setObjectScale(earth, 0.7, 0.7, 0.7);
   setObjectScale(moon, 0.5, 0.5, 0.5);
   setObjectScale(rushmoreLight, 0.3,0.3,0.3);
+  setObjectScale(rushmoreLight2, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
   setObjectScale(mountRushmore,0.1,0.1,0.1);
   setObjectScale(boat, 0.5, 0.5, 0.5);
@@ -703,13 +714,22 @@ void createScene(void) {
 
   LightSource* light = createLight();
   //Vec4 ambient = {1,1,1,1};
-  Vec4 diffuse = {1,1,1,1};
-  Vec4 specular = {1,1,1,1};  
+  Vec4 diffuse = {0,0,1,1};
+  Vec4 specular = {0,0,1,1};   
   light->diffuse = diffuse;
   light->specular = specular;
 
   rushmoreLight->light=light;
   addLightAffectedBy(mountRushmore, light);
+
+  LightSource* light2 = createLight();
+  diffuse = (Vec4){1,0,0,1};
+  specular = (Vec4){1,0,0,1};
+  light2->diffuse = diffuse;
+  light2->specular = specular;
+
+  rushmoreLight2->light=light2;
+  addLightAffectedBy(mountRushmore, light2);
 
   LightSource* sunLight = createLight();
   //Vec4 sun_ambient = {1,1,1,1};
@@ -781,7 +801,6 @@ void draw() {
 
     drawIlluminatedObjects(&illuminatedObjects);
     drawTransparentObjects(&transparentObjects);
-    printf("\n");
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -807,8 +826,7 @@ int main(void) {
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
-  //glfwSetCursorPosCallback(window, mouse_callback);
-  //glfwSetScrollCallback(window, scroll_callback);
+  glfwSetCursorPosCallback(window, mouse_callback);
 
   glfwMakeContextCurrent(window);
   glewInit();
@@ -819,7 +837,7 @@ int main(void) {
   initializeSkybox();
   loadCubemapTexture();
   scene->shader = createShader("shaders/skybox.vert", "shaders/skybox.frag");
-    
+  
   while (!glfwWindowShouldClose(window)) {
     timeAtDraw = glfwGetTime();
     //float deltaTime = timeAtDraw - timeAtStart;
@@ -837,6 +855,7 @@ int main(void) {
 }
 
 int testForCollisions = 1;
+int pressed = 0;
 void processInput(GLFWwindow *window, Camera* cam)
 {
   assert(window != NULL);
@@ -874,27 +893,32 @@ void processInput(GLFWwindow *window, Camera* cam)
     cam->position.z += temp.z * cameraSpeed;
   }
 
-  if (testForCollisions) {
-    for (int i = 0; i < objCount; i++) {
-      if (isColliding(camera->boundingBox, objects[i]->boundingBox)) {
-        printf("colliding");
-      }
-    }
-  }
+  // if (testForCollisions) {
+  //   for (int i = 0; i < objCount; i++) {
+  //     if (isColliding(camera->boundingBox, objects[i]->boundingBox)) {
+  //       printf("colliding");
+  //     }
+  //   }
+  // }
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX, cam->lastY-1);
+    mouse_callback(window, cam->lastX, cam->lastY-1);
   }
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX, cam->lastY+1);
+    mouse_callback(window, cam->lastX, cam->lastY+1);
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX-1, cam->lastY);
+    mouse_callback(window, cam->lastX-1, cam->lastY);
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    mouse_callback(window, cam, cam->lastX+1, cam->lastY);
+    mouse_callback(window, cam->lastX+1, cam->lastY);
   }
   if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-    drawBoundingBoxes = !drawBoundingBoxes;
+    pressed = 1;
+  } else {
+    if (pressed) {
+      pressed = 0;
+      drawBoundingBoxes = !drawBoundingBoxes;
+    }
   }
 }
