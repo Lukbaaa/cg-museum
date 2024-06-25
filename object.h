@@ -98,11 +98,21 @@ void setObjectRotation(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     setRotation(&obj->transform, x, y, z);
 }
 
-Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
-  assert(in != NULL);
+Vec3 getGlobalPosition(GLfloat in[16], Vec3 vec) {
+    assert(in != NULL);
 
-  Vec3 globalPosition = {v.x + in[12], v.y + in[13], v.z + in[14]};
-  return globalPosition;
+    Vec3 globalPosition;
+    
+    GLfloat x = 0;//vec.x;
+    GLfloat y = 0;//vec.y;
+    GLfloat z = 0;//vec.z;
+    GLfloat w = 1.0f;
+
+    globalPosition.x = in[0] * x + in[4] * y + in[8] * z + in[12] * w;
+    globalPosition.y = in[1] * x + in[5] * y + in[9] * z + in[13] * w;
+    globalPosition.z = in[2] * x + in[6] * y + in[10] * z + in[14] * w;
+
+    return globalPosition;
 }
 
 void addLightAffectedBy(Object* obj, LightSource* light) {
