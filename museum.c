@@ -14,6 +14,9 @@
 #include "particle.h"
 #include "skybox.h"
 
+#include "test_vector.h"
+
+
 
 Camera* cam;
 Object* scene;
@@ -335,6 +338,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 int main(void) {
+  /*
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -379,5 +383,16 @@ int main(void) {
 
   free(objects);
   glfwTerminate();
+  */
+
+  // testStructVec2();
+  // testStructVec3();
+  // testStructVec4();
+  testVec2ToArr();
+  testVec3ToArr();
+  testVec4ToArr();
+  testDotProduct();
+  testCrossProduct();
+  testNormalize();
   return 0;
 }

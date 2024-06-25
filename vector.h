@@ -48,10 +48,25 @@ void printVec3(Vec3 vec) {
   printf("\n");
 }
 
+/**
+ * Funktion berechnet das Skalarprodukt der beiden uebergebenen
+ * Vektoren und gibt das Ergebnis als GLfloat wieder
+ */
+
+/**
+ * @param vec1 
+ * @param vec2 
+ * @return GLfloat Skalarprodukt von vec1 und vec2
+ */
 GLfloat dotProduct(Vec3 vec1, Vec3 vec2) {
   return vec1.x*vec2.x+vec1.y*vec2.y+vec1.z*vec2.z;
 }
 
+/**
+ * @param v1 
+ * @param v2 
+ * @return Vec3 Kreuzprodukt von v1 und v2
+ */
 Vec3 crossProduct(Vec3 v1, Vec3 v2) {
   Vec3 cross;
   cross.x = v1.y*v2.z - v1.z*v2.y;
@@ -60,6 +75,10 @@ Vec3 crossProduct(Vec3 v1, Vec3 v2) {
   return cross;
 }
 
+/**
+ * @param vec 
+ * vec wird normiert
+ */
 void normalize(Vec3* vec) {
   assert(vec != NULL);
 
