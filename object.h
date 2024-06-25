@@ -19,7 +19,9 @@
 #include "transform.h"
 #include "boundingbox.h"
 
-
+/**
+ * Ein Objekt, das im Raum platziert werden kann
+ */
 typedef struct Object {
     GLuint vao;
     int vertCount;
@@ -49,17 +51,26 @@ typedef struct ObjectHardList {
     int length;
 } ObjectHardList;
 
+
+
 void initObjectHardList(ObjectHardList* list) {
     list->objects = NULL;
     list->length=0;
 }
 
+/**
+ * @param list - die Liste, in die das Objekt eingefügt werden soll
+ * @param object - das Objekt, das eingefügt werden soll
+ */
 void objectHardListAdd(ObjectHardList* list, Object object) {
     list->objects = (Object*)realloc(list->objects, sizeof(Object)*((list->length)+1));
     (list->objects)[list->length] = object;
     (list->length)++;
 }
 
+/**
+ * @param obj - das Objekt, das initialisiert werden soll
+ */
 void initObject(Object* obj) {
     assert(obj != NULL);
     obj->vao = 0;
@@ -83,21 +94,45 @@ void initObject(Object* obj) {
     obj->animate = NULL;
 }
 
+/**
+ * @param obj - das Objekt, von welchem die Position geändert werden soll
+ * @param x - die x-Koordinate der neuen Position
+ * @param y - die y-Koordinate der neuen Position
+ * @param z - die z-Koordinate der neuen Position
+ */
 void setObjectPosition(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     assert(obj != NULL);
     setPosition(&obj->transform, x, y, z);
 }
 
+/**
+ * @param obj - das Objekt, von welchem die Skalierung geändert werden soll
+ * @param x - die x-Koordinate der neuen Skalierung
+ * @param y - die y-Koordinate der neuen Skalierung
+ * @param z - die z-Koordinate der neuen Skalierung
+ 
+ */
 void setObjectScale(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     assert(obj != NULL);
     setScale(&obj->transform, x, y, z);
 }
 
+/**
+ * @param obj - das Objekt, von welchem die Rotation geändert werden soll
+ * @param x - die x-Koordinate der neuen Rotation
+ * @param y - die y-Koordinate der neuen Rotation
+ * @param z - die z-Koordinate der neuen Rotation
+ 
+ */
 void setObjectRotation(Object* obj, GLfloat x, GLfloat y, GLfloat z) {
     assert(obj != NULL);
     setRotation(&obj->transform, x, y, z);
 }
 
+/**
+ * @param in - die Matrix, die die Transformation enthält
+ * @param v - der Vektor, der transformiert werden soll
+ */
 Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
   assert(in != NULL);
 
@@ -105,6 +140,10 @@ Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
   return globalPosition;
 }
 
+/**
+ * @param obj - das Objekt, von welchem die globale Position berechnet werden soll
+ * @param light - die Lichtquelle, von welcher das Objekt beleuchtet wird
+ */
 void addLightAffectedBy(Object* obj, LightSource* light) {
   lightSourceListAdd(&obj->lightsAffectedBy, light);
 }

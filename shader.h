@@ -19,6 +19,12 @@ typedef struct Shader {
     GLuint program;
 } Shader;
 
+/**
+* Prüft ob ein Shader erfolgreich kompiliert wurde
+* @param shader - Shader
+* @param type - Typ des Shaders
+* @param path - Pfad zur Shader Datei
+*/
 void checkCompileErrors(unsigned int shader, const char* type, const char* path) {
     assert(shader > 0);
     assert(type != NULL);
@@ -46,6 +52,12 @@ void checkCompileErrors(unsigned int shader, const char* type, const char* path)
     }
 }
 
+/**
+* Erstellt einen Shader aus den angegebenen Dateien
+* @param vertexPath - Pfad zur Vertex Shader Datei
+* @param fragmentPath - Pfad zur Fragment Shader Datei
+* @return Shader
+*/
 Shader* createShader(const char* vertexPath, const char* fragmentPath) {
     assert(vertexPath != NULL);
     assert(fragmentPath != NULL);

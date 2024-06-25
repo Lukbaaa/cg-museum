@@ -15,13 +15,23 @@
 #include <GL/glew.h>
 
 //#define M_PI 3.14159265358979323846
-
+/**
+ * Kopiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param n - Anzahl der Elemente
+ */
 void copyMat(GLfloat* out, GLfloat* in, int n) {
   assert(out != NULL);
   assert(in != NULL);
   for (int i = 0; i < n; i++) { out[i] = in[i]; }
 }
 
+/**
+ * Gibt eine Matrix aus
+ * @param mat - Matrix
+ * @param in - Transponieren
+*/ 
 void printMat4(GLfloat mat[16], int transpose) { 
   assert(mat != NULL);
   for (int i = 0; i < 4; i++) {
@@ -36,6 +46,10 @@ void printMat4(GLfloat mat[16], int transpose) {
   }
 }
 
+/**
+ * Erstellt eine Identitätsmatrix
+ * @param out - Ausgabe Matrix
+ */
 void identity(GLfloat* out) {
   assert(out != NULL);
   for (int i = 0; i < 16; i++) {
@@ -47,6 +61,12 @@ void identity(GLfloat* out) {
   }
 }
 
+/**
+ * Multipliziert zwei Matrizen
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param v - Eingabe Matrix
+ */
 void mat4Multiplication(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
@@ -65,6 +85,12 @@ void mat4Multiplication(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   copyMat(out, temp, 16);
 }
 
+/**
+ * Translaiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param v - Eingabe Matrix
+ */
 void translate(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
@@ -73,6 +99,12 @@ void translate(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   mat4Multiplication(out, in, v);
 }
 
+/**
+ * Translaiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param v - Eingabe Matrix
+ */
 void translateParticleVector(GLfloat* out, GLfloat in[16], GLfloat v[3]) {
     assert(out != NULL);
     assert(in != NULL);
@@ -84,6 +116,11 @@ void translateParticleVector(GLfloat* out, GLfloat in[16], GLfloat v[3]) {
     out[15] = 1.0f;
 }
 
+/**
+ * Translaiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Vektor
+ */
 void createTransMatVec3(GLfloat* out, Vec3 vec) {
   assert(out != NULL);
 
@@ -93,6 +130,13 @@ void createTransMatVec3(GLfloat* out, Vec3 vec) {
   out[14] = vec.z;
 }
 
+/**
+ * Translaiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param x - x-Wert
+ * @param y - y-Wert
+ * @param z - z-Wert
+ */
 void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   assert(out != NULL);
 
@@ -102,6 +146,12 @@ void createTransMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   out[14] = z;
 }
 
+/**
+ * Skaliert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param v - Eingabe Matrix
+ */
 void scale(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   assert(out != NULL);
   assert(in != NULL);
@@ -110,6 +160,12 @@ void scale(GLfloat* out, GLfloat in[16], GLfloat v[16]) {
   mat4Multiplication(out, in, v);
 }
 
+/**
+ * Skaliert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param v - Eingabe Matrix
+ */
 void createScaleMatVec3(GLfloat* out, Vec3 vec) {
   assert(out != NULL);
 
@@ -119,6 +175,13 @@ void createScaleMatVec3(GLfloat* out, Vec3 vec) {
   out[10] = vec.z;
 }
 
+/**
+ * Skaliert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param x - x-Wert
+ * @param y - y-Wert
+ * @param z - z-Wert
+ */
 void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   assert(out != NULL);
 
@@ -127,7 +190,12 @@ void createScaleMat3f(GLfloat* out, GLfloat x, GLfloat y, GLfloat z) {
   out[5]  = y;
   out[10] = z;
 }
-
+/**
+ * Rotiert eine Matrix um die x-Achse
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param a - Winkel
+ */
 void rotatex(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
@@ -142,6 +210,12 @@ void rotatex(GLfloat* out, GLfloat in[16], double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
+/**
+ * Rotiert eine Matrix um die y-Achse
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param a - Winkel
+ */
 void rotatey(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
@@ -156,6 +230,12 @@ void rotatey(GLfloat* out, GLfloat in[16], double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
+/**
+ * Rotiert eine Matrix um die z-Achse
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param a - Winkel
+ */
 void rotatez(GLfloat* out, GLfloat in[16], double a) {
   assert(out != NULL);
   assert(in != NULL);
@@ -170,12 +250,23 @@ void rotatez(GLfloat* out, GLfloat in[16], double a) {
   mat4Multiplication(out, in, rotMat);
 }
 
+/**
+ * Rotiert eine Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ * @param rotation - Rotationsvektor
+ */
 void rotate(GLfloat* out, GLfloat in[16], Vec3 rotation) {
   rotatex(out, in, rotation.x);
   rotatey(out, in, rotation.y);
   rotatez(out, in, rotation.z);
 }
 
+/**
+ * Transponiert eine 4x4 Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ */
 void transpose4(GLfloat out[16], GLfloat in[16]) {
   assert(out != NULL);
   assert(in != NULL);
@@ -189,6 +280,11 @@ void transpose4(GLfloat out[16], GLfloat in[16]) {
   copyMat(out, temp, 16);
 }
 
+/**
+ * Berechnet die Inverse einer 4x4 Matrix
+ * @param out - Ausgabe Matrix
+ * @param in - Eingabe Matrix
+ */
 int inverse4(GLfloat out[16], GLfloat in[16]) {
   assert(in != NULL);
   assert(out != NULL);

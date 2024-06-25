@@ -20,6 +20,7 @@ typedef struct LightSource {
     Vec4 specular;
 } LightSource;
 
+
 LightSource* createLight(void) {
     return (LightSource*)malloc(sizeof(LightSource));
 }

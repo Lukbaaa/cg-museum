@@ -18,6 +18,12 @@ typedef struct BoundingBox {
 int drawBoundingBoxes = 0;
 GLuint boundingBoxProgram;
 
+/**
+* Erstellt eine Bounding Box mit den gegebenen Dimensionen
+* @param width - Breite der Bounding Box
+* @param length - Länge der Bounding Box
+* @param depth - Tiefe der Bounding Box
+*/
 BoundingBox createBoundingBox(int width, int length, int depth) {
     BoundingBox box;
 
@@ -38,6 +44,11 @@ BoundingBox createBoundingBox(int width, int length, int depth) {
     return box;
 }
 
+/**
+* prüft ob ein Punkt innerhalb einer Bounding Box liegt
+* @param point - Punkt der geprüft werden soll
+* @param box - Bounding Box in der der Punkt geprüft werden soll
+*/
 int isInside(Vec3 point, BoundingBox box) {
     if (point.x >= box.topleftfront.x && point.x <= box.toprightfront.x &&
         point.y >= box.bottomleftfront.y && point.y <= box.topleftfront.y &&
@@ -47,6 +58,11 @@ int isInside(Vec3 point, BoundingBox box) {
     return 0;
 }
 
+/**
+* prüft ob zwei Bounding Boxen kollidieren
+* @param box1 - erste Bounding Box
+* @param box2 - zweite Bounding Box
+*/
 int isColliding(BoundingBox box1, BoundingBox box2) {
     if (isInside(box1.topleftfront, box2) || isInside(box1.toprightfront, box2) ||
         isInside(box1.bottomleftfront, box2) || isInside(box1.bottomrightfront, box2) ||
@@ -56,7 +72,11 @@ int isColliding(BoundingBox box1, BoundingBox box2) {
     }
     return 0;
 }
-
+/**
+* Erstellt ein Vertex Array für die Bounding Box um sie zu zeichnen
+* @param out - Array in das die Vertices geschrieben werden
+* @param boundingBox - Bounding Box die gezeichnet werden soll
+*/
 void createBoundingBoxVertexArray(GLfloat out[32*3], BoundingBox boundingBox) {
     GLfloat boundingBoxVerts[36*3] = {
         //front

@@ -31,16 +31,32 @@ typedef struct Vec4 {
     GLfloat a;
 } Vec4;
 
+/**
+* Vektor2d zu Array
+* @param out: Array, in das der Vektor geschrieben wird
+* @param vec: Vektor, der in das Array geschrieben wird
+*/
 void vec2ToArr(GLfloat out[2], Vec2 vec) {
     out[0] = vec.x;
     out[1] = vec.y;
 }
 
+/**
+* Vektor3d zu Array
+* @param out: Array, in das der Vektor geschrieben wird
+* @param vec: Vektor, der in das Array geschrieben wird
+*/
 void vec3ToArr(GLfloat out[3], Vec3 vec) {
     out[0] = vec.x;
     out[1] = vec.y;
     out[2] = vec.z;
 }
+
+/**
+* Vektor4d zu Array
+* @param out: Array, in das der Vektor geschrieben wird
+* @param vec: Vektor, der in das Array geschrieben wird
+*/
 void vec4ToArr(GLfloat out[4], Vec4 vec) {
     out[0] = vec.r;
     out[1] = vec.g;
@@ -48,6 +64,10 @@ void vec4ToArr(GLfloat out[4], Vec4 vec) {
     out[3] = vec.a;
 }
 
+/**
+* Print Funktion für Vektor3d
+* @param vec: Vektor, der ausgegeben wird
+*/
 void printVec3(Vec3 vec) {
   for (int i = 0; i < 3; i++) {
     printf("%f ", *(((float*)&(vec.x))+i));
@@ -55,6 +75,11 @@ void printVec3(Vec3 vec) {
   printf("\n");
 }
 
+
+/**
+* Print Funktion für Vektor4d
+* @param vec: Vektor, der ausgegeben wird
+*/
 void printVec4(Vec4 vec) {
   for (int i = 0; i < 4; i++) {
     printf("%f ", *(((float*)&(vec.r))+i));
@@ -62,6 +87,11 @@ void printVec4(Vec4 vec) {
   printf("\n");
 }
 
+/**
+* Skalarprodukt von zwei Vektoren
+* @param vec1: erster Vektor
+* @param vec2: zweiter Vektor
+*/
 GLfloat dotProduct(Vec3 vec1, Vec3 vec2) {
   return vec1.x*vec2.x+vec1.y*vec2.y+vec1.z*vec2.z;
 }

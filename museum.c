@@ -28,6 +28,8 @@ double timeAtDraw = 0;
 
 Object** objects;
 int objCount = 0;   
+
+
 Object* createObject(const char* objFilePath) {
   objects = (Object**)realloc(objects, sizeof(Object*)*(objCount+1));
   objects[objCount] = createVAOwithObj(objFilePath);

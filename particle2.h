@@ -43,8 +43,7 @@ Vec4 specular = {1,1,1,1};
 
 Object* particleObject;
 Object* partList[NUM_PARTICLES];
-// Object* ParticleSystemObject;
-
+// Object* ParticleSystemObject
 ParticleSystem ps;
 
 // Particle particles[NUM_PARTICLES];
@@ -71,6 +70,10 @@ const GLuint cube_indices[] = {
 
 GLuint vertexbufferparticles, elementbufferparticles;
 
+
+/**
+* Initialisiert die Buffer arrays in denen die Partikel gespeichert werden
+*/
 void initBuffers() {
 
     // glGenVertexArrays(1, &particleObject->vao);
@@ -87,6 +90,10 @@ void initBuffers() {
     glBindVertexArray(0);
 
 }
+
+/**
+* Initialisiert das Partikelsystem
+*/
 void initParticles() {
 
     particleObject->light = createLight();  
@@ -110,6 +117,10 @@ void initParticles() {
     initBuffers();
 }
 
+/**
+* Partikeln position und velocity werden aktualisiert
+* @param deltaTime - Zeit seit dem letzten Frame
+*/
 void updateParticles(float deltaTime) {
     for (int i = 0; i < NUM_PARTICLES; i++) {
         ps.particles[i].life -= deltaTime/1.6;

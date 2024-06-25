@@ -1,4 +1,4 @@
-#ifndef OBJECTLOADER_H
+ifndef OBJECTLOADER_H
 #define OBJECTLOADER_H
 
 #ifdef __APPLE__
@@ -17,7 +17,12 @@
 #include <GL/glew.h>
 
 #include "object.h"
-
+/**
+ * Schreibt ein Array in eine Datei
+ * @param array - Das Array, in das die Werte geschrieben werden
+ * @param size - Die Größe des Arrays (Schätzwert)
+ * @param filename - Der Dateiname
+ */
 void writeArrayToFile(float* array, int size, const char* filename) {
     assert(array != NULL);
 
@@ -38,6 +43,10 @@ void writeArrayToFile(float* array, int size, const char* filename) {
     fclose(file);
 }
 
+/**
+ * Lädt ein Objekt aus einer .obj Datei
+ * @param objFilePath - Der Dateiname
+ */
 Object* createVAOwithObj(const char* objFilePath) {
 
     Object* obj = (Object*)malloc(sizeof(Object));
@@ -47,8 +56,6 @@ Object* createVAOwithObj(const char* objFilePath) {
         obj->shouldRender = 0;
         return obj;
     }
-
-    //clock_t begin = clock();
 
     FILE* objFile = fopen(objFilePath, "r");
     if (objFile == NULL) {
@@ -213,9 +220,6 @@ Object* createVAOwithObj(const char* objFilePath) {
     obj->boundingBoxVao = boundingBoxVAO;
 
     fclose(objFile);
-    //clock_t end = clock();
-    //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    //printf("Object %s took %lf\n", objFilePath, time_spent);
     return obj;
 }
 

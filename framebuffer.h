@@ -3,6 +3,10 @@
 
 #include <GL/glew.h>
 
+/**
+ * Erstellen eines Framebuffers
+ * @return GLuint - stelle im Speicher des Grafikprozessors wo der Framebuffer liegt
+ */
 int createRenderTarget() {
     unsigned int target;
     glGenFramebuffers(1, &target);
@@ -23,6 +27,11 @@ int createRenderTarget() {
     return target;
 }
 
+/**
+ * Anhängen eines RenderTextures an einen Framebuffer
+ * @param target - Der Framebuffer
+ * @param renderTexture - Das RenderTexture
+ */
 void attachRenderTexture(GLuint target, GLuint renderTexture) {
     glBindFramebuffer(GL_FRAMEBUFFER, target); 
     glBindTexture(GL_TEXTURE_2D, renderTexture);
