@@ -175,7 +175,7 @@ void drawBoat(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
-void drawBjarne(Object* obj) {
+void drawBaloon(Object* obj) {
 
   int program = obj->shader->program;
   glUseProgram(program);
@@ -256,6 +256,8 @@ void drawRopes(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
 
+  activateTextures(obj);
+
   glBindVertexArray(obj->vao);
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
@@ -301,11 +303,11 @@ void sunAnimation(Object* obj) {
 }
 
 void earthAnimation(Object* obj) {
-  setObjectRotation(obj, 0, glfwGetTime()*100,0);
+  setObjectRotation(obj, 0, glfwGetTime()*50,0);
 }
 
 void moonAnimation(Object* obj) {
-  setObjectRotation(obj, 0, glfwGetTime()*50,0);
+  setObjectRotation(obj, 0, -glfwGetTime()*50,0);
 }
 
 void bjarneLightAnimation(Object* obj) {
@@ -594,8 +596,8 @@ void createScene(void) {
   houseRoof->draw = &drawWithTexture;
   rope1->draw = &drawRopes;
   rope2->draw = &drawRopes;
-  baloon1->draw = &drawBjarne;
-  baloon2->draw = &drawBjarne;
+  baloon1->draw = &drawBaloon;
+  baloon2->draw = &drawBaloon;
   vitrinePodest->draw = &drawWithTexture;
   particleLight->draw = &drawWithTexture;
   vitrineFront->draw = &drawWithTexture;

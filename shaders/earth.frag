@@ -58,7 +58,7 @@ void main() {
     vec4 day = texture(tex0, texCoord);
     vec4 night = texture(tex1, texCoord);
     vec4 ocean = texture(tex2, texCoord);
-    vec4 clouds = texture(tex3, texCoord);//vec2(texCoord.x+time/5, texCoord.y)); 
+    vec4 clouds = texture(tex3, vec2(texCoord.x-time/10, texCoord.y)); 
 
     vec4 day_night_ocean = mix(night, day, diff*diffuseStrength) + ocean*spec*specularStrength;
     FragColor = mix(day_night_ocean, clouds, clouds.a);
