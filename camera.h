@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 
 #include "vector.h"
+#include "boundingbox.h"
 #include "matrix_functions.h"
 
 typedef struct Camera {
@@ -29,6 +30,7 @@ typedef struct Camera {
   GLfloat lastX;
   GLfloat lastY;
   GLfloat fov;
+  BoundingBox boundingBox;
   int active;
 } Camera;
 
@@ -46,6 +48,7 @@ void initCamera(Camera* cam) {
   cam->lastX =  800.0f / 2.0;
   cam->lastY =  600.0 / 2.0;
   cam->fov   =  45.0f;
+  cam->boundingBox = createBoundingBox(1,0.2,1);
 }
 
 Camera* createCamera() {

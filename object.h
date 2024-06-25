@@ -17,17 +17,8 @@
 #include "camera.h"
 #include "materials.h"
 #include "transform.h"
+#include "boundingbox.h"
 
-typedef struct BoundingBox {
-    Vec3 topleftfront;
-    Vec3 toprightfront;
-    Vec3 bottomleftfront;
-    Vec3 bottomrightfront;
-    Vec3 topleftback;
-    Vec3 toprightback;
-    Vec3 bottomleftback;
-    Vec3 bottomrightback;
-} BoundingBox;
 
 typedef struct Object {
     GLuint vao;
@@ -112,25 +103,6 @@ Vec3 getGlobalPosition(GLfloat in[16], Vec3 v) {
 
   Vec3 globalPosition = {v.x + in[12], v.y + in[13], v.z + in[14]};
   return globalPosition;
-}
-
-int isInside(Vec3 point, BoundingBox box) {
-    if (point.x >= box.topleftfront.x && point.x <= box.toprightfront.x &&
-        point.y >= box.bottomleftfront.y && point.y <= box.topleftfront.y &&
-        point.z >= box.topleftfront.z && point.z <= box.topleftback.z) {
-        return 1;
-    }
-    return 0;
-}
-
-int isColliding(BoundingBox box1, BoundingBox box2) {
-    if (isInside(box1.topleftfront, box2) || isInside(box1.toprightfront, box2) ||
-        isInside(box1.bottomleftfront, box2) || isInside(box1.bottomrightfront, box2) ||
-        isInside(box1.topleftback, box2) || isInside(box1.toprightback, box2) ||
-        isInside(box1.bottomleftback, box2) || isInside(box1.bottomrightback, box2)) {
-        return 1;
-    }
-    return 0;
 }
 
 void addLightAffectedBy(Object* obj, LightSource* light) {

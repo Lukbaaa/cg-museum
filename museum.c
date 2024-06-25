@@ -36,13 +36,27 @@ Object* createObject(const char* objFilePath) {
 }
 double timeAtStart;
 
-void drawTextures(Object* obj) {
-  for (int j = 0; j < obj->textureCount; j++) {
+void activateTextures(Object* obj) {
+  for (int i = 0; i < obj->textureCount; i++) {
     char uniformName[15]; 
-    sprintf(uniformName, "tex%d", j);
-    glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), j);
-    glActiveTexture(GL_TEXTURE0+j);
-    glBindTexture(GL_TEXTURE_2D, obj->textures[j]);
+    sprintf(uniformName, "tex%d", i);
+    glUniform1i(glGetUniformLocation(obj->shader->program, uniformName), i);
+    glActiveTexture(GL_TEXTURE0+i);
+    glBindTexture(GL_TEXTURE_2D, obj->textures[i]);
+  }
+}
+
+void sendLightParams(Object* obj) {
+  for(int i = 0; i < obj->lightsAffectedBy.length; i++) {
+    char uniformName[30]; 
+    sprintf(uniformName, "light%d.position", i);
+    glUniform3fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->position));
+    sprintf(uniformName, "light%d.ambient", i);
+    glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->ambient));
+    sprintf(uniformName, "light%d.diffuse", i);
+    glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->diffuse));
+    sprintf(uniformName, "light%d.specular", i);
+    glUniform4fv(glGetUniformLocation(obj->shader->program, uniformName), 1, (float*)&(obj->lightsAffectedBy.objects[i]->specular));
   }
 }
 
@@ -131,7 +145,7 @@ void drawWater(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
 
-  drawTextures(obj);
+  activateTextures(obj);
 
   glBindVertexArray(obj->vao);
 
@@ -147,7 +161,7 @@ void drawBoat(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
 
-  drawTextures(obj);
+  activateTextures(obj);
 
   glBindVertexArray(obj->vao);
   
@@ -175,12 +189,8 @@ void drawBjarne(Object* obj) {
   glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
   glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
   glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
-  for(int i = 0; i < obj->lightsAffectedBy.length; i++) {
-    glUniform3fv(glGetUniformLocation(program, "light.position"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->position));
-    glUniform4fv(glGetUniformLocation(program, "light.ambient"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->ambient));
-    glUniform4fv(glGetUniformLocation(program, "light.diffuse"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->diffuse));
-    glUniform4fv(glGetUniformLocation(program, "light.specular"), 1, (float*)&(obj->lightsAffectedBy.objects[i]->specular));
-  }
+
+  sendLightParams(obj);
 
   GLfloat normalMatrix[16];
   inverse4(normalMatrix, obj->model);
@@ -231,7 +241,7 @@ void drawWithTexture(Object* obj) {
   int program = obj->shader->program;
   glUseProgram(program);
 
-  drawTextures(obj);
+  activateTextures(obj);
 
   glBindVertexArray(obj->vao);
 
@@ -242,21 +252,60 @@ void drawWithTexture(Object* obj) {
   glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
+void drawRopes(Object* obj) {
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+}
+
+void drawEarth(Object* obj) {
+  glDisable(GL_BLEND);
+  int program = obj->shader->program;
+  glUseProgram(program);
+
+  glBindVertexArray(obj->vao);
+  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
+  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
+  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
+  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
+  glUniform3fv(glGetUniformLocation(program, "viewPos"), 1, (float*)&(camera->position));
+  glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
+  glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
+  glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
+  glUniform4fv(glGetUniformLocation(program, "material.specular"), 1, obj->material.specular);
+  glUniform1f(glGetUniformLocation(program, "material.shininess"), obj->material.shininess);
+  printVec3(obj->lightsAffectedBy.objects[0]->position);
+  printVec3(getGlobalPosition(obj->model, obj->transform.position));
+  sendLightParams(obj);
+  activateTextures(obj);
+
+  GLfloat normalMatrix[16];
+  identity(normalMatrix);
+
+  inverse4(obj->model, normalMatrix);
+  transpose4(normalMatrix, normalMatrix);
+  glUniformMatrix4fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, normalMatrix);
+
+  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
+  glEnable(GL_BLEND);
+}
 
 void sunAnimation(Object* obj) {
-  //setObjectPosition(obj, 0, 0, 0);
   setObjectRotation(obj, 0, glfwGetTime()*10, 0);
 }
 
 void earthAnimation(Object* obj) {
-  setObjectPosition(obj, 7,0,0);
   setObjectRotation(obj, 0, glfwGetTime()*100,0);
 }
 
 void moonAnimation(Object* obj) {
-  setObjectPosition(obj, 2,0,0);
   setObjectRotation(obj, 0, glfwGetTime()*50,0);
-  setObjectScale(obj, 0.3, 0.3, 0.3);
 }
 
 void bjarneLightAnimation(Object* obj) {
@@ -272,18 +321,6 @@ void rmDisplayAnimation(Object* obj) {
   float x = obj->transform.position.x - camera->position.x;
   float y = obj->transform.position.z - camera->position.z;
   setObjectRotation(obj, 0, 180-atan2(y,x)*180/M_PI, 0);
-}
-
-void drawRopes(Object* obj) {
-  int program = obj->shader->program;
-  glUseProgram(program);
-
-  glBindVertexArray(obj->vao);
-  glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
-  glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
-  glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform1f(glGetUniformLocation(program, "time"), timeAtDraw);
-  glDrawArrays(GL_TRIANGLES, 0, obj->vertCount);
 }
 
 void createScene(void) {
@@ -318,10 +355,10 @@ void createScene(void) {
   Object* particleLight = createObject("objects/cube.obj");
   
 
-  Object* vitrineFront = createObject("objects/house_objects/vitrine/glas_front.obj"); 
-  Object* vitrineRight = createObject("objects/house_objects/vitrine/glas_right.obj");
-  Object* vitrineLeft = createObject("objects/house_objects/vitrine/glas_left.obj"); 
-  Object* vitrineBack = createObject("objects/house_objects/vitrine/glas_back.obj"); 
+  Object* vitrineFront = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
+  Object* vitrineRight = createObject("objects/house_objects/vitrine/glas_vitrine.obj");
+  Object* vitrineLeft = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
+  Object* vitrineBack = createObject("objects/house_objects/vitrine/glas_vitrine.obj"); 
   Object* vitrineTop = createObject("objects/house_objects/vitrine/top.obj"); 
   Object* vitrinePodest = createObject("objects/house_objects/vitrine/podest.obj");
 
@@ -393,14 +430,14 @@ void createScene(void) {
 
   // Boat
   sgAddChild(house,vitrine2);
-  sgAddChild(vitrine2, water);
   sgAddChild(vitrine2,vitrinePodest);
-  sgAddChild(water, boat);
   sgAddChild(vitrine2,vitrineFront);
   sgAddChild(vitrine2,vitrineBack);
   sgAddChild(vitrine2,vitrineLeft);
   sgAddChild(vitrine2,vitrineRight);
   sgAddChild(vitrine2,vitrineTop);
+  sgAddChild(vitrine2, water);
+  sgAddChild(water, boat);
 
   // mount Rushmore
   sgAddChild(house,vitrine3);
@@ -418,13 +455,13 @@ void createScene(void) {
   // sgAddChild(vitrine4, rmRenderer); 
   // sgAddChild(vitrine4, rmDisplay);
 
-  sgAddChild(vitrine4, particleObject);
   sgAddChild(vitrine4,vitrinePodest);
   sgAddChild(vitrine4,vitrineFront);
   sgAddChild(vitrine4,vitrineBack);
   sgAddChild(vitrine4,vitrineLeft);
   sgAddChild(vitrine4,vitrineRight);
   sgAddChild(vitrine4,vitrineTop);
+  sgAddChild(vitrine4, particleObject);
 
   sgAddChild(root, particleLight);
 
@@ -436,8 +473,8 @@ void createScene(void) {
   printf("creating shaders...\n");
   Shader* textureShader = createShader("shaders/texture.vert", "shaders/texture.frag");
   sun->shader = textureShader;
-  earth->shader = textureShader;
   moon->shader = textureShader;
+  earth->shader = createShader("shaders/earth.vert", "shaders/earth.frag");
   houseWindow1->shader = textureShader;
   houseWindow2->shader = textureShader;
   houseWindow3->shader = textureShader;
@@ -510,21 +547,28 @@ void createScene(void) {
   loadTexture(rope1, "textures/rope1.jpg",0);
   loadTexture(rope2, "textures/rope1.jpg",0);
   
-  
   loadTexture(vitrinePodest, "textures/black_marble_texture.jpg",0);
   loadTexture(vitrineTop,"textures/black_marble_texture.jpg",0);
   loadTexture(vitrineFront,"textures/podest_glass.png",0);
   loadTexture(vitrineBack,"textures/podest_glass.png",0);
   loadTexture(vitrineRight,"textures/podest_glass.png",0);
   loadTexture(vitrineLeft,"textures/podest_glass.png",0);
+
+  loadTexture(earth, "textures/earth_day.png", 0);
+  loadTexture(earth, "textures/earth_night.png", 1);
+  loadTexture(earth, "textures/earth_ocean_mask.png", 2);
+  loadTexture(earth, "textures/earth_clouds.png", 3);
+
+  earth->material = lightMat;
+ 
   Texture rmTexture = loadTexture(rmDisplay, NULL, 0);
   attachRenderTexture(rmRenderer->renderTarget, rmTexture);
-  // printf("finished loading textures!\n");
+  printf("finished loading textures!\n");
 
   // draw functions
   sun->draw = &drawWithTexture;
-  earth->draw = &drawWithTexture;
   moon->draw = &drawWithTexture;
+  earth->draw = &drawEarth;
   houseWindow1->draw = &drawWithTexture;
   houseWindow2->draw = &drawWithTexture;
   houseWindow3->draw = &drawWithTexture;
@@ -539,7 +583,7 @@ void createScene(void) {
   skyboxSun->draw = &drawBjarneLight;
   boat->draw = &drawBoat;
   rmRenderer->draw = &drawRMRenderer;
-  rmDisplay->draw = &drawTextures;
+  rmDisplay->draw = &activateTextures;
   houseFloor->draw = &drawWithTexture;
   houseFundamentFront_L->draw = &drawWithTexture;
   houseFundamentFront_M->draw = &drawWithTexture;
@@ -611,20 +655,39 @@ void createScene(void) {
   setObjectPosition(rope1, 29.95, 41.81, 23.10);
   setObjectPosition(rope2, -36.15, 40.73, -34.64);
 
-  setObjectPosition(vitrine1,11.25,-15,16);
-  setObjectPosition(vitrine2,11.25,-15,-16);
-  setObjectPosition(vitrine3,-11.25,-15,16);
-  setObjectPosition(vitrine4,-11.25,-15,-16);
+  setObjectRotation(vitrineBack, 0, 90, 0);
+  setObjectRotation(vitrineFront, 0, 90, 0);
+
+  setObjectPosition(vitrinePodest, 0, 0, 0);
+  setObjectPosition(vitrineTop, 0, 17.2, 0);
+  setObjectPosition(vitrineFront, 0, 0, 4.34);
+  setObjectPosition(vitrineBack, 0, 0, -4.34);
+  setObjectPosition(vitrineLeft, -4.34, 0, 0);
+  setObjectPosition(vitrineRight, 4.34, 0, 0);
+
+  setObjectPosition(vitrine1,11.25, 0.1, 16);
+  setObjectPosition(vitrine2,11.25, 0.1, -16);
+  setObjectPosition(vitrine3,-11.25, 0.1, 16);
+  setObjectPosition(vitrine4,-11.25, 0.1, -16);
+
+  setObjectPosition(sun, 0, 10, 0);
+  setObjectPosition(earth, 4,0,0);
+  setObjectPosition(moon, 2,0,0);
+
+  setObjectPosition(particleObject, 0, 50, 0);
+  setObjectPosition(water, 0, 10, 0);
 
   setObjectPosition(rmRenderer, -15, 0, 0);
   setObjectPosition(rmDisplay, -10, 0, 0);
   // setObjectPosition(rmRenderer, 0, 1, 0);
   // setObjectPosition(rmDisplay, 0, 1, 0); 
-  setObjectPosition(particleObject, -1, -1, 1);
+  //setObjectPosition(particleObject, -1, -1, 1);
 
   setObjectPosition(skyboxSun,10.0,40.0,50.0);
   setObjectScale(particleObject, 0.15, 0.15, 0.15);
-  setObjectScale(sun, 0.5,0.5,0.5);
+  setObjectScale(sun, 0.8,0.8,0.8);
+  setObjectScale(earth, 0.7, 0.7, 0.7);
+  setObjectScale(moon, 0.5, 0.5, 0.5);
   setObjectScale(bjarneLight, 0.3,0.3,0.3);
   setObjectScale(house,0.1,0.1,0.1);
   //setObjectScale(mountRushmore,0.1,0.1,0.1);
@@ -651,8 +714,14 @@ void createScene(void) {
   sunLight->specular = sun_specular;
 
   skyboxSun->light = sunLight;
-  addLightAffectedBy(baloon1,sunLight);
-  addLightAffectedBy(baloon2,sunLight);
+  addLightAffectedBy(baloon1, sunLight);
+  addLightAffectedBy(baloon2, sunLight);
+
+  LightSource* miniSunLight = createLight();
+  miniSunLight->diffuse = sun_diffuse;
+  miniSunLight->specular = sun_specular;
+  sun->light = miniSunLight;
+  addLightAffectedBy(earth, miniSunLight);
 
 
   vitrineBack->isTransparent = 1; 
@@ -766,6 +835,7 @@ int main(void) {
   return 0;
 }
 
+int testForCollisions = 1;
 void processInput(GLFWwindow *window, Camera* cam)
 {
   assert(window != NULL);
@@ -801,6 +871,14 @@ void processInput(GLFWwindow *window, Camera* cam)
     cam->position.x += temp.x * cameraSpeed;
     cam->position.y += temp.y * cameraSpeed;
     cam->position.z += temp.z * cameraSpeed;
+  }
+
+  if (testForCollisions) {
+    for (int i = 0; i < objCount; i++) {
+      if (isColliding(camera->boundingBox, objects[i]->boundingBox)) {
+        printf("colliding");
+      }
+    }
   }
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {

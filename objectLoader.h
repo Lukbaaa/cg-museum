@@ -133,63 +133,8 @@ Object* createVAOwithObj(const char* objFilePath) {
         {right,bottom,back},
     };
 
-    GLfloat boundingBoxVerts[36*3] = {
-        //front
-        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
-        boundingBox.toprightfront.x,boundingBox.toprightfront.y,boundingBox.toprightfront.z,
-        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
-
-        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
-        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
-        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
-        
-        //left
-        boundingBox.topleftfront.x,boundingBox.topleftfront.y,boundingBox.topleftfront.z,
-        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
-        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
-
-        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
-        boundingBox.bottomleftback.x,boundingBox.bottomleftback.y,boundingBox.bottomleftback.z,
-        boundingBox.bottomleftfront.x,boundingBox.bottomleftfront.y,boundingBox.bottomleftfront.z,
-
-        //back
-        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
-        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
-        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
-
-        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
-        boundingBox.bottomleftback.x,boundingBox.bottomleftback.y,boundingBox.bottomleftback.z,
-        boundingBox.topleftback.x,boundingBox.topleftback.y,boundingBox.topleftback.z,
-
-        //right
-        boundingBox.toprightfront.x,boundingBox.toprightfront.y,boundingBox.toprightfront.z,
-        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
-        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
-
-        boundingBox.toprightback.x,boundingBox.toprightback.y,boundingBox.toprightback.z,
-        boundingBox.bottomrightback.x,boundingBox.bottomrightback.y,boundingBox.bottomrightback.z,
-        boundingBox.bottomrightfront.x,boundingBox.bottomrightfront.y,boundingBox.bottomrightfront.z,
-
-        //top
-        boundingBox.topleftfront.x, boundingBox.topleftfront.y, boundingBox.topleftfront.z,
-        boundingBox.topleftback.x, boundingBox.topleftback.y, boundingBox.topleftback.z,
-        boundingBox.toprightback.x, boundingBox.toprightback.y, boundingBox.toprightback.z,
-
-        boundingBox.toprightback.x, boundingBox.toprightback.y, boundingBox.toprightback.z,
-        boundingBox.toprightfront.x, boundingBox.toprightfront.y, boundingBox.toprightfront.z,
-        boundingBox.topleftfront.x, boundingBox.topleftfront.y, boundingBox.topleftfront.z,
-
-        //bottom
-        boundingBox.bottomleftfront.x, boundingBox.bottomleftfront.y, boundingBox.bottomleftfront.z,
-        boundingBox.bottomleftback.x, boundingBox.bottomleftback.y, boundingBox.bottomleftback.z,
-        boundingBox.bottomrightback.x, boundingBox.bottomrightback.y, boundingBox.bottomrightback.z,
-
-        boundingBox.bottomrightback.x, boundingBox.bottomrightback.y, boundingBox.bottomrightback.z,
-        boundingBox.bottomrightfront.x, boundingBox.bottomrightfront.y, boundingBox.bottomrightfront.z,
-        boundingBox.bottomleftfront.x, boundingBox.bottomleftfront.y, boundingBox.bottomleftfront.z,
-
-
-    };
+    GLfloat boundingBoxVerts[36*3];
+    createBoundingBoxVertexArray(boundingBoxVerts, boundingBox);
 
     vertices = (GLfloat*)realloc(vertices, vertSize*sizeof(GLfloat));
     textures = (GLfloat*)realloc(textures, textSize*sizeof(GLfloat));

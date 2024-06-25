@@ -11,8 +11,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <GL/glew.h>
+
 #include "list.h"
 #include "object.h"
+#include "boundingbox.h"
 #include "matrix_functions.h"
 
 
@@ -68,24 +70,10 @@ void drawIlluminatedObjects(ObjectHardList* objects) {
 }
 
 void drawTransparentObjects(ObjectHardList* objects) {
-    // for (int i = 0; i < objects->length; i++) {
-    //     //printf("%f ", distToCamera(objects->objects[i].globalPosition, camera->position));
-    //     printVec3(objects->objects[i].transform.position);
-    // }
-    printf("\n");
-
     sortObjectsByDist(objects);
 
-    // for (int i = 0; i < objects->length; i++) {
-    //     //printf("%f ", distToCamera(objects->objects[i].globalPosition, camera->position));
-    //     printVec3(objects->objects[i].transform.position);
-    // }
-    //printf("\n");
     drawObjectsFromList(objects);
 }
-
-int drawBoundingBoxes = 0;
-GLuint boundingBoxProgram;
 
 void drawBoundingBox(Object* obj) {
   if (drawBoundingBoxes) {
@@ -118,7 +106,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectHardList* transpar
     root->globalPosition = getGlobalPosition(modelStack, root->transform.position);
 
     if (root->camera != NULL) {
-        //root->camera->camPos = getGlobalPosition(modelStack, root->camera->camPos);
+        //root->camera->position = getGlobalPosition(modelStack, root->camera->position);
     }
     if (root->light != NULL) {
         root->light->position = root->globalPosition;
@@ -128,7 +116,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectHardList* transpar
             drawBoundingBox(root);
         }
         if(root->isTransparent) {
-            printVec3(root->globalPosition);
+            //printVec3(root->globalPosition);
             objectHardListAdd(transparentObjects, *root);
         } else if(root->lightsAffectedBy.length > 0) {
             objectHardListAdd(illuminatedObjects, *root);
