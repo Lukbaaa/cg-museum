@@ -1,10 +1,10 @@
 # cg-museum
 
 ## Gruppenmitglieder:
-Lukas Baule 1715212
-Maximilian Kotsarev 1714569
-Florin Morari 1714857
-Sun-Min Yook 1714637
+- Lukas Baule 1715212
+- Maximilian Kotsarev 1714569
+- Florin Morari 1714857
+- Sun-Min Yook 1714637
 
 ## Ausführung
 Zum Ausführen des Programms kann die Makedatei wie folgt verwendet werden:
