@@ -44,6 +44,13 @@ void swap(Object* elem1, Object* elem2)
     *elem2 = temp;
 }
 
+void swap2(Object* arr, int i, int j)
+{
+    Object temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}
+
 // bubble sort
 void sortObjectsByDist(ObjectHardList* objects) {
     int swapped;
@@ -51,7 +58,10 @@ void sortObjectsByDist(ObjectHardList* objects) {
         swapped = 0;
         for (int j = 0; j < objects->length - i - 1; j++) {
             if (distToCamera(objects->objects[j].globalPosition, camera->position) < distToCamera(objects->objects[j+1].globalPosition, camera->position)) {
-                swap(&objects->objects[j], &objects->objects[j+1]);
+                //printf("swap ");
+                //printf("%f < %f \n", distToCamera(objects->objects[j].globalPosition, camera->position), distToCamera(objects->objects[j+1].globalPosition, camera->position));
+                //swap(&(objects->objects[j]), &(objects->objects[j+1]));
+                swap2(objects->objects, j, j+1);
                 swapped = 1;
             }
         }
@@ -71,7 +81,6 @@ void drawIlluminatedObjects(ObjectHardList* objects) {
 
 void drawTransparentObjects(ObjectHardList* objects) {
     sortObjectsByDist(objects);
-
     drawObjectsFromList(objects);
 }
 
@@ -93,7 +102,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectHardList* transpar
     assert(root != NULL);
     assert(transparentObjects != NULL);
     assert(illuminatedObjects != NULL);
-    //printf("%d\n", root->vao);
+
     if(root->animate != NULL) {
         root->animate(root);
     } 
@@ -116,7 +125,7 @@ void traverseDraw(Object* root, GLfloat modelStack[16], ObjectHardList* transpar
             drawBoundingBox(root);
         }
         if(root->isTransparent) {
-            //printVec3(root->globalPosition);
+            //printf("%d ", root->vao);
             objectHardListAdd(transparentObjects, *root);
         } else if(root->lightsAffectedBy.length > 0) {
             objectHardListAdd(illuminatedObjects, *root);
