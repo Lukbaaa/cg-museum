@@ -185,7 +185,7 @@ void drawLightAffectedObject(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniform4fv(glGetUniformLocation(program, "viewPos"), 1, (float*)&(camera->position));
+  glUniform3fv(glGetUniformLocation(program, "viewPos"), 1, (float*)&(camera->position));
   glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
   glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
   glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
@@ -316,7 +316,7 @@ void moonAnimation(Object* obj) {
 void rushmoreLightAnimation(Object* obj) {
   setObjectPosition(obj, sin(glfwGetTime())*3,0,cos(glfwGetTime())*3);
   obj->light->diffuse = (Vec4){fabs(cos(glfwGetTime()*0.2)),fabs(cos(glfwGetTime()*0.3)),fabs(cos(glfwGetTime()*0.4)),1};
-  obj->light->specular = (Vec4){fabs(cos(glfwGetTime()*0.)),fabs(cos(glfwGetTime()*0.3)),fabs(cos(glfwGetTime()*0.4)),1};
+  obj->light->specular = (Vec4){fabs(cos(glfwGetTime()*0.2)),fabs(cos(glfwGetTime()*0.3)),fabs(cos(glfwGetTime()*0.4)),1};
 } 
 
 void rushmoreLight2Animation(Object* obj) {
@@ -713,9 +713,10 @@ void createScene(void) {
 
 
   LightSource* light = createLight();
-  Vec4 ambient = {0,0,1,1};
+  Vec4 ambient = {0,0,0,0};
   Vec4 diffuse = {0,0,1,1};
-  Vec4 specular = {0,0,1,1};   
+  Vec4 specular = {0,0,1,1}; 
+  light->ambient = ambient;  
   light->diffuse = diffuse;
   light->specular = specular;
 
@@ -723,9 +724,10 @@ void createScene(void) {
   addLightAffectedBy(mountRushmore, light);
 
   LightSource* light2 = createLight();
-  ambient = (Vec4){1,0,0,1};
+  ambient = (Vec4){0,0,0,0};
   diffuse = (Vec4){1,0,0,1};
   specular = (Vec4){1,0,0,1};
+  light2->ambient = ambient;
   light2->diffuse = diffuse;
   light2->specular = specular;
 
@@ -744,6 +746,7 @@ void createScene(void) {
   addLightAffectedBy(baloon2, sunLight);
 
   LightSource* miniSunLight = createLight();
+  miniSunLight->ambient = sun_ambient;
   miniSunLight->diffuse = sun_diffuse;
   miniSunLight->specular = sun_specular;
   sun->light = miniSunLight;
