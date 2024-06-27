@@ -185,7 +185,7 @@ void drawLightAffectedObject(Object* obj) {
   glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, obj->model);
   glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, camera->view);
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_TRUE, camera->projection);
-  glUniformMatrix4fv(glGetUniformLocation(program, "viewPos"), 1, GL_FALSE, (float*)&(camera->position));
+  glUniform4fv(glGetUniformLocation(program, "viewPos"), 1, (float*)&(camera->position));
   glUniform4fv(glGetUniformLocation(program, "material.emissive"), 1, obj->material.emissive);
   glUniform4fv(glGetUniformLocation(program, "material.ambient"), 1, obj->material.ambient);
   glUniform4fv(glGetUniformLocation(program, "material.diffuse"), 1, obj->material.diffuse);
@@ -713,7 +713,7 @@ void createScene(void) {
 
 
   LightSource* light = createLight();
-  //Vec4 ambient = {1,1,1,1};
+  Vec4 ambient = {0,0,1,1};
   Vec4 diffuse = {0,0,1,1};
   Vec4 specular = {0,0,1,1};   
   light->diffuse = diffuse;
@@ -723,6 +723,7 @@ void createScene(void) {
   addLightAffectedBy(mountRushmore, light);
 
   LightSource* light2 = createLight();
+  ambient = (Vec4){1,0,0,1};
   diffuse = (Vec4){1,0,0,1};
   specular = (Vec4){1,0,0,1};
   light2->diffuse = diffuse;
@@ -732,7 +733,7 @@ void createScene(void) {
   addLightAffectedBy(mountRushmore, light2);
 
   LightSource* sunLight = createLight();
-  //Vec4 sun_ambient = {1,1,1,1};
+  Vec4 sun_ambient = {1,1,1,1};
   Vec4 sun_diffuse = {1,1,1,1};
   Vec4 sun_specular = {1,1,1,1};  
   sunLight->diffuse = sun_diffuse;
